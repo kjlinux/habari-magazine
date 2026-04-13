@@ -1,0 +1,20 @@
+CREATE TABLE `magazineIssues` (
+	`id` int AUTO_INCREMENT NOT NULL,
+	`issueNumber` varchar(20) NOT NULL,
+	`title` varchar(512) NOT NULL,
+	`description` text,
+	`coverUrl` varchar(512),
+	`pdfUrl` varchar(512),
+	`pdfFileKey` varchar(512),
+	`coverFileKey` varchar(512),
+	`pageCount` int,
+	`isPremium` boolean NOT NULL DEFAULT true,
+	`isPublished` boolean NOT NULL DEFAULT false,
+	`publishedAt` timestamp,
+	`sommaire` longtext,
+	`downloadCount` int DEFAULT 0,
+	`createdAt` timestamp NOT NULL DEFAULT (now()),
+	`updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
+	CONSTRAINT `magazineIssues_id` PRIMARY KEY(`id`),
+	CONSTRAINT `magazineIssues_issueNumber_unique` UNIQUE(`issueNumber`)
+);

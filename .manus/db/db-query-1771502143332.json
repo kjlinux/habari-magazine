@@ -1,0 +1,9 @@
+{
+  "query": "INSERT INTO countries (code, name, flag) VALUES \n('CM', 'Cameroun', '🇨🇲'),\n('CF', 'République centrafricaine', '🇨🇫'),\n('CG', 'Congo', '🇨🇬'),\n('GA', 'Gabon', '🇬🇦'),\n('GQ', 'Guinée équatoriale', '🇬🇶'),\n('TD', 'Tchad', '🇹🇩'),\n('CD', 'République démocratique du Congo', '🇨🇩'),\n('AO', 'Angola', '🇦🇴'),\n('BI', 'Burundi', '🇧🇮'),\n('RW', 'Rwanda', '🇷🇼'),\n('ST', 'São Tomé-et-Príncipe', '🇸🇹');",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3MYDTqRQXXnCy7D.root --database C6aFnP23nadn7BHJcaRyWP --execute INSERT INTO countries (code, name, flag) VALUES \n('CM', 'Cameroun', '🇨🇲'),\n('CF', 'République centrafricaine', '🇨🇫'),\n('CG', 'Congo', '🇨🇬'),\n('GA', 'Gabon', '🇬🇦'),\n('GQ', 'Guinée équatoriale', '🇬🇶'),\n('TD', 'Tchad', '🇹🇩'),\n('CD', 'République démocratique du Congo', '🇨🇩'),\n('AO', 'Angola', '🇦🇴'),\n('BI', 'Burundi', '🇧🇮'),\n('RW', 'Rwanda', '🇷🇼'),\n('ST', 'São Tomé-et-Príncipe', '🇸🇹');",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 410
+}

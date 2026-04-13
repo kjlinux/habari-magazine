@@ -1,0 +1,76 @@
+{
+  "query": "SELECT id, code, name, flag FROM countries ORDER BY name;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3MYDTqRQXXnCy7D.root --database C6aFnP23nadn7BHJcaRyWP --execute SELECT id, code, name, flag FROM countries ORDER BY name;",
+  "rows": [
+    {
+      "id": "8",
+      "code": "AO",
+      "name": "Angola",
+      "flag": "🇦🇴"
+    },
+    {
+      "id": "9",
+      "code": "BI",
+      "name": "Burundi",
+      "flag": "🇧🇮"
+    },
+    {
+      "id": "1",
+      "code": "CM",
+      "name": "Cameroun",
+      "flag": "🇨🇲"
+    },
+    {
+      "id": "3",
+      "code": "CG",
+      "name": "Congo",
+      "flag": "🇨🇬"
+    },
+    {
+      "id": "4",
+      "code": "GA",
+      "name": "Gabon",
+      "flag": "🇬🇦"
+    },
+    {
+      "id": "5",
+      "code": "GQ",
+      "name": "Guinée équatoriale",
+      "flag": "🇬🇶"
+    },
+    {
+      "id": "10",
+      "code": "RW",
+      "name": "Rwanda",
+      "flag": "🇷🇼"
+    },
+    {
+      "id": "2",
+      "code": "CF",
+      "name": "République centrafricaine",
+      "flag": "🇨🇫"
+    },
+    {
+      "id": "7",
+      "code": "CD",
+      "name": "République démocratique du Congo",
+      "flag": "🇨🇩"
+    },
+    {
+      "id": "11",
+      "code": "ST",
+      "name": "São Tomé-et-Príncipe",
+      "flag": "🇸🇹"
+    },
+    {
+      "id": "6",
+      "code": "TD",
+      "name": "Tchad",
+      "flag": "🇹🇩"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tcode\tname\tflag\n8\tAO\tAngola\t🇦🇴\n9\tBI\tBurundi\t🇧🇮\n1\tCM\tCameroun\t🇨🇲\n3\tCG\tCongo\t🇨🇬\n4\tGA\tGabon\t🇬🇦\n5\tGQ\tGuinée équatoriale\t🇬🇶\n10\tRW\tRwanda\t🇷🇼\n2\tCF\tRépublique centrafricaine\t🇨🇫\n7\tCD\tRépublique démocratique du Congo\t🇨🇩\n11\tST\tSão Tomé-et-Príncipe\t🇸🇹\n6\tTD\tTchad\t🇹🇩\n",
+  "stderr": "",
+  "execution_time_ms": 352
+}

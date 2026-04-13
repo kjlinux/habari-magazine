@@ -1,0 +1,55 @@
+{
+  "version": "7",
+  "dialect": "mysql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1770824497494,
+      "tag": "0000_curious_robin_chapel",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1770825086399,
+      "tag": "0001_remarkable_carmella_unuscione",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1771188594032,
+      "tag": "0002_gray_deadpool",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1771198948776,
+      "tag": "0003_outgoing_genesis",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1771500996410,
+      "tag": "0004_red_shaman",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1771599953071,
+      "tag": "0005_dashing_obadiah_stane",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1771606390789,
+      "tag": "0006_numerous_lord_hawal",
+      "breakpoints": true
+    }
+  ]
+}

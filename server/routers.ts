@@ -1,0 +1,600 @@
+import { COOKIE_NAME } from "@shared/const";
+import { getSessionCookieOptions } from "./_core/cookies";
+import { systemRouter } from "./_core/systemRouter";
+import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
+import { TRPCError } from "@trpc/server";
+import { z } from "zod";
+import { createCheckoutSession, getCheckoutSession, cancelSubscription } from "./stripe/stripe";
+import { HABARI_PRODUCTS, type ProductKey, type PriceInterval } from "./stripe/products";
+import {
+  getPublishedArticles,
+  getArticleBySlug,
+  getArticlesByCategory,
+  getArticlesByCountry,
+  getEconomicActors,
+  getEconomicActorBySlug,
+  getEconomicActorsByCountry,
+  getEconomicActorsBySector,
+  getOpenInvestmentOpportunities,
+  getInvestmentOpportunitiesByCountry,
+  getUpcomingEvents,
+  getAllCountries,
+  getCountryByCode,
+  getOpenCallsForBids,
+  getSubscriptionPlans,
+  getUserSubscription,
+  subscribeToNewsletter,
+  getNewsletterSubscription,
+  unsubscribeNewsletter,
+  getFreeArticles,
+  getPremiumArticles,
+  // Contact helpers
+  submitContactMessage,
+  adminGetContactMessages,
+  adminGetContactMessageById,
+  adminUpdateContactMessageStatus,
+  adminCountNewContactMessages,
+  adminDeleteContactMessage,
+  // Admin helpers
+  getAdminStats,
+  adminGetAllArticles,
+  adminGetArticleById,
+  adminCreateArticle,
+  adminUpdateArticle,
+  adminDeleteArticle,
+  adminGetAllUsers,
+  adminUpdateUserRole,
+  adminUpdateUserSubscription,
+  adminGetNewsletterSubscribers,
+  adminGetCategories,
+  // Magazine issues helpers
+  getPublishedMagazineIssues,
+  getMagazineIssueByNumber,
+  incrementMagazineDownloadCount,
+  adminGetAllMagazineIssues,
+  adminGetMagazineIssueById,
+  adminCreateMagazineIssue,
+  adminUpdateMagazineIssue,
+  adminDeleteMagazineIssue,
+  // Stats
+  getTotalUserCount,
+  // Archives
+  getArchivedArticles,
+  getArticleYears,
+  getArchivedMagazineIssues,
+  // Profile
+  getUserProfile,
+  updateUserProfile,
+  isProfileCompleted,
+} from "./db";
+
+// Admin-only procedure middleware
+const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
+  if (ctx.user.role !== 'admin') {
+    throw new TRPCError({ code: 'FORBIDDEN', message: 'Accès réservé aux administrateurs' });
+  }
+  return next({ ctx });
+});
+
+export const appRouter = router({
+  system: systemRouter,
+  auth: router({
+    me: publicProcedure.query(opts => opts.ctx.user),
+    logout: publicProcedure.mutation(({ ctx }) => {
+      const cookieOptions = getSessionCookieOptions(ctx.req);
+      ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
+      return { success: true } as const;
+    }),
+  }),
+
+  // ═══════════════════════════════════════════════
+  // PUBLIC ROUTERS
+  // ═══════════════════════════════════════════════
+
+  articles: router({
+    list: publicProcedure
+      .input(z.object({ limit: z.number().default(10), offset: z.number().default(0) }))
+      .query(async ({ input }) => await getPublishedArticles(input.limit, input.offset)),
+
+    free: publicProcedure
+      .input(z.object({ limit: z.number().default(10), offset: z.number().default(0) }))
+      .query(async ({ input }) => await getFreeArticles(input.limit, input.offset)),
+
+    premium: publicProcedure
+      .input(z.object({ limit: z.number().default(10), offset: z.number().default(0) }))
+      .query(async ({ input }) => await getPremiumArticles(input.limit, input.offset)),
+
+    bySlug: publicProcedure
+      .input(z.object({ slug: z.string() }))
+      .query(async ({ input }) => await getArticleBySlug(input.slug)),
+
+    byCategory: publicProcedure
+      .input(z.object({ categoryId: z.number(), limit: z.number().default(10) }))
+      .query(async ({ input }) => await getArticlesByCategory(input.categoryId, input.limit)),
+
+    byCountry: publicProcedure
+      .input(z.object({ countryId: z.number(), limit: z.number().default(10) }))
+      .query(async ({ input }) => await getArticlesByCountry(input.countryId, input.limit)),
+  }),
+
+  directory: router({
+    list: publicProcedure
+      .input(z.object({ limit: z.number().default(20), offset: z.number().default(0) }))
+      .query(async ({ input }) => await getEconomicActors(input.limit, input.offset)),
+
+    bySlug: publicProcedure
+      .input(z.object({ slug: z.string() }))
+      .query(async ({ input }) => await getEconomicActorBySlug(input.slug)),
+
+    byCountry: publicProcedure
+      .input(z.object({ countryId: z.number(), limit: z.number().default(20) }))
+      .query(async ({ input }) => await getEconomicActorsByCountry(input.countryId, input.limit)),
+
+    bySector: publicProcedure
+      .input(z.object({ sector: z.string(), limit: z.number().default(20) }))
+      .query(async ({ input }) => await getEconomicActorsBySector(input.sector, input.limit)),
+  }),
+
+  investments: router({
+    list: publicProcedure
+      .input(z.object({ limit: z.number().default(10), offset: z.number().default(0) }))
+      .query(async ({ input }) => await getOpenInvestmentOpportunities(input.limit, input.offset)),
+
+    byCountry: publicProcedure
+      .input(z.object({ countryId: z.number(), limit: z.number().default(10) }))
+      .query(async ({ input }) => await getInvestmentOpportunitiesByCountry(input.countryId, input.limit)),
+  }),
+
+  events: router({
+    upcoming: publicProcedure
+      .input(z.object({ limit: z.number().default(10) }))
+      .query(async ({ input }) => await getUpcomingEvents(input.limit)),
+  }),
+
+  bids: router({
+    list: publicProcedure
+      .input(z.object({ limit: z.number().default(10), offset: z.number().default(0) }))
+      .query(async ({ input }) => await getOpenCallsForBids(input.limit, input.offset)),
+  }),
+
+  countries: router({
+    list: publicProcedure.query(async () => await getAllCountries()),
+    byCode: publicProcedure
+      .input(z.object({ code: z.string() }))
+      .query(async ({ input }) => await getCountryByCode(input.code)),
+  }),
+
+  subscriptions: router({
+    plans: publicProcedure.query(async () => await getSubscriptionPlans()),
+    userPlan: protectedProcedure.query(async ({ ctx }) => await getUserSubscription(ctx.user.id)),
+  }),
+
+  newsletter: router({
+    subscribe: publicProcedure
+      .input(z.object({ email: z.string().email(), name: z.string().optional(), tier: z.enum(["free", "premium"]).default("free") }))
+      .mutation(async ({ input }) => await subscribeToNewsletter({ email: input.email, name: input.name, tier: input.tier })),
+
+    status: publicProcedure
+      .input(z.object({ email: z.string().email() }))
+      .query(async ({ input }) => await getNewsletterSubscription(input.email)),
+
+    unsubscribe: publicProcedure
+      .input(z.object({ email: z.string().email() }))
+      .mutation(async ({ input }) => await unsubscribeNewsletter(input.email)),
+  }),
+
+  // ═══════════════════════════════════════════════
+  // USER PROFILE
+  // ═══════════════════════════════════════════════
+
+  profile: router({
+    /** Get current user profile */
+    get: protectedProcedure.query(async ({ ctx }) => {
+      return await getUserProfile(ctx.user.id);
+    }),
+
+    /** Update user profile (registration form) */
+    update: protectedProcedure
+      .input(z.object({
+        firstName: z.string().min(1, "Le prénom est requis"),
+        lastName: z.string().min(1, "Le nom est requis"),
+        email: z.string().email("Adresse email invalide"),
+        phone: z.string().min(6, "Numéro de téléphone invalide"),
+        jobFunction: z.string().min(1, "La fonction est requise"),
+        organization: z.string().min(1, "L'entreprise/organisation est requise"),
+        country: z.string().optional(),
+        sector: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        return await updateUserProfile(ctx.user.id, input);
+      }),
+
+    /** Check if profile is completed */
+    isCompleted: protectedProcedure.query(async ({ ctx }) => {
+      const completed = await isProfileCompleted(ctx.user.id);
+      return { completed };
+    }),
+  }),
+
+  // ═══════════════════════════════════════════════
+  // ADMIN ROUTERS
+  // ═══════════════════════════════════════════════
+
+  admin: router({
+    /** Dashboard stats */
+    stats: adminProcedure.query(async () => await getAdminStats()),
+
+    /** Articles CRUD */
+    articles: router({
+      list: adminProcedure
+        .input(z.object({
+          limit: z.number().default(50),
+          offset: z.number().default(0),
+          status: z.string().optional(),
+        }))
+        .query(async ({ input }) => await adminGetAllArticles(input.limit, input.offset, input.status)),
+
+      byId: adminProcedure
+        .input(z.object({ id: z.number() }))
+        .query(async ({ input }) => await adminGetArticleById(input.id)),
+
+      create: adminProcedure
+        .input(z.object({
+          title: z.string().min(1),
+          slug: z.string().min(1),
+          excerpt: z.string().optional(),
+          content: z.string().min(1),
+          authorId: z.number().optional(),
+          categoryId: z.number().optional(),
+          countryId: z.number().optional(),
+          featuredImage: z.string().optional(),
+          status: z.enum(["draft", "published", "archived"]).default("draft"),
+          minSubscriptionTier: z.enum(["free", "standard", "premium", "enterprise"]).default("free"),
+        }))
+        .mutation(async ({ input }) => await adminCreateArticle(input)),
+
+      update: adminProcedure
+        .input(z.object({
+          id: z.number(),
+          title: z.string().optional(),
+          slug: z.string().optional(),
+          excerpt: z.string().optional(),
+          content: z.string().optional(),
+          authorId: z.number().nullable().optional(),
+          categoryId: z.number().nullable().optional(),
+          countryId: z.number().nullable().optional(),
+          featuredImage: z.string().nullable().optional(),
+          status: z.enum(["draft", "published", "archived"]).optional(),
+          minSubscriptionTier: z.enum(["free", "standard", "premium", "enterprise"]).optional(),
+        }))
+        .mutation(async ({ input }) => {
+          const { id, ...data } = input;
+          return await adminUpdateArticle(id, data);
+        }),
+
+      delete: adminProcedure
+        .input(z.object({ id: z.number() }))
+        .mutation(async ({ input }) => await adminDeleteArticle(input.id)),
+    }),
+
+    /** Users management */
+    users: router({
+      list: adminProcedure
+        .input(z.object({
+          limit: z.number().default(50),
+          offset: z.number().default(0),
+          search: z.string().optional(),
+        }))
+        .query(async ({ input }) => await adminGetAllUsers(input.limit, input.offset, input.search)),
+
+      updateRole: adminProcedure
+        .input(z.object({
+          userId: z.number(),
+          role: z.enum(["user", "admin"]),
+        }))
+        .mutation(async ({ input }) => await adminUpdateUserRole(input.userId, input.role)),
+
+      updateSubscription: adminProcedure
+        .input(z.object({
+          userId: z.number(),
+          tier: z.enum(["free", "standard", "premium", "enterprise"]),
+        }))
+        .mutation(async ({ input }) => await adminUpdateUserSubscription(input.userId, input.tier)),
+    }),
+
+    /** Newsletter subscribers */
+    newsletter: router({
+      list: adminProcedure
+        .input(z.object({
+          limit: z.number().default(50),
+          offset: z.number().default(0),
+          tier: z.string().optional(),
+        }))
+        .query(async ({ input }) => await adminGetNewsletterSubscribers(input.limit, input.offset, input.tier)),
+    }),
+
+    /** Categories */
+    categories: router({
+      list: adminProcedure.query(async () => await adminGetCategories()),
+    }),
+
+    /** Countries (for dropdowns) */
+    countries: router({
+      list: adminProcedure.query(async () => await getAllCountries()),
+    }),
+
+    /** Magazine issues CRUD */
+    magazineIssues: router({
+      list: adminProcedure.query(async () => await adminGetAllMagazineIssues()),
+
+      byId: adminProcedure
+        .input(z.object({ id: z.number() }))
+        .query(async ({ input }) => await adminGetMagazineIssueById(input.id)),
+
+      create: adminProcedure
+        .input(z.object({
+          issueNumber: z.string().min(1),
+          title: z.string().min(1),
+          description: z.string().optional(),
+          coverUrl: z.string().optional(),
+          pdfUrl: z.string().optional(),
+          pdfFileKey: z.string().optional(),
+          coverFileKey: z.string().optional(),
+          pageCount: z.number().optional(),
+          isPremium: z.boolean().default(true),
+          isPublished: z.boolean().default(false),
+          sommaire: z.string().optional(),
+        }))
+        .mutation(async ({ input }) => await adminCreateMagazineIssue(input)),
+
+      update: adminProcedure
+        .input(z.object({
+          id: z.number(),
+          issueNumber: z.string().optional(),
+          title: z.string().optional(),
+          description: z.string().nullable().optional(),
+          coverUrl: z.string().nullable().optional(),
+          pdfUrl: z.string().nullable().optional(),
+          pdfFileKey: z.string().nullable().optional(),
+          coverFileKey: z.string().nullable().optional(),
+          pageCount: z.number().nullable().optional(),
+          isPremium: z.boolean().optional(),
+          isPublished: z.boolean().optional(),
+          sommaire: z.string().nullable().optional(),
+        }))
+        .mutation(async ({ input }) => {
+          const { id, ...data } = input;
+          return await adminUpdateMagazineIssue(id, data);
+        }),
+
+      delete: adminProcedure
+        .input(z.object({ id: z.number() }))
+        .mutation(async ({ input }) => await adminDeleteMagazineIssue(input.id)),
+    }),
+
+    /** Registered users count */
+    userCount: adminProcedure.query(async () => {
+      const total = await getTotalUserCount();
+      return { totalUsers: total };
+    }),
+
+    /** Contact messages */
+    contact: router({
+      list: adminProcedure
+        .input(z.object({
+          limit: z.number().default(50),
+          offset: z.number().default(0),
+          status: z.string().optional(),
+        }))
+        .query(async ({ input }) => await adminGetContactMessages(input.limit, input.offset, input.status)),
+
+      byId: adminProcedure
+        .input(z.object({ id: z.number() }))
+        .query(async ({ input }) => await adminGetContactMessageById(input.id)),
+
+      updateStatus: adminProcedure
+        .input(z.object({
+          id: z.number(),
+          status: z.enum(["new", "read", "replied", "archived"]),
+        }))
+        .mutation(async ({ input }) => await adminUpdateContactMessageStatus(input.id, input.status)),
+
+      countNew: adminProcedure
+        .query(async () => await adminCountNewContactMessages()),
+
+      delete: adminProcedure
+        .input(z.object({ id: z.number() }))
+        .mutation(async ({ input }) => await adminDeleteContactMessage(input.id)),
+    }),
+  }),
+
+  // ═══════════════════════════════════════════════
+  // STRIPE PAYMENTS
+  // ═══════════════════════════════════════════════
+
+  stripe: router({
+    /** Get available products and prices */
+    products: publicProcedure.query(() => {
+      return Object.entries(HABARI_PRODUCTS).map(([key, product]) => ({
+        key,
+        name: product.name,
+        description: product.description,
+        prices: {
+          monthly: { amount: product.prices.monthly.amount, label: product.prices.monthly.label },
+          annual: { amount: product.prices.annual.amount, label: product.prices.annual.label },
+        },
+      }));
+    }),
+
+    /** Create a checkout session */
+    createCheckout: protectedProcedure
+      .input(z.object({
+        productKey: z.enum(["premiumAccess", "newsletterPremium", "bundle"]),
+        interval: z.enum(["monthly", "annual"]),
+        origin: z.string(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const result = await createCheckoutSession({
+          productKey: input.productKey as ProductKey,
+          interval: input.interval as PriceInterval,
+          userId: ctx.user.id,
+          userEmail: ctx.user.email || "",
+          userName: ctx.user.name || undefined,
+          origin: input.origin,
+        });
+        return result;
+      }),
+
+    /** Get checkout session result */
+    getSession: protectedProcedure
+      .input(z.object({ sessionId: z.string() }))
+      .query(async ({ input }) => {
+        const session = await getCheckoutSession(input.sessionId);
+        return {
+          status: session.status,
+          paymentStatus: session.payment_status,
+          customerEmail: session.customer_email,
+        };
+      }),
+
+    /** Cancel subscription */
+    cancelSubscription: protectedProcedure
+      .input(z.object({ subscriptionId: z.string() }))
+      .mutation(async ({ input }) => {
+        await cancelSubscription(input.subscriptionId);
+        return { success: true };
+      }),
+  }),
+
+  // ═══════════════════════════════════════════════
+  // MAGAZINE PDF ACCESS
+  // ═══════════════════════════════════════════════
+
+  magazineIssues: router({
+    /** List published issues (public) */
+    list: publicProcedure.query(async () => await getPublishedMagazineIssues()),
+
+    /** Get issue by number (public) */
+    byNumber: publicProcedure
+      .input(z.object({ issueNumber: z.string() }))
+      .query(async ({ input }) => await getMagazineIssueByNumber(input.issueNumber)),
+
+    /** Track download */
+    trackDownload: publicProcedure
+      .input(z.object({ issueId: z.number() }))
+      .mutation(async ({ input }) => {
+        await incrementMagazineDownloadCount(input.issueId);
+        return { success: true };
+      }),
+  }),
+
+  magazine: router({
+    /** Check if user has access to a specific magazine issue */
+    checkAccess: publicProcedure
+      .input(z.object({ issueId: z.string() }))
+      .query(async ({ ctx, input }) => {
+        // Launch period: free premium access for all registered users until June 1, 2026
+        const LAUNCH_END_DATE = new Date("2026-06-01T00:00:00Z");
+        const isLaunchPeriod = new Date() < LAUNCH_END_DATE;
+
+        // Define which issues require premium
+        const PREMIUM_ISSUES = ["N001", "N002", "N003"]; // Future issues are premium
+        const FREE_ISSUES = ["N000"]; // First issue is free
+
+        const isPremiumIssue = PREMIUM_ISSUES.includes(input.issueId);
+        const isFreeIssue = FREE_ISSUES.includes(input.issueId);
+
+        // Free issues are always accessible
+        if (isFreeIssue || !isPremiumIssue) {
+          return { hasAccess: true, reason: "free" as const, isLaunchPeriod };
+        }
+
+        // Not logged in
+        if (!ctx.user) {
+          return { hasAccess: false, reason: "not_authenticated" as const, isLaunchPeriod };
+        }
+
+        // Admin always has access
+        if (ctx.user.role === "admin") {
+          return { hasAccess: true, reason: "admin" as const, isLaunchPeriod };
+        }
+
+        // During launch period, all registered users get premium access
+        if (isLaunchPeriod) {
+          return { hasAccess: true, reason: "launch_promo" as const, isLaunchPeriod };
+        }
+
+        // After launch period: check user subscription tier
+        const tier = ctx.user.subscriptionTier;
+        if (tier === "premium" || tier === "enterprise") {
+          return { hasAccess: true, reason: "subscription" as const, isLaunchPeriod };
+        }
+
+        // Also check active subscription in userSubscriptions table
+        const activeSub = await getUserSubscription(ctx.user.id);
+        if (activeSub && (activeSub.tier === "premium" || activeSub.tier === "enterprise") && activeSub.status === "active") {
+          return { hasAccess: true, reason: "subscription" as const, isLaunchPeriod };
+        }
+
+        return { hasAccess: false, reason: "no_subscription" as const, isLaunchPeriod };
+      }),
+
+    /** Get launch period status */
+    launchStatus: publicProcedure.query(() => {
+      const LAUNCH_END_DATE = new Date("2026-06-01T00:00:00Z");
+      const now = new Date();
+      const isLaunchPeriod = now < LAUNCH_END_DATE;
+      const daysRemaining = isLaunchPeriod ? Math.ceil((LAUNCH_END_DATE.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)) : 0;
+      return { isLaunchPeriod, launchEndDate: LAUNCH_END_DATE.toISOString(), daysRemaining };
+    }),
+  }),
+
+  // ═══════════════════════════════════════════════
+  // PUBLIC ARCHIVES
+  // ═══════════════════════════════════════════════
+
+  archives: router({
+    /** List archived articles with filters */
+    articles: publicProcedure
+      .input(z.object({
+        categoryId: z.number().optional(),
+        year: z.number().optional(),
+        search: z.string().optional(),
+        limit: z.number().default(12),
+        offset: z.number().default(0),
+      }))
+      .query(async ({ input }) => await getArchivedArticles(input)),
+
+    /** Get available years for filtering */
+    years: publicProcedure.query(async () => await getArticleYears()),
+
+    /** Get available categories for filtering */
+    categories: publicProcedure.query(async () => await adminGetCategories()),
+
+    /** List archived magazine issues with filters */
+    issues: publicProcedure
+      .input(z.object({
+        year: z.number().optional(),
+        search: z.string().optional(),
+      }))
+      .query(async ({ input }) => await getArchivedMagazineIssues(input)),
+  }),
+
+  // ═══════════════════════════════════════════════
+  // PUBLIC CONTACT
+  // ═══════════════════════════════════════════════
+
+  contact: router({
+    submit: publicProcedure
+      .input(z.object({
+        name: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
+        email: z.string().email("Adresse email invalide"),
+        subject: z.string().min(5, "Le sujet doit contenir au moins 5 caractères"),
+        message: z.string().min(20, "Le message doit contenir au moins 20 caractères"),
+        category: z.enum(["general", "editorial", "partnership", "advertising", "subscription", "other"]).default("general"),
+      }))
+      .mutation(async ({ input }) => await submitContactMessage(input)),
+  }),
+});
+
+export type AppRouter = typeof appRouter;
