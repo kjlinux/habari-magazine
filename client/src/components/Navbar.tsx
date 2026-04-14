@@ -2,7 +2,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { getLoginUrl } from "@/const";
 import { Link, useLocation } from "wouter";
-import { Menu, X, Shield, Leaf, BarChart3, TreePine, Zap, Landmark, Users, FileText, ChevronDown } from "lucide-react";
+import { Menu, X, Shield, Leaf, BarChart3, TreePine, Zap, Landmark, Users, FileText, ChevronDown, Search } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 
 const navLinks = [
@@ -13,7 +13,8 @@ const navLinks = [
   { href: "/appels-offres", label: "Appels d'offres" },
   { href: "/evenements", label: "Événements" },
   { href: "/archives", label: "Archives" },
-  { href: "/abonnements", label: "Abonnements" },
+  { href: "/partenaires", label: "Partenaires" },
+  { href: "/abonnements", label: "Votre Accès" },
 ];
 
 const greenSubLinks = [
@@ -64,20 +65,12 @@ export default function Navbar() {
       <nav className="border-b border-border sticky top-0 bg-background/98 backdrop-blur-sm z-50 shadow-sm">
         <div className="container flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 group">
+          <Link href="/" className="flex items-center group">
             <img
-              src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663347570863/kYveEAnauwaZocFd.png"
-              alt="HM"
-              className="h-8 w-auto transition-transform group-hover:scale-105"
+              src="https://d2xsxph8kpxj0f.cloudfront.net/310519663347570863/C6aFnP23nadn7BHJcaRyWP/logoHABARI_transparent_b638ce27.png"
+              alt="Habari Mag"
+              className="h-10 w-auto transition-transform group-hover:scale-105"
             />
-            <div className="hidden sm:flex flex-col">
-              <img
-                src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663347570863/cjBXwSPslRggwhgd.png"
-                alt="HABARI MAG"
-                className="h-4 w-auto"
-              />
-              <span className="text-[8px] tracking-wider text-muted-foreground hidden xl:block leading-tight mt-0.5">Connexion économique pour l'intégration de l'Afrique Centrale. Comprendre, décider, investir, agir.</span>
-            </div>
           </Link>
 
           {/* Desktop links */}
@@ -151,8 +144,11 @@ export default function Navbar() {
             })}
           </div>
 
-          {/* Auth + mobile toggle */}
+          {/* Search + Auth + mobile toggle */}
           <div className="flex items-center gap-3">
+            <Link href="/recherche" className="p-2 rounded-md hover:bg-muted transition-colors text-foreground/60 hover:text-primary" aria-label="Recherche">
+              <Search className="w-4.5 h-4.5" />
+            </Link>
             {isAuthenticated ? (
               <div className="hidden sm:flex items-center gap-2">
                 {user?.role === "admin" && (
@@ -248,6 +244,13 @@ export default function Navbar() {
                   </Link>
                 );
               })}
+              <Link
+                href="/recherche"
+                className="flex items-center gap-2 px-4 py-3 text-sm font-sans font-medium rounded-md text-foreground/70 hover:text-primary hover:bg-primary/5 transition-colors"
+                onClick={() => setMobileOpen(false)}
+              >
+                <Search className="w-4 h-4" /> Recherche avancée
+              </Link>
               <div className="pt-3 border-t border-border mt-3 space-y-2">
                 {isAuthenticated ? (
                   <>

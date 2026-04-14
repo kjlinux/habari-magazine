@@ -1,0 +1,9 @@
+{
+  "query": "DELETE FROM opportunities WHERE title LIKE 'VITEST%';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3MYDTqRQXXnCy7D.root --database C6aFnP23nadn7BHJcaRyWP --execute DELETE FROM opportunities WHERE title LIKE 'VITEST%';",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 367
+}

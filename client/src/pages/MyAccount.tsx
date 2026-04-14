@@ -601,7 +601,7 @@ export default function MyAccount() {
                   {!isPremium && (
                     <Link href="/abonnements">
                       <Button className="font-sans bg-[oklch(0.72_0.15_75)] text-[oklch(0.20_0.02_250)] hover:bg-[oklch(0.72_0.15_75)]/90">
-                        <Crown className="w-4 h-4 mr-2" /> Passer à Premium — 10 €/mois
+                        <Crown className="w-4 h-4 mr-2" /> Passer à Premium — 4,50 €/mois
                       </Button>
                     </Link>
                   )}

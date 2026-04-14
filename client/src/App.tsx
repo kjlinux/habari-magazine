@@ -20,6 +20,8 @@ import AdminUsers from "./pages/admin/AdminUsers";
 import AdminNewsletter from "./pages/admin/AdminNewsletter";
 import AdminContact from "./pages/admin/AdminContact";
 import AdminMagazine from "./pages/admin/AdminMagazine";
+import AdminOpportunities from "./pages/admin/AdminOpportunities";
+import AdminOpportunityForm from "./pages/admin/AdminOpportunityForm";
 import About from "./pages/About";
 import MyAccount from "./pages/MyAccount";
 import Downloads from "./pages/Downloads";
@@ -32,6 +34,8 @@ import GreenEnergie from "./pages/GreenEnergie";
 import GreenFinance from "./pages/GreenFinance";
 import GreenActeurs from "./pages/GreenActeurs";
 import GreenRessources from "./pages/GreenRessources";
+import Partners from "./pages/Partners";
+import SearchPage from "./pages/Search";
 
 function Router() {
   return (
@@ -49,6 +53,8 @@ function Router() {
       <Route path={"/telecharger"} component={Downloads} />
       <Route path={"/archives"} component={Archives} />
       <Route path={"/inscription"} component={Registration} />
+      <Route path={"/partenaires"} component={Partners} />
+      <Route path={"/recherche"} component={SearchPage} />
 
       {/* Green pages */}
       <Route path={"/green"} component={Green} />
@@ -70,6 +76,9 @@ function Router() {
       <Route path={"/admin/newsletter"} component={AdminNewsletter} />
       <Route path={"/admin/magazine"} component={AdminMagazine} />
       <Route path={"/admin/messages"} component={AdminContact} />
+      <Route path={"/admin/opportunites"} component={AdminOpportunities} />
+      <Route path={"/admin/opportunites/nouveau"} component={AdminOpportunityForm} />
+      <Route path={"/admin/opportunites/:id"} component={AdminOpportunityForm} />
 
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />

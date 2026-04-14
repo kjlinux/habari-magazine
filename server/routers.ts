@@ -66,6 +66,17 @@ import {
   getUserProfile,
   updateUserProfile,
   isProfileCompleted,
+  // Opportunities helpers
+  getActiveOpportunities,
+  getOpportunityBySlug,
+  countActiveOpportunities,
+  adminGetAllOpportunities,
+  adminGetOpportunityById,
+  adminCreateOpportunity,
+  adminUpdateOpportunity,
+  adminDeleteOpportunity,
+  adminToggleOpportunityFeatured,
+  adminCountOpportunities,
 } from "./db";
 
 // Admin-only procedure middleware
@@ -155,6 +166,23 @@ export const appRouter = router({
     list: publicProcedure
       .input(z.object({ limit: z.number().default(10), offset: z.number().default(0) }))
       .query(async ({ input }) => await getOpenCallsForBids(input.limit, input.offset)),
+  }),
+
+  opportunities: router({
+    list: publicProcedure
+      .input(z.object({
+        type: z.enum(['bid', 'ami', 'job']).optional(),
+        limit: z.number().default(50),
+        offset: z.number().default(0),
+      }))
+      .query(async ({ input }) => await getActiveOpportunities(input.type, input.limit, input.offset)),
+
+    bySlug: publicProcedure
+      .input(z.object({ slug: z.string() }))
+      .query(async ({ input }) => await getOpportunityBySlug(input.slug)),
+
+    counts: publicProcedure
+      .query(async () => await countActiveOpportunities()),
   }),
 
   countries: router({
@@ -376,6 +404,82 @@ export const appRouter = router({
     userCount: adminProcedure.query(async () => {
       const total = await getTotalUserCount();
       return { totalUsers: total };
+    }),
+
+    /** Opportunities CRUD (Appels d'offres, AMI, Emplois) */
+    opportunities: router({
+      list: adminProcedure
+        .input(z.object({
+          type: z.enum(['bid', 'ami', 'job']).optional(),
+          status: z.enum(['active', 'closed', 'draft']).optional(),
+          search: z.string().optional(),
+          limit: z.number().default(50),
+          offset: z.number().default(0),
+        }))
+        .query(async ({ input }) => await adminGetAllOpportunities(input)),
+
+      byId: adminProcedure
+        .input(z.object({ id: z.number() }))
+        .query(async ({ input }) => await adminGetOpportunityById(input.id)),
+
+      create: adminProcedure
+        .input(z.object({
+          type: z.enum(['bid', 'ami', 'job']),
+          title: z.string().min(1),
+          organization: z.string().min(1),
+          country: z.string().min(1),
+          sector: z.string().optional(),
+          description: z.string().optional(),
+          budget: z.string().optional(),
+          currency: z.string().optional(),
+          deadline: z.string().optional(),
+          amiType: z.string().optional(),
+          partners: z.string().optional(),
+          webinaire: z.string().optional(),
+          externalLink: z.string().optional(),
+          contractType: z.string().optional(),
+          experienceLevel: z.string().optional(),
+          featured: z.boolean().default(false),
+          status: z.enum(['active', 'closed', 'draft']).default('active'),
+        }))
+        .mutation(async ({ input }) => await adminCreateOpportunity(input)),
+
+      update: adminProcedure
+        .input(z.object({
+          id: z.number(),
+          type: z.enum(['bid', 'ami', 'job']).optional(),
+          title: z.string().optional(),
+          organization: z.string().optional(),
+          country: z.string().optional(),
+          sector: z.string().nullable().optional(),
+          description: z.string().nullable().optional(),
+          budget: z.string().nullable().optional(),
+          currency: z.string().nullable().optional(),
+          deadline: z.string().nullable().optional(),
+          amiType: z.string().nullable().optional(),
+          partners: z.string().nullable().optional(),
+          webinaire: z.string().nullable().optional(),
+          externalLink: z.string().nullable().optional(),
+          contractType: z.string().nullable().optional(),
+          experienceLevel: z.string().nullable().optional(),
+          featured: z.boolean().optional(),
+          status: z.enum(['active', 'closed', 'draft']).optional(),
+        }))
+        .mutation(async ({ input }) => {
+          const { id, ...data } = input;
+          return await adminUpdateOpportunity(id, data);
+        }),
+
+      delete: adminProcedure
+        .input(z.object({ id: z.number() }))
+        .mutation(async ({ input }) => await adminDeleteOpportunity(input.id)),
+
+      toggleFeatured: adminProcedure
+        .input(z.object({ id: z.number() }))
+        .mutation(async ({ input }) => await adminToggleOpportunityFeatured(input.id)),
+
+      counts: adminProcedure
+        .query(async () => await adminCountOpportunities()),
     }),
 
     /** Contact messages */

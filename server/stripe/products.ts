@@ -14,16 +14,16 @@ export const HABARI_PRODUCTS = {
     description: "Dossiers complets, archives, analyses pays, tribunes exclusives, espace investisseurs",
     prices: {
       monthly: {
-        amount: 1000, // 10.00 €
+        amount: 450, // 4.50 €
         currency: "eur",
         interval: "month" as const,
-        label: "10 €/mois",
+        label: "4,50 €/mois",
       },
       annual: {
-        amount: 10000, // 100.00 € (2 mois offerts)
+        amount: 4500, // 45.00 € (2 mois offerts)
         currency: "eur",
         interval: "year" as const,
-        label: "100 €/an (2 mois offerts)",
+        label: "45 €/an (2 mois offerts)",
       },
     },
   },
@@ -36,16 +36,16 @@ export const HABARI_PRODUCTS = {
     description: "Analyse approfondie hebdomadaire, données exclusives, archives complètes, invitations événements",
     prices: {
       monthly: {
-        amount: 1500, // 15.00 €
+        amount: 500, // 5.00 €
         currency: "eur",
         interval: "month" as const,
-        label: "15 €/mois",
+        label: "5 €/mois",
       },
       annual: {
-        amount: 15000, // 150.00 € (2 mois offerts)
+        amount: 5000, // 50.00 € (2 mois offerts)
         currency: "eur",
         interval: "year" as const,
-        label: "150 €/an (2 mois offerts)",
+        label: "50 €/an (2 mois offerts)",
       },
     },
   },
@@ -58,16 +58,16 @@ export const HABARI_PRODUCTS = {
     description: "Accès complet au site + newsletter premium. La formule la plus avantageuse.",
     prices: {
       monthly: {
-        amount: 2000, // 20.00 € (au lieu de 25 €)
+        amount: 900, // 9.00 € (au lieu de 9,50 €)
         currency: "eur",
         interval: "month" as const,
-        label: "20 €/mois (au lieu de 25 €)",
+        label: "9 €/mois (au lieu de 9,50 €)",
       },
       annual: {
-        amount: 20000, // 200.00 € (au lieu de 300 €)
+        amount: 9000, // 90.00 € (au lieu de 114 €)
         currency: "eur",
         interval: "year" as const,
-        label: "200 €/an (au lieu de 300 €)",
+        label: "90 €/an (au lieu de 114 €)",
       },
     },
   },

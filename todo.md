@@ -56,7 +56,7 @@
 - [ ] Historique des lectures/consultations
 
 ## Phase 8: Moteur de recherche
-- [ ] Recherche globale (articles + annuaire)
+- [x] Recherche globale (articles + annuaire)
 - [x] Filtres avancés
 - [ ] Autocomplete et suggestions
 - [ ] Historique de recherche
@@ -365,3 +365,180 @@
 - [x] Ajouter l'article dans Magazine.tsx et Home.tsx
 - [x] Ajouter l'article dans les articles suggérés
 - [x] Vérifier les tests (83 tests passent)
+
+## Phase 48: Article court Habari Green — Cobalt & Minerais Verts
+- [x] Lire le document source DOCX
+- [x] Rechercher et uploader des illustrations sur le CDN
+- [x] Ajouter l'article court (3-5 min) dans ArticlePage.tsx
+- [x] Ajouter dans Magazine.tsx
+- [x] Ajouter dans Home.tsx
+- [x] Vérifier les tests et le rendu (83 tests passent)
+- [x] Sauvegarder le checkpoint
+
+## Phase 49: Recadrer et recentrer la photo de Loïc Mackosso
+- [x] Analyser la photo actuelle
+- [x] Recadrer et recentrer sur le visage
+- [x] Uploader la nouvelle image sur le CDN
+- [x] Mettre à jour les références dans le site (ArticlePage, Magazine, Home)
+- [x] Vérifier le rendu (83 tests passent)
+
+## Phase 50: Article court Habari Green — Villes Africaines & Défi Climatique
+- [x] Lire le document source DOCX
+- [x] Rechercher et uploader des illustrations sur le CDN (ville africaine, BRT Dakar, ville durable)
+- [x] Ajouter l'article court (4 min) dans ArticlePage.tsx
+- [x] Ajouter dans Magazine.tsx
+- [x] Ajouter dans Home.tsx
+- [x] Vérifier les tests et le rendu (83 tests passent)
+- [x] Sauvegarder le checkpoint
+
+## Phase 51: Mise à jour logo Habari — fond transparent
+- [x] Analyser le logo fourni (logoHABARI.png) — fond noir supprimé, rendu transparent
+- [x] Uploader le logo sur le CDN
+- [x] Mettre à jour la Navbar avec le nouveau logo transparent
+- [x] Mettre à jour le Footer avec le nouveau logo + filtre brightness CSS
+- [x] Vérifier le rendu sur fond clair (Navbar) et fond sombre (Footer) — OK
+- [x] Sauvegarder le checkpoint (83 tests passent)
+
+## Phase 52: Corriger le positionnement des photos de portrait
+- [x] Corriger object-position dans ArticlePage.tsx (hero image + miniatures)
+- [x] Corriger object-position dans Home.tsx (cartes free + premium)
+- [x] Corriger object-position dans Magazine.tsx (cartes DB + sample)
+- [x] Vérifier le rendu — visages Mackosso et Gweth visibles en entier
+- [x] Sauvegarder le checkpoint (83 tests passent)
+
+## Phase 53: Améliorer les boutons de partage réseaux sociaux
+- [x] Analyser les boutons de partage existants (SocialShare component)
+- [x] Améliorer le composant SocialShare : ajout Telegram, Email, variante sticky
+- [x] Vérifier la présence des boutons dans ArticlePage (haut + bas d'article)
+- [x] Ajouter barre de partage flottante/sticky sur le côté gauche (desktop)
+- [x] Ajouter les meta tags Open Graph dynamiques par article (react-helmet-async)
+- [x] Vérifier le rendu et les tests (83 tests passent)
+- [x] Sauvegarder le checkpoint
+
+## Phase 54: Article court Culture et Société - Femmes entrepreneuses
+- [x] Lire le document source DOCX
+- [x] Rechercher et uploader des illustrations sur le CDN (AWIEF, RDC, tech)
+- [x] Rédiger l'article court percutant (4 min) dans ArticlePage.tsx
+- [x] Ajouter dans Magazine.tsx
+- [x] Ajouter dans Home.tsx
+- [x] Vérifier les tests et le rendu (83 tests passent)
+- [x] Sauvegarder le checkpoint
+
+## Phase 55: Article Culture & Société - Révolution du Mobile Money (1200-1300 mots)
+- [x] Lire le document source DOCX
+- [x] Rechercher et uploader des illustrations sur le CDN (M-Pesa, femme marché, kiosque)
+- [x] Rédiger l'article (1200-1300 mots) avec encadré chiffré DATA dans ArticlePage.tsx
+- [x] Ajouter dans Magazine.tsx
+- [x] Ajouter dans Home.tsx
+- [x] Vérifier les tests et le rendu (83 tests passent)
+- [x] Sauvegarder le checkpoint
+
+## Phase 56: Revue site Habari Mag - Recommandations ABT
+
+### 56a. Refonte Hero page d'accueil
+- [x] Passer le hero en fond clair (pas sombre)
+- [x] Créer une bande défilante interactive avec articles chauds / derniers dossiers
+- [x] Style Forbes Afrique (défilement bullets points)
+
+### 56b. Réorganisation sections page d'accueil
+- [x] Ordre : Prez & Téléchargement Mag → Articles du N° → Green → Contenu Premium → Abonnements → Events → Écosystème Habari → Footer
+
+### 56c. Section Abonnements renommée
+- [x] Changer "La newsletter Habari" par "Votre Accès Habari"
+- [x] Changer "Newsletter Gratuite" par "Accès Gratuit"
+- [x] Changer "Newsletter Premium" par "Accès Premium"
+- [x] Rendre les boxes redirectionnelles vers /abonnements
+- [x] Garder la lucarne email pour inscription gratuite NL
+
+### 56d. Baromètre mensuel
+- [x] Retirer le baromètre de la page d'accueil
+- [x] Ajouter le baromètre dans l'onglet Investisseurs (6 indicateurs)
+
+### 56e. Sous-rubriques Magazine
+- [x] Chaque sous-rubrique redirige vers son contenu respectif (pas toutes vers "Tous")
+- [x] Rajouter la sous-rubrique Green dans le listing des rubriques Magazine
+
+### 56f. Onglet Appels d'offres enrichi
+- [x] Ajouter les AMI (Appels à Manifestation d'Intérêt)
+- [x] Ajouter les appels à candidatures / offres d'emploi
+
+### 56g. Nouvel onglet contenus externes
+- [x] Créer un onglet entre Événements et Archives pour les contenus externes
+- [x] Communiqués de presse, communications publiques, messages sponsorisés
+- [x] Nom : "Partenaires" (page créée avec 3 catégories)
+
+### 56h. Révision structure pricing
+- [x] Corriger : NL premium ne doit pas coûter plus cher que accès premium site
+- [x] Revoir les prix, casser en 2-3 paliers
+- [x] Conserver formule Intégral et formules annuelles
+- [x] Ajouter tarif magazine PDF (4,99€ barré 9,99€)
+- [ ] Corriger le bug clic-droit sur les boutons s'abonner (à investiguer)
+
+### 56i. Aperçu articles
+- [x] S'assurer que tous les articles affichent bien un aperçu
+
+### 56j. Tarif magazine PDF
+- [x] Inscrire un prix/tarif d'accès au mag papier en téléchargement (4,99€ barré 9,99€)
+- [x] Montrer l'économie réalisée en s'inscrivant (effet psychologique)
+
+## Phase 57: Recherche avancée articles
+- [x] Analyser la structure actuelle des articles (sampleArticles + DB)
+- [x] Créer la page /recherche (Search.tsx) avec filtres avancés (catégorie, auteur, date, accès)
+- [x] Barre de recherche plein texte (titre, extrait, auteur, rubrique)
+- [x] 4 filtres dropdown : Catégorie, Auteur, Période, Accès
+- [x] Tags de filtres actifs avec suppression individuelle
+- [x] Tri par pertinence, date, temps de lecture
+- [x] Compteur de résultats dynamique
+- [x] État vide avec message et bouton "Effacer tous les filtres"
+- [x] Ajouter l'icône de recherche (loupe) dans la Navbar (desktop + mobile)
+- [x] Ajouter la route /recherche dans App.tsx
+- [x] Support du paramètre URL ?q= pour recherche depuis d'autres pages
+- [x] Écrire 33 tests Vitest pour la logique de filtrage (search.test.ts)
+- [x] Vérifier les tests et le rendu (116 tests passent, 0 erreurs TypeScript)
+- [x] Sauvegarder le checkpoint
+
+## Phase 58: Mise à jour Appels d'offres — ANSER RDC Fonds Mwinda
+- [x] Consulter le lien LinkedIn ANSER RDC et extraire les informations
+- [x] Analyser la structure actuelle des appels d'offres dans le site
+- [x] Intégrer l'annonce ANSER RDC Fonds Mwinda dans l'onglet AMI/Partenariats (en position « À la une »)
+- [x] Ajouter description complète, partenaires (GEAPP, GreenMax, Banque Mondiale), webinaire (17 mars), lien LinkedIn
+- [x] Vérifier le rendu et les tests (116 tests passent)
+- [x] Sauvegarder le checkpoint
+
+## Phase 59: Mise à jour complète — Revue DOCX + Appel d'offres + Pricing
+- [x] Consulter lien arzikinhaske.com et extraire l'appel à candidature G4-A1
+- [x] Ajouter l'appel Arzikin HASKE G4-A1 dans l'onglet AMI/Partenariats (badge « Nouveau — À la une »)
+- [x] Mettre à jour le pricing : Premium 4,50€/mois, Intégral 9€/mois (MEILLEURE OFFRE), Newsletter 5€/mois
+- [x] Mettre à jour les prix dans products.ts (serveur Stripe)
+- [x] Mettre à jour les prix dans Home.tsx, MyAccount.tsx, Subscriptions.tsx
+- [x] Ajouter la bande défilante « Les + lus » (style Forbes) entre le hero et les articles
+- [x] Animation marquee CSS ajoutée dans index.css
+- [x] Ajouter rubrique Habari Green dans le footer (colonne Rubriques)
+- [x] Liens de rubriques du footer avec paramètres de filtrage (?rubrique=...)
+- [x] Tests : 116 tests passent, 0 erreur TypeScript
+- [x] Sauvegarder le checkpoint
+
+## Phase 60: Formulaire admin CRUD Appels d'offres / AMI / Emplois
+- [x] Analyser la structure existante (schéma DB, données en dur Bids.tsx, pages admin, AdminLayout)
+- [x] Créer la table DB unifiée `opportunities` (type: bid/ami/job) + migration
+- [x] Créer les helpers DB CRUD dans server/db.ts (getActive, bySlug, counts, adminList, adminById, adminCreate, adminUpdate, adminDelete, adminToggleFeatured)
+- [x] Créer les procédures tRPC admin (admin.opportunities: list, byId, create, update, delete, toggleFeatured)
+- [x] Créer les procédures tRPC publiques (opportunities: list, bySlug, counts)
+- [x] Créer la page admin /admin/opportunites (AdminOpportunities.tsx) avec liste, filtres par type/statut, recherche, actions
+- [x] Créer le formulaire de création/édition (AdminOpportunityForm.tsx) avec tous les champs (titre, organisme, pays, date limite, budget, description, type, secteur, statut, featured, lien externe, partenaires, webinaire, type contrat, niveau expérience)
+- [x] Ajouter le lien « Opportunités » dans le sidebar admin (AdminLayout.tsx) avec icône Megaphone
+- [x] Ajouter les routes /admin/opportunites, /admin/opportunites/nouveau, /admin/opportunites/:id dans App.tsx
+- [x] Adapter la page publique Bids.tsx pour lire depuis la DB via tRPC (fallback données en dur)
+- [x] Écrire 19 tests Vitest pour les procédures CRUD (opportunities.test.ts)
+- [x] Tous les 135 tests passent, 0 erreur TypeScript
+- [x] Sauvegarder le checkpoint
+
+## Phase 61: Corrections régressions — Restaurer indicateurs CEEAC, données appels d'offres, liens
+- [x] Restaurer les données en dur (sampleBids, sampleAMI, sampleJobs) sur la page publique Bids.tsx (nettoyage données test DB)
+- [x] Corriger le fallback DB → données en dur pour que les 3 onglets affichent du contenu
+- [x] Créer le sous-onglet « Indicateurs économiques CEEAC » par pays dans la page Investisseurs
+- [x] Tableau complet 11 pays (RDC, Angola, Cameroun, Gabon, Tchad, Congo, Guinée Éq., Rwanda, Burundi, RCA, São Tomé) avec PIB, Croissance, Inflation, Population
+- [x] Sélecteur principal « Deal Flow » / « Indicateurs économiques CEEAC »
+- [x] Vérifier que les liens ANSER RDC et Arzikin HASKE sont bien en place dans AMI/Partenariats
+- [x] Tests : 135 tests passent, 0 erreur TypeScript
+- [x] Sauvegarder le checkpoint

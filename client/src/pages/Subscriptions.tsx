@@ -76,7 +76,7 @@ export default function Subscriptions() {
       {/* Header */}
       <section className="bg-[oklch(0.20_0.02_250)] py-16 md:py-20">
         <div className="container text-center">
-          <div className="habari-rubrique text-[oklch(0.72_0.15_75)] mb-4">Abonnements</div>
+          <div className="habari-rubrique text-[oklch(0.72_0.15_75)] mb-4">Votre Accès Habari</div>
           <h1 className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight mb-4">
             Choisissez votre formule
           </h1>
@@ -195,13 +195,13 @@ export default function Subscriptions() {
                 </div>
                 <div className="mb-5">
                   <span className="text-3xl font-serif font-bold text-foreground">
-                    {interval === "monthly" ? "10 €" : "100 €"}
+                    {interval === "monthly" ? "4,50 €" : "45 €"}
                   </span>
                   <span className="text-sm text-muted-foreground font-sans">
                     /{interval === "monthly" ? "mois" : "an"}
                   </span>
                   {interval === "annual" && (
-                    <span className="block text-xs text-green-700 font-sans mt-1">soit 8,33 €/mois</span>
+                    <span className="block text-xs text-green-700 font-sans mt-1">soit 3,75 €/mois</span>
                   )}
                 </div>
                 <ul className="space-y-2.5 text-sm font-sans text-muted-foreground mb-6">
@@ -261,13 +261,13 @@ export default function Subscriptions() {
                 </div>
                 <div className="mb-5">
                   <span className="text-3xl font-serif font-bold text-foreground">
-                    {interval === "monthly" ? "20 €" : "200 €"}
+                    {interval === "monthly" ? "9 €" : "90 €"}
                   </span>
                   <span className="text-sm text-muted-foreground font-sans">
                     /{interval === "monthly" ? "mois" : "an"}
                   </span>
                   <span className="block text-xs text-green-700 font-sans mt-1">
-                    {interval === "monthly" ? "au lieu de 25 €" : "au lieu de 300 €"}
+                    {interval === "monthly" ? "au lieu de 9,50 €" : "au lieu de 114 €"}
                   </span>
                 </div>
                 <ul className="space-y-2.5 text-sm font-sans text-muted-foreground mb-6">
@@ -303,6 +303,34 @@ export default function Subscriptions() {
                     <>S'abonner <ArrowRight className="w-4 h-4 ml-2" /></>
                   )}
                 </Button>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Magazine PDF à l'unité */}
+          <div className="mt-10 max-w-5xl mx-auto">
+            <Card className="border border-dashed border-[oklch(0.72_0.15_75)]/50 bg-[oklch(0.72_0.15_75)]/5">
+              <CardContent className="p-6 flex flex-col md:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-11 h-11 rounded-full bg-[oklch(0.72_0.15_75)]/15 flex items-center justify-center">
+                    <BookOpen className="w-5 h-5 text-[oklch(0.55_0.12_75)]" />
+                  </div>
+                  <div>
+                    <h3 className="font-serif font-bold text-foreground">Magazine PDF — Numéro à l'unité</h3>
+                    <p className="text-sm text-muted-foreground font-sans">Téléchargez un numéro complet au format PDF (67+ pages d'analyses)</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-right">
+                    <span className="text-2xl font-serif font-bold text-foreground">4,99 €</span>
+                    <span className="text-xs text-muted-foreground font-sans block"><s>9,99 €</s> — Offre lancement</span>
+                  </div>
+                  <Link href="/archives">
+                    <Button variant="outline" className="font-sans border-[oklch(0.72_0.15_75)] text-[oklch(0.55_0.12_75)] hover:bg-[oklch(0.72_0.15_75)]/10">
+                      Voir les numéros <ArrowRight className="w-4 h-4 ml-2" />
+                    </Button>
+                  </Link>
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -373,7 +401,7 @@ export default function Subscriptions() {
                 <h3 className="font-serif text-lg font-bold text-foreground">Newsletter Premium</h3>
                 <div className="text-right">
                   <span className="text-2xl font-serif font-bold text-[oklch(0.55_0.12_75)]">
-                    {interval === "monthly" ? "15 €" : "150 €"}
+                    {interval === "monthly" ? "5 €" : "50 €"}
                   </span>
                   <span className="text-xs text-muted-foreground font-sans block">
                     /{interval === "monthly" ? "mois" : "an"}

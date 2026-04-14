@@ -20,10 +20,16 @@ const sampleEvents = [
   { id: 11, title: "PME-Bright Forum — N'Djamena 2026", type: "conference", date: "15 novembre 2026", location: "N'Djamena, Tchad", desc: "Forum dédié aux PME et à l'entrepreneuriat en zone CEEAC. Ateliers, pitchs et rencontres B2B pour accélérer la croissance des entreprises tchadiennes et régionales." },
   { id: 12, title: "Cultur'Com — Ouagadougou 2026", type: "conference", date: "26 février 2026", location: "Ouagadougou, Burkina Faso", desc: "Rendez-vous des industries culturelles et créatives d'Afrique. Échanges sur la communication, les médias et la culture comme leviers de développement économique." },
   { id: 13, title: "Petit-déjeuner décideurs CEEAC — Kinshasa", type: "networking", date: "2026", location: "Kinshasa, RDC", desc: "Rencontre exclusive entre décideurs économiques, institutionnels et investisseurs de la zone CEEAC. Échanges stratégiques sur les opportunités en République démocratique du Congo." },
+  { id: 14, title: "Sommet de la Ligue des États Arabes (Sommet Ordinaire)", type: "sommet", date: "Fin mars 2026", location: "Alger, Algérie", desc: "Sommet ordinaire de la Ligue des États Arabes. Lieu sous réserve de confirmation officielle. Enjeux géopolitiques et économiques pour la coopération arabo-africaine." },
+  { id: 15, title: "Réunion Ministérielle du G20 — Finances", type: "sommet", date: "Mars 2026", location: "États-Unis", desc: "Première grande réunion technique pour préparer le sommet des dirigeants de Miami (décembre 2026). Sous la présidence américaine du G20, enjeux de stabilité financière mondiale." },
+  { id: 16, title: "Sommet ASEAN–Australie (Sommet Spécial)", type: "sommet", date: "Mars 2026", location: "À confirmer", desc: "Renforcement des liens sécuritaires et commerciaux en Indo-Pacifique. Sommet spécial entre l'ASEAN et l'Australie, avec des implications pour les partenariats africains." },
+  { id: 17, title: "OMC MC14 — 14ᵉ Conférence ministérielle", type: "sommet", date: "26-29 mars 2026", location: "Yaoundé, Cameroun", desc: "Événement historique pour la CEEAC : la 14ᵉ Conférence ministérielle de l'OMC se tient pour la première fois en Afrique Centrale. Renforce le commerce régional avec le tarif externe commun CEEAC appliqué dès janvier 2026." },
+  { id: 18, title: "Sommet Afrique-France \"Africa Forward\"", type: "sommet", date: "11-12 mai 2026", location: "Nairobi, Kenya", desc: "Premier sommet du genre en pays anglophone. La France invite tous les chefs d'État africains, y compris ceux de la zone CEEAC, pour parler innovation et climat. Un tournant dans les relations franco-africaines." },
+  { id: 19, title: "Trade and Sustainability Hub (en marge OMC MC14)", type: "sommet", date: "Mars 2026", location: "Yaoundé, Cameroun", desc: "Pour la première fois en Afrique Centrale, les ministres du monde entier discuteront des échanges de biens et services environnementaux. Un enjeu majeur pour l'économie verte de la zone CEEAC." },
 ];
 
-const types = ["Tous", "conference", "networking", "formation", "webinaire"];
-const typeLabels: Record<string, string> = { conference: "Conférence", networking: "Networking", formation: "Formation", webinaire: "Webinaire" };
+const types = ["Tous", "sommet", "conference", "networking", "formation", "webinaire"];
+const typeLabels: Record<string, string> = { sommet: "Sommet", conference: "Conférence", networking: "Networking", formation: "Formation", webinaire: "Webinaire" };
 
 export default function Events() {
   const [activeType, setActiveType] = useState("Tous");

@@ -3,12 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { trpc } from "@/lib/trpc";
 import { getLoginUrl } from "@/const";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import {
   Loader2, ArrowRight, TrendingUp, BarChart3, Globe2, Briefcase,
   Calendar, BookOpen, Users, Lock, Mail, CheckCircle2, Star, Shield, Gift, Clock, Sparkles,
-  Leaf, TreePine, Zap, Landmark
+  Leaf, TreePine, Zap, Landmark, ChevronLeft, ChevronRight, Download
 } from "lucide-react";
 import { Link } from "wouter";
 import SocialShare from "@/components/SocialShare";
@@ -26,22 +26,51 @@ const IMG = {
   culturePortrait: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663347570863/MsiRkJOHcDfupLNH.jpg",
 };
 
-/* Baromètre CEEAC — données statiques vitrine (11 pays membres) */
-const barometre = [
-  { country: "RDC", flag: "🇨🇩", pib: "~65 Mds $", croissance: "+6,2%", inflation: "9,5%", pop: "105M" },
-  { country: "Angola", flag: "🇦🇴", pib: "~78 Mds $", croissance: "+3,0%", inflation: "13,8%", pop: "36M" },
-  { country: "Cameroun", flag: "🇨🇲", pib: "~45 Mds $", croissance: "+4,2%", inflation: "5,8%", pop: "28M" },
-  { country: "Gabon", flag: "🇬🇦", pib: "~20 Mds $", croissance: "+3,0%", inflation: "3,2%", pop: "2,4M" },
-  { country: "Tchad", flag: "🇹🇩", pib: "~12 Mds $", croissance: "+3,5%", inflation: "6,3%", pop: "18M" },
-  { country: "Congo", flag: "🇨🇬", pib: "~14 Mds $", croissance: "+2,5%", inflation: "4,1%", pop: "6M" },
-  { country: "Guinée Éq.", flag: "🇬🇶", pib: "~11 Mds $", croissance: "+1,8%", inflation: "2,9%", pop: "1,7M" },
-  { country: "Rwanda", flag: "🇷🇼", pib: "~13 Mds $", croissance: "+7,2%", inflation: "6,1%", pop: "14M" },
-  { country: "Burundi", flag: "🇧🇮", pib: "~3 Mds $", croissance: "+3,6%", inflation: "18,2%", pop: "13M" },
-  { country: "RCA", flag: "🇨🇫", pib: "~2,5 Mds $", croissance: "+1,2%", inflation: "4,5%", pop: "5,5M" },
-  { country: "São Tomé", flag: "🇸🇹", pib: "~0,6 Mds $", croissance: "+2,8%", inflation: "7,9%", pop: "0,2M" },
+/* Bande défilante — articles "chauds" et derniers dossiers */
+const heroSlides = [
+  {
+    rubrique: "Dossier Central",
+    title: "Panne sèche à la CEMAC — Crise financière et ajustements budgétaires",
+    excerpt: "La zone CEMAC traverse une période charnière. Entre crise financière, dette souveraine et suspension des activités de la Commission.",
+    image: IMG.cemac,
+    slug: "cemac-panne-seche",
+    stats: { label1: "265M hab.", label2: "~265 Mds $ PIB", label3: "11 pays" },
+  },
+  {
+    rubrique: "Enquête",
+    title: "Gabon — Oligui Nguema face au mur de l'argent",
+    excerpt: "Le Gabon affiche une ambition économique tous azimuts. Mais derrière la volonté politique se cache une équation plus dure.",
+    image: IMG.gabon,
+    slug: "gabon-oligui-mur-argent",
+    stats: { label1: "20 Mds $ PIB", label2: "+3,0% croiss.", label3: "2,4M hab." },
+  },
+  {
+    rubrique: "Dossier Stratégique",
+    title: "La CEEAC face au paradoxe vert — Capital naturel d'envergure mondiale",
+    excerpt: "30 % des forêts tropicales mondiales, 107 GW de potentiel hydroélectrique, mais seulement 0,8 Md$ de finance verte captée.",
+    image: IMG.ceeacVert,
+    slug: "ceeac-paradoxe-vert",
+    stats: { label1: "30% forêts", label2: "107 GW hydro", label3: "0,8 Md$ vert" },
+  },
+  {
+    rubrique: "La Grande Interview",
+    title: "Loïc Mackosso : \u00ab Rester debout, c'est décider de se renforcer \u00bb",
+    excerpt: "Banquier d'affaires et fondateur d'Aries Investissements, Loïc Mackosso livre un témoignage puissant sur la résilience.",
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663347570863/C6aFnP23nadn7BHJcaRyWP/mackosso1_cropped_3c196986.jpg",
+    slug: "interview-mackosso-rester-debout",
+    stats: { label1: "Congo-Brazza", label2: "Aries Invest.", label3: "Finance" },
+  },
+  {
+    rubrique: "Culture & Société",
+    title: "La révolution du mobile money change-t-elle les comportements sociaux ?",
+    excerpt: "856 millions de comptes et 1 000 milliards de dollars de transactions annuelles. Le mobile money redéfinit les solidarités.",
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663347570863/C6aFnP23nadn7BHJcaRyWP/qIZrLdK4gbPn_90cf748f.jpg",
+    slug: "revolution-mobile-money-afrique",
+    stats: { label1: "856M comptes", label2: "1 000 Mds $", label3: "Afrique" },
+  },
 ];
 
-/* Contenu vitrine — articles en accès libre avec images */
+/* Contenu vitrine — articles en accès libre */
 const freeContent = [
   {
     rubrique: "Dossier Central",
@@ -72,8 +101,38 @@ const freeContent = [
     badge: "Accès libre",
     title: "Loïc Mackosso : \u00ab Rester debout, c'est décider de se renforcer \u00bb",
     excerpt: "Banquier d'affaires et fondateur d'Aries Investissements, Loïc Mackosso livre un témoignage puissant sur la résilience, l'entrepreneuriat en Afrique et la reconstruction après la guerre civile au Congo.",
-    image: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663347570863/ARoCDHZWpDwKcVeV.jpg",
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663347570863/C6aFnP23nadn7BHJcaRyWP/mackosso1_cropped_3c196986.jpg",
     slug: "interview-mackosso-rester-debout",
+  },
+  {
+    rubrique: "Habari Green",
+    badge: "Accès libre",
+    title: "Cobalt et minerais stratégiques : bénédiction ou piège économique pour l'Afrique ?",
+    excerpt: "Avec 70 % de la production mondiale de cobalt, l'Afrique est au c\u0153ur de la révolution énergétique. Mais la Chine contrôle 73 % du raffinage. Bénédiction ou nouveau piège extractif ?",
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663347570863/C6aFnP23nadn7BHJcaRyWP/nhhpqOsQjMrA_e4729627.jpg",
+    slug: "cobalt-minerais-verts-afrique",
+  },
+  {
+    rubrique: "Habari Green",
+    badge: "Accès libre",
+    title: "Les villes africaines face au défi climatique : entre contraintes et opportunités",
+    excerpt: "Avec 700 millions de nouveaux citadins attendus d'ici 2050, l'Afrique doit construire des villes durables sans répéter les erreurs des pays industrialisés.",
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663347570863/C6aFnP23nadn7BHJcaRyWP/GQwuI2Igxrdy_a1957686.jpg",
+    slug: "villes-africaines-defi-climatique",
+  },
+  {
+    rubrique: "Culture & Société",
+    title: "La montée des femmes entrepreneuses change-t-elle l'économie africaine ?",
+    excerpt: "L'Afrique détient le taux d'entrepreneuriat féminin le plus élevé au monde. Pourtant, moins de 5 % du financement startup va à des CEO femmes.",
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663347570863/C6aFnP23nadn7BHJcaRyWP/q66ZJPQU1SQY_02c30c67.jpg",
+    slug: "femmes-entrepreneuses-afrique",
+  },
+  {
+    rubrique: "Culture & Société",
+    title: "La révolution du mobile money change-t-elle les comportements sociaux en Afrique ?",
+    excerpt: "Avec 856 millions de comptes et 1 000 milliards de dollars de transactions annuelles, le mobile money redéfinit les solidarités familiales.",
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663347570863/C6aFnP23nadn7BHJcaRyWP/qIZrLdK4gbPn_90cf748f.jpg",
+    slug: "revolution-mobile-money-afrique",
   },
 ];
 
@@ -98,7 +157,7 @@ const premiumContent = [
   {
     rubrique: "Culture & Société",
     title: "Akendengué : le retour d'un homme devenu repère",
-    excerpt: "Pierre Claver Akendengué, 82 ans, est remonté sur scène à l'Institut français de Libreville. Deux soirs où une mémoire s'est remise à chanter.",
+    excerpt: "Pierre Claver Akendengué, 82 ans, est remonté sur scène à l'Institut français de Libreville.",
     image: IMG.culturePortrait,
   },
 ];
@@ -112,6 +171,24 @@ export default function Home() {
   const [nlLoading, setNlLoading] = useState(false);
   const [nlDone, setNlDone] = useState(false);
   const subscribeMutation = trpc.newsletter.subscribe.useMutation();
+
+  /* Bande défilante state */
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+
+  const nextSlide = useCallback(() => {
+    setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+  }, []);
+
+  const prevSlide = useCallback(() => {
+    setCurrentSlide((prev) => (prev - 1 + heroSlides.length) % heroSlides.length);
+  }, []);
+
+  useEffect(() => {
+    if (!isAutoPlaying) return;
+    const timer = setInterval(nextSlide, 5000);
+    return () => clearInterval(timer);
+  }, [isAutoPlaying, nextSlide]);
 
   const handleNewsletterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -128,146 +205,185 @@ export default function Home() {
     }
   };
 
+  const slide = heroSlides[currentSlide];
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
 
-      {/* ═══════ HERO — VITRINE PREMIUM ═══════ */}
-      <section className="relative overflow-hidden bg-[oklch(0.20_0.02_250)]">
-        {/* Background image */}
-        <div className="absolute inset-0">
-          <img src={IMG.hero} alt="" className="w-full h-full object-cover opacity-25" />
-          <div className="absolute inset-0 bg-gradient-to-r from-[oklch(0.15_0.02_250)] via-[oklch(0.18_0.02_250)]/95 to-[oklch(0.18_0.02_250)]/70" />
-        </div>
-        <div className="container relative py-20 md:py-28">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/10 rounded-full px-4 py-1.5 mb-6">
-                <Star className="w-3.5 h-3.5 text-[oklch(0.72_0.15_75)]" />
-                <span className="text-xs font-sans text-white/80 tracking-wide">Connexion économique pour l'intégration de l'Afrique Centrale. Comprendre, décider, investir, agir.</span>
+      {/* ═══════ HERO — FOND CLAIR + BANDE DÉFILANTE ═══════ */}
+      <section className="relative overflow-hidden bg-[oklch(0.97_0.005_250)] border-b border-border">
+        <div className="container py-10 md:py-16">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+            {/* Left — Magazine presentation + download */}
+            <div className="lg:col-span-4 flex flex-col">
+              <div className="flex items-center gap-2 mb-4">
+                <BookOpen className="w-4 h-4 text-primary" />
+                <span className="text-xs font-sans font-semibold uppercase tracking-wider text-primary">Numéro 1 — Février 2026</span>
               </div>
-              <h1 className="font-serif text-4xl md:text-5xl lg:text-[3.5rem] font-bold text-white leading-[1.12] mb-6">
-                Connecter les acteurs économiques de l'Afrique Centrale
+              <h1 className="font-serif text-3xl md:text-4xl font-bold text-[oklch(0.20_0.02_250)] leading-tight mb-4">
+                Habari Magazine
               </h1>
-              <div className="w-20 h-1 bg-[oklch(0.72_0.15_75)] mb-6"></div>
-              <p className="text-lg text-white/65 leading-relaxed mb-8 max-w-xl font-sans">
-                Analyses de fond, données exclusives, réseau de décideurs. Habari est le magazine de référence
-                pour les professionnels et investisseurs engagés dans la zone CEEAC.
+              <div className="w-16 h-1 bg-[oklch(0.72_0.15_75)] mb-4"></div>
+              <p className="text-sm text-[oklch(0.35_0.02_250)] font-sans leading-relaxed mb-6">
+                Connexion économique pour l'intégration de l'Afrique Centrale. Analyses de fond, données exclusives, réseau de décideurs.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4">
+
+              {/* Cover + download */}
+              <div className="flex items-start gap-4 mb-6">
+                <Link href="/telecharger">
+                  <img
+                    src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663347570863/TDJnjIvMMFwogdcg.webp"
+                    alt="Couverture Habari N°000"
+                    className="w-28 rounded-lg shadow-md border border-border hover:shadow-lg transition-shadow cursor-pointer"
+                  />
+                </Link>
+                <div className="flex-1">
+                  <p className="font-serif font-bold text-sm text-foreground mb-1">N°000 — Juin 2024</p>
+                  <p className="text-xs text-muted-foreground font-sans mb-3">67 pages — Gratuit</p>
+                  <div className="flex flex-col gap-2">
+                    <a href="https://files.manuscdn.com/user_upload_by_module/session_file/310519663347570863/pqeNdyKiCydqFTQF.pdf" download="Habari-Magazine-N000.pdf" target="_blank" rel="noopener noreferrer">
+                      <Button size="sm" className="font-sans bg-primary hover:bg-primary/90 w-full text-xs">
+                        <Download className="w-3.5 h-3.5 mr-1.5" /> Télécharger le PDF
+                      </Button>
+                    </a>
+                    <Link href="/telecharger">
+                      <Button size="sm" variant="outline" className="font-sans w-full text-xs border-primary/30 text-primary">
+                        Tous les numéros
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              </div>
+
+              {/* CTA */}
+              <div className="mt-auto">
                 <Link href="/abonnements">
-                  <Button size="lg" className="font-sans bg-[oklch(0.72_0.15_75)] text-[oklch(0.15_0.02_250)] hover:bg-[oklch(0.78_0.15_75)] w-full sm:w-auto font-semibold">
+                  <Button className="font-sans bg-[oklch(0.72_0.15_75)] text-[oklch(0.15_0.02_250)] hover:bg-[oklch(0.78_0.15_75)] w-full font-semibold">
                     Découvrir nos offres <ArrowRight className="ml-2 w-4 h-4" />
                   </Button>
                 </Link>
-                <Link href="/magazine">
-                  <Button size="lg" variant="outline" className="font-sans border-white/25 text-white hover:bg-white/10 w-full sm:w-auto">
-                    Lire le magazine
-                  </Button>
-                </Link>
               </div>
             </div>
 
-            {/* Hero right — Numéro courant */}
-            <div className="bg-white/[0.04] backdrop-blur-sm border border-white/10 rounded-xl overflow-hidden">
-              {/* Image d'en-tête du numéro */}
-              <div className="relative h-40 overflow-hidden">
-                <img src={IMG.cemac} alt="Dossier CEMAC" className="w-full h-full object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-t from-[oklch(0.15_0.02_250)] to-transparent" />
-                <div className="absolute bottom-3 left-6 right-6 flex items-center justify-between">
-                  <div className="habari-rubrique text-[oklch(0.72_0.15_75)]">Numéro 1 — Février 2026</div>
-                  <span className="text-xs font-sans text-white/40 bg-white/10 backdrop-blur-sm px-3 py-1 rounded-full">Trimestriel</span>
+            {/* Right — Bande défilante interactive (style Forbes) */}
+            <div className="lg:col-span-8">
+              <div
+                className="relative rounded-xl overflow-hidden bg-[oklch(0.20_0.02_250)] h-full min-h-[380px] cursor-pointer"
+                onMouseEnter={() => setIsAutoPlaying(false)}
+                onMouseLeave={() => setIsAutoPlaying(true)}
+              >
+                {/* Background image */}
+                <div className="absolute inset-0">
+                  <img
+                    src={slide.image}
+                    alt=""
+                    className="w-full h-full object-cover object-top opacity-40 transition-all duration-700"
+                    key={currentSlide}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[oklch(0.12_0.02_250)] via-[oklch(0.15_0.02_250)]/80 to-[oklch(0.18_0.02_250)]/50" />
                 </div>
-              </div>
-              <div className="p-6 pt-4">
-                <h2 className="font-serif text-2xl md:text-3xl font-bold text-white leading-tight mb-3">
-                  Panne sèche à la CEMAC
-                </h2>
-                <p className="text-sm text-white/55 font-sans leading-relaxed mb-5">
-                  Crise financière, dette souveraine, suspension des activités de la Commission. Dossier complet sur les six économies de la zone CEMAC.
-                </p>
-                <div className="grid grid-cols-3 gap-3 mb-5">
-                  <div className="text-center p-3 bg-white/5 rounded-lg">
-                    <div className="text-xl font-serif font-bold text-[oklch(0.72_0.15_75)]">265M</div>
-                    <div className="text-[0.65rem] text-white/50 font-sans mt-0.5">Habitants CEEAC</div>
+
+                {/* Content */}
+                <div className="relative h-full flex flex-col justify-end p-6 md:p-8">
+                  <div className="mb-auto flex items-center justify-between pt-2">
+                    <span className="text-xs font-sans font-semibold uppercase tracking-wider text-[oklch(0.72_0.15_75)] bg-white/10 backdrop-blur-sm px-3 py-1 rounded-full">
+                      {slide.rubrique}
+                    </span>
+                    <span className="text-xs font-sans text-white/40">
+                      {currentSlide + 1} / {heroSlides.length}
+                    </span>
                   </div>
-                  <div className="text-center p-3 bg-white/5 rounded-lg">
-                    <div className="text-xl font-serif font-bold text-[oklch(0.72_0.15_75)]">~265</div>
-                    <div className="text-[0.65rem] text-white/50 font-sans mt-0.5">Mds $ PIB</div>
+
+                  <div>
+                    <Link href={`/article/${slide.slug}`}>
+                      <h2 className="font-serif text-2xl md:text-3xl font-bold text-white leading-tight mb-3 hover:text-[oklch(0.72_0.15_75)] transition-colors cursor-pointer">
+                        {slide.title}
+                      </h2>
+                    </Link>
+                    <p className="text-sm text-white/60 font-sans leading-relaxed mb-5 max-w-2xl line-clamp-2">
+                      {slide.excerpt}
+                    </p>
+
+                    {/* Stats chips */}
+                    <div className="flex flex-wrap gap-2 mb-5">
+                      {Object.values(slide.stats).map((val, i) => (
+                        <span key={i} className="text-xs font-sans font-medium bg-white/10 backdrop-blur-sm text-white/80 px-3 py-1.5 rounded-full">
+                          {val}
+                        </span>
+                      ))}
+                    </div>
+
+                    {/* Navigation */}
+                    <div className="flex items-center justify-between">
+                      <Link href={`/article/${slide.slug}`}>
+                        <Button size="sm" className="font-sans bg-[oklch(0.72_0.15_75)] text-[oklch(0.15_0.02_250)] hover:bg-[oklch(0.78_0.15_75)]">
+                          Lire l'article <ArrowRight className="ml-1.5 w-3.5 h-3.5" />
+                        </Button>
+                      </Link>
+
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={(e) => { e.stopPropagation(); prevSlide(); }}
+                          className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+                        >
+                          <ChevronLeft className="w-4 h-4 text-white" />
+                        </button>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); nextSlide(); }}
+                          className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+                        >
+                          <ChevronRight className="w-4 h-4 text-white" />
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                  <div className="text-center p-3 bg-white/5 rounded-lg">
-                    <div className="text-xl font-serif font-bold text-[oklch(0.72_0.15_75)]">11</div>
-                    <div className="text-[0.65rem] text-white/50 font-sans mt-0.5">Pays membres</div>
+
+                  {/* Bullet dots */}
+                  <div className="flex items-center gap-1.5 mt-4">
+                    {heroSlides.map((_, i) => (
+                      <button
+                        key={i}
+                        onClick={() => setCurrentSlide(i)}
+                        className={`h-1.5 rounded-full transition-all duration-300 ${
+                          i === currentSlide ? "w-6 bg-[oklch(0.72_0.15_75)]" : "w-1.5 bg-white/30 hover:bg-white/50"
+                        }`}
+                      />
+                    ))}
                   </div>
                 </div>
-                <Link href="/article/cemac-panne-seche">
-                  <Button className="w-full font-sans bg-primary/80 hover:bg-primary text-white">
-                    Lire le dossier <ArrowRight className="ml-2 w-4 h-4" />
-                  </Button>
-                </Link>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ═══════ BAROMÈTRE MENSUEL — ACCÈS LIBRE ═══════ */}
-      <section className="py-16 bg-muted/30 border-b border-border">
-        <div className="container">
-          <div className="flex items-end justify-between mb-8">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <BarChart3 className="w-4 h-4 text-[oklch(0.72_0.15_75)]" />
-                <span className="habari-rubrique">Baromètre mensuel</span>
-                <span className="text-[0.6rem] font-sans bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium uppercase tracking-wider">Accès libre</span>
-              </div>
-              <h2 className="font-serif text-3xl font-bold text-primary">Indicateurs économiques CEEAC</h2>
-              <div className="habari-separator mt-3"></div>
+      {/* ═══════ BANDE DÉFILANTE — ARTICLES CHAUDS (style Forbes) ═══════ */}
+      <section className="bg-[oklch(0.97_0.005_250)] border-b border-border overflow-hidden py-3">
+        <div className="relative">
+          <div className="flex items-center">
+            <div className="shrink-0 bg-primary text-white px-4 py-1.5 font-sans text-xs font-bold uppercase tracking-wider z-10 mr-4">
+              <Sparkles className="w-3.5 h-3.5 inline mr-1.5" />
+              Les + lus
             </div>
-            <Link href="/magazine" className="hidden md:block">
-              <Button variant="ghost" className="font-sans gap-2 text-primary">
-                Analyse complète <ArrowRight className="w-4 h-4" />
-              </Button>
-            </Link>
-          </div>
-
-          <div className="overflow-x-auto rounded-lg border border-border">
-            <table className="w-full text-sm font-sans">
-              <thead>
-                <tr className="bg-primary text-white">
-                  <th className="text-left px-5 py-3.5 font-semibold">Pays</th>
-                  <th className="text-right px-5 py-3.5 font-semibold">PIB</th>
-                  <th className="text-right px-5 py-3.5 font-semibold">Croissance</th>
-                  <th className="text-right px-5 py-3.5 font-semibold hidden sm:table-cell">Inflation</th>
-                  <th className="text-right px-5 py-3.5 font-semibold">Population</th>
-                </tr>
-              </thead>
-              <tbody>
-                {barometre.map((row, i) => (
-                  <tr key={row.country} className={`border-b border-border last:border-0 ${i % 2 === 0 ? "bg-background" : "bg-muted/40"}`}>
-                    <td className="px-5 py-3.5 font-medium">
-                      <span className="mr-2">{row.flag}</span>
-                      {row.country}
-                    </td>
-                    <td className="text-right px-5 py-3.5 text-muted-foreground">{row.pib}</td>
-                    <td className="text-right px-5 py-3.5">
-                      <span className="inline-flex items-center gap-1 text-green-700 font-medium">
-                        <TrendingUp className="w-3 h-3" />
-                        {row.croissance}
-                      </span>
-                    </td>
-                    <td className="text-right px-5 py-3.5 text-muted-foreground hidden sm:table-cell">{row.inflation}</td>
-                    <td className="text-right px-5 py-3.5 text-muted-foreground">{row.pop}</td>
-                  </tr>
+            <div className="overflow-hidden flex-1">
+              <div className="flex animate-marquee gap-12 whitespace-nowrap">
+                {[...freeContent, ...freeContent].map((item, i) => (
+                  <Link key={i} href={item.slug ? `/article/${item.slug}` : "/magazine"}>
+                    <span className="inline-flex items-center gap-2 text-sm font-sans text-foreground/80 hover:text-primary transition-colors cursor-pointer">
+                      <span className="text-[oklch(0.72_0.15_75)] font-semibold text-xs">{item.rubrique}</span>
+                      <span className="text-muted-foreground/40">—</span>
+                      <span className="font-medium">{item.title}</span>
+                    </span>
+                  </Link>
                 ))}
-              </tbody>
-            </table>
+              </div>
+            </div>
           </div>
-          <p className="text-xs text-muted-foreground mt-3 font-sans">Sources : BEAC, FMI, Banque mondiale — Estimations 2024-2025. Mis à jour mensuellement.</p>
         </div>
       </section>
 
-      {/* ═══════ ARTICLES EN ACCÈS LIBRE ═══════ */}
+      {/* ═══════ ARTICLES DU NUMÉRO ═══════ */}
       <section className="py-16">
         <div className="container">
           <div className="flex items-end justify-between mb-8">
@@ -301,7 +417,7 @@ export default function Home() {
                         <img
                           src={item.image || item.featuredImage}
                           alt={item.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
@@ -333,65 +449,6 @@ export default function Home() {
               ))}
             </div>
           )}
-        </div>
-      </section>
-
-      {/* ═══════ CONTENU PREMIUM — APERÇU VERROUILLÉ ═══════ */}
-      <section className="py-16 bg-[oklch(0.97_0.005_250)]">
-        <div className="container">
-          <div className="flex items-end justify-between mb-8">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <Sparkles className="w-4 h-4 text-[oklch(0.72_0.15_75)]" />
-                <span className="habari-rubrique">Contenu premium</span>
-                <span className="text-[0.6rem] font-sans bg-[oklch(0.72_0.15_75)]/15 text-[oklch(0.55_0.12_75)] px-2.5 py-0.5 rounded-full font-semibold uppercase tracking-wider flex items-center gap-1"><Gift className="w-3 h-3" /> Offre lancement</span>
-              </div>
-              <h2 className="font-serif text-3xl font-bold text-primary">Accès gratuit pour les inscrits</h2>
-              <p className="text-sm text-muted-foreground font-sans mt-2">Jusqu'au 1er juin 2026, tout le contenu premium est accessible gratuitement. Inscrivez-vous !</p>
-              <div className="habari-separator mt-3"></div>
-            </div>
-            <Link href="/inscription">
-              <Button className="font-sans gap-2 bg-[oklch(0.72_0.15_75)] text-[oklch(0.15_0.02_250)] hover:bg-[oklch(0.78_0.15_75)]">
-                <Gift className="w-4 h-4" /> S'inscrire gratuitement
-              </Button>
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {premiumContent.map((item, i) => (
-              <div key={i} className="relative group">
-                <Card className="border-0 shadow-sm overflow-hidden h-full opacity-90">
-                  <div className="w-full h-52 bg-gradient-to-br from-[oklch(0.72_0.15_75)]/15 to-primary/10 relative overflow-hidden">
-                    {item.image ? (
-                      <img src={item.image} alt={item.title} className="w-full h-full object-cover opacity-70" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <Lock className="w-10 h-10 text-[oklch(0.72_0.15_75)]/40" />
-                      </div>
-                    )}
-                    <span className="absolute top-3 left-3 text-[0.6rem] font-sans bg-[oklch(0.72_0.15_75)]/15 text-[oklch(0.55_0.12_75)] px-2.5 py-1 rounded-full font-semibold uppercase tracking-wider flex items-center gap-1">
-                      <Gift className="w-3 h-3" /> Gratuit jusqu'au 1er juin
-                    </span>
-                  </div>
-                  <CardContent className="p-5">
-                    <div className="habari-rubrique text-xs mb-2">{item.rubrique}</div>
-                    <h3 className="font-serif font-bold text-lg text-foreground leading-snug mb-2 line-clamp-2">
-                      {item.title}
-                    </h3>
-                    <p className="text-sm text-muted-foreground font-sans line-clamp-2">{item.excerpt}</p>
-                  </CardContent>
-                </Card>
-                {/* Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center pb-6">
-                  <Link href="/inscription">
-                    <Button size="sm" className="font-sans bg-[oklch(0.72_0.15_75)] text-[oklch(0.15_0.02_250)] hover:bg-[oklch(0.78_0.15_75)]">
-                      <Gift className="w-3.5 h-3.5 mr-1.5" /> S'inscrire pour lire
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-            ))}
-          </div>
         </div>
       </section>
 
@@ -457,88 +514,159 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ═══════ NEWSLETTER ═══════ */}
-      <section className="py-16 border-b border-border">
+      {/* ═══════ CONTENU PREMIUM — APERÇU VERROUILLÉ ═══════ */}
+      <section className="py-16 bg-[oklch(0.97_0.005_250)]">
         <div className="container">
-          <div className="max-w-3xl mx-auto text-center">
-            <div className="w-14 h-14 mx-auto mb-5 rounded-full bg-primary/5 flex items-center justify-center">
-              <Mail className="w-6 h-6 text-primary" />
+          <div className="flex items-end justify-between mb-8">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <Sparkles className="w-4 h-4 text-[oklch(0.72_0.15_75)]" />
+                <span className="habari-rubrique">Contenu premium</span>
+                <span className="text-[0.6rem] font-sans bg-[oklch(0.72_0.15_75)]/15 text-[oklch(0.55_0.12_75)] px-2.5 py-0.5 rounded-full font-semibold uppercase tracking-wider flex items-center gap-1"><Gift className="w-3 h-3" /> Offre lancement</span>
+              </div>
+              <h2 className="font-serif text-3xl font-bold text-primary">Accès gratuit pour les inscrits</h2>
+              <p className="text-sm text-muted-foreground font-sans mt-2">Jusqu'au 1er juin 2026, tout le contenu premium est accessible gratuitement. Inscrivez-vous !</p>
+              <div className="habari-separator mt-3"></div>
             </div>
-            <h2 className="font-serif text-3xl font-bold text-primary mb-3">
-              La newsletter Habari
-            </h2>
-            <div className="w-16 h-1 bg-[oklch(0.72_0.15_75)] mx-auto mb-5"></div>
-            <p className="text-muted-foreground font-sans mb-8 max-w-lg mx-auto">
-              Chaque semaine, recevez un résumé de l'actualité économique de la zone CEEAC, une analyse courte et l'agenda des événements.
-            </p>
+            <a href={getLoginUrl()}>
+              <Button className="font-sans gap-2 bg-[oklch(0.72_0.15_75)] text-[oklch(0.15_0.02_250)] hover:bg-[oklch(0.78_0.15_75)]">
+                <Gift className="w-4 h-4" /> S'inscrire gratuitement
+              </Button>
+            </a>
+          </div>
 
-            {/* Two tiers */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 text-left">
-              <div className="border border-border rounded-xl p-6 bg-background">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
-                    <Mail className="w-5 h-5 text-green-700" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {premiumContent.map((item, i) => (
+              <div key={i} className="relative group">
+                <Card className="border-0 shadow-sm overflow-hidden h-full opacity-90">
+                  <div className="w-full h-52 bg-gradient-to-br from-[oklch(0.72_0.15_75)]/15 to-primary/10 relative overflow-hidden">
+                    {item.image ? (
+                      <img src={item.image} alt={item.title} className="w-full h-full object-cover object-top opacity-70" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Lock className="w-10 h-10 text-[oklch(0.72_0.15_75)]/40" />
+                      </div>
+                    )}
+                    <span className="absolute top-3 left-3 text-[0.6rem] font-sans bg-[oklch(0.72_0.15_75)]/15 text-[oklch(0.55_0.12_75)] px-2.5 py-1 rounded-full font-semibold uppercase tracking-wider flex items-center gap-1">
+                      <Gift className="w-3 h-3" /> Gratuit jusqu'au 1er juin
+                    </span>
                   </div>
-                  <div>
-                    <h3 className="font-serif font-bold text-foreground">Newsletter Gratuite</h3>
-                    <span className="text-xs font-sans text-green-700 font-semibold">0 € / mois</span>
-                  </div>
+                  <CardContent className="p-5">
+                    <div className="habari-rubrique text-xs mb-2">{item.rubrique}</div>
+                    <h3 className="font-serif font-bold text-lg text-foreground leading-snug mb-2 line-clamp-2">
+                      {item.title}
+                    </h3>
+                    <p className="text-sm text-muted-foreground font-sans line-clamp-2">{item.excerpt}</p>
+                  </CardContent>
+                </Card>
+                <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center pb-6">
+                  <a href={getLoginUrl()}>
+                    <Button size="sm" className="font-sans bg-[oklch(0.72_0.15_75)] text-[oklch(0.15_0.02_250)] hover:bg-[oklch(0.78_0.15_75)]">
+                      <Gift className="w-3.5 h-3.5 mr-1.5" /> S'inscrire pour lire
+                    </Button>
+                  </a>
                 </div>
-                <ul className="space-y-2 text-sm font-sans text-muted-foreground">
-                  <li className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-green-600 mt-0.5 shrink-0" /> Résumé hebdomadaire de l'actualité CEEAC</li>
-                  <li className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-green-600 mt-0.5 shrink-0" /> 1 analyse courte par semaine</li>
-                  <li className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-green-600 mt-0.5 shrink-0" /> Agenda des événements à venir</li>
-                </ul>
               </div>
-              <div className="border-2 border-[oklch(0.72_0.15_75)] rounded-xl p-6 bg-[oklch(0.72_0.15_75)]/5 relative">
-                <div className="absolute -top-3 right-4 bg-[oklch(0.72_0.15_75)] text-[oklch(0.15_0.02_250)] text-[0.6rem] font-sans font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-                  Recommandé
-                </div>
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-full bg-[oklch(0.72_0.15_75)]/20 flex items-center justify-center">
-                    <Shield className="w-5 h-5 text-[oklch(0.55_0.12_75)]" />
-                  </div>
-                  <div>
-                    <h3 className="font-serif font-bold text-foreground">Newsletter Premium</h3>
-                    <span className="text-xs font-sans text-[oklch(0.55_0.12_75)] font-semibold">15-25 € / mois</span>
-                  </div>
-                </div>
-                <ul className="space-y-2 text-sm font-sans text-muted-foreground">
-                  <li className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-[oklch(0.72_0.15_75)] mt-0.5 shrink-0" /> Analyse approfondie hebdomadaire</li>
-                  <li className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-[oklch(0.72_0.15_75)] mt-0.5 shrink-0" /> Données exclusives et tableaux de bord</li>
-                  <li className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-[oklch(0.72_0.15_75)] mt-0.5 shrink-0" /> Accès aux archives complètes</li>
-                  <li className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-[oklch(0.72_0.15_75)] mt-0.5 shrink-0" /> Invitations événements Habari</li>
-                </ul>
-              </div>
-            </div>
-
-            {/* Newsletter form */}
-            {nlDone ? (
-              <div className="flex items-center justify-center gap-3 py-4 px-6 bg-green-50 border border-green-200 rounded-lg">
-                <CheckCircle2 className="w-5 h-5 text-green-600" />
-                <span className="font-sans text-green-700 font-medium">Merci ! Vous recevrez notre prochaine newsletter.</span>
-              </div>
-            ) : (
-              <form onSubmit={handleNewsletterSubmit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-                <input
-                  type="email"
-                  placeholder="votre@email.com"
-                  value={nlEmail}
-                  onChange={(e) => setNlEmail(e.target.value)}
-                  required
-                  className="flex-1 px-4 py-3 rounded-lg border border-border bg-background text-foreground font-sans text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
-                />
-                <Button type="submit" disabled={nlLoading} className="font-sans bg-primary hover:bg-primary/90 px-6">
-                  {nlLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "S'inscrire gratuitement"}
-                </Button>
-              </form>
-            )}
-            <p className="text-xs text-muted-foreground font-sans mt-3">Newsletter gratuite. Désabonnement en un clic.</p>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* ═══════ AGENDA ÉVÉNEMENTS — ACCÈS LIBRE ═══════ */}
+      {/* ═══════ VOTRE ACCÈS HABARI (ex-Newsletter) ═══════ */}
+      <section className="py-16 border-b border-border">
+        <div className="container">
+          <div className="max-w-4xl mx-auto text-center">
+            <div className="w-14 h-14 mx-auto mb-5 rounded-full bg-primary/5 flex items-center justify-center">
+              <Star className="w-6 h-6 text-primary" />
+            </div>
+            <h2 className="font-serif text-3xl font-bold text-primary mb-3">
+              Votre Accès Habari
+            </h2>
+            <div className="w-16 h-1 bg-[oklch(0.72_0.15_75)] mx-auto mb-5"></div>
+            <p className="text-muted-foreground font-sans mb-8 max-w-lg mx-auto">
+              Choisissez la formule qui vous convient. Accédez aux analyses, données et événements de la zone CEEAC.
+            </p>
+
+            {/* Two tiers — redirectionnels */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 text-left">
+              <Link href="/abonnements">
+                <div className="border border-border rounded-xl p-6 bg-background hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer h-full group">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+                      <Mail className="w-5 h-5 text-green-700" />
+                    </div>
+                    <div>
+                      <h3 className="font-serif font-bold text-foreground group-hover:text-primary transition-colors">Accès Gratuit</h3>
+                      <span className="text-xs font-sans text-green-700 font-semibold">0 € / mois</span>
+                    </div>
+                  </div>
+                  <ul className="space-y-2 text-sm font-sans text-muted-foreground mb-4">
+                    <li className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-green-600 mt-0.5 shrink-0" /> Résumé hebdomadaire de l'actualité CEEAC</li>
+                    <li className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-green-600 mt-0.5 shrink-0" /> 1 analyse courte par semaine</li>
+                    <li className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-green-600 mt-0.5 shrink-0" /> Agenda des événements à venir</li>
+                  </ul>
+                  <div className="flex items-center gap-2 text-primary font-sans text-sm font-medium group-hover:gap-3 transition-all">
+                    En savoir plus <ArrowRight className="w-4 h-4" />
+                  </div>
+                </div>
+              </Link>
+              <Link href="/abonnements">
+                <div className="border-2 border-[oklch(0.72_0.15_75)] rounded-xl p-6 bg-[oklch(0.72_0.15_75)]/5 relative hover:shadow-lg transition-all cursor-pointer h-full group">
+                  <div className="absolute -top-3 right-4 bg-[oklch(0.72_0.15_75)] text-[oklch(0.15_0.02_250)] text-[0.6rem] font-sans font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                    Recommandé
+                  </div>
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 rounded-full bg-[oklch(0.72_0.15_75)]/20 flex items-center justify-center">
+                      <Shield className="w-5 h-5 text-[oklch(0.55_0.12_75)]" />
+                    </div>
+                    <div>
+                      <h3 className="font-serif font-bold text-foreground group-hover:text-[oklch(0.55_0.12_75)] transition-colors">Accès Premium</h3>
+                      <span className="text-xs font-sans text-[oklch(0.55_0.12_75)] font-semibold">À partir de 4,50 € / mois</span>
+                    </div>
+                  </div>
+                  <ul className="space-y-2 text-sm font-sans text-muted-foreground mb-4">
+                    <li className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-[oklch(0.72_0.15_75)] mt-0.5 shrink-0" /> Analyse approfondie hebdomadaire</li>
+                    <li className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-[oklch(0.72_0.15_75)] mt-0.5 shrink-0" /> Données exclusives et tableaux de bord</li>
+                    <li className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-[oklch(0.72_0.15_75)] mt-0.5 shrink-0" /> Accès aux archives complètes</li>
+                    <li className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-[oklch(0.72_0.15_75)] mt-0.5 shrink-0" /> Invitations événements Habari</li>
+                  </ul>
+                  <div className="flex items-center gap-2 text-[oklch(0.55_0.12_75)] font-sans text-sm font-medium group-hover:gap-3 transition-all">
+                    Voir les offres <ArrowRight className="w-4 h-4" />
+                  </div>
+                </div>
+              </Link>
+            </div>
+
+            {/* Newsletter form — petite lucarne email */}
+            <div className="bg-muted/30 border border-border rounded-xl p-6 max-w-lg mx-auto">
+              <p className="text-sm font-sans text-muted-foreground mb-3">Inscrivez-vous gratuitement à la newsletter Habari</p>
+              {nlDone ? (
+                <div className="flex items-center justify-center gap-3 py-3 px-6 bg-green-50 border border-green-200 rounded-lg">
+                  <CheckCircle2 className="w-5 h-5 text-green-600" />
+                  <span className="font-sans text-green-700 font-medium text-sm">Merci ! Vous recevrez notre prochaine newsletter.</span>
+                </div>
+              ) : (
+                <form onSubmit={handleNewsletterSubmit} className="flex flex-col sm:flex-row gap-3">
+                  <input
+                    type="email"
+                    placeholder="votre@email.com"
+                    value={nlEmail}
+                    onChange={(e) => setNlEmail(e.target.value)}
+                    required
+                    className="flex-1 px-4 py-2.5 rounded-lg border border-border bg-background text-foreground font-sans text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                  />
+                  <Button type="submit" disabled={nlLoading} className="font-sans bg-primary hover:bg-primary/90 px-5 text-sm">
+                    {nlLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "S'inscrire"}
+                  </Button>
+                </form>
+              )}
+              <p className="text-xs text-muted-foreground font-sans mt-2">Newsletter gratuite. Désabonnement en un clic.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════ AGENDA ÉVÉNEMENTS ═══════ */}
       <section className="py-16">
         <div className="container">
           <div className="flex items-end justify-between mb-8">
@@ -586,58 +714,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ═══════ TÉLÉCHARGEMENT MAGAZINE ═══════ */}
-      <section className="py-16 bg-[oklch(0.20_0.02_250)] text-white">
-        <div className="container">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div className="flex justify-center lg:justify-start">
-              <div className="relative">
-                <img
-                  src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663347570863/TDJnjIvMMFwogdcg.webp"
-                  alt="Couverture Habari Magazine N°000"
-                  className="w-56 md:w-64 rounded-lg shadow-2xl border border-white/10"
-                />
-                <div className="absolute -top-3 -right-3 bg-[oklch(0.72_0.15_75)] text-[oklch(0.15_0.02_250)] font-sans font-bold text-xs px-3 py-1.5 rounded-full shadow-lg">
-                  N°000
-                </div>
-              </div>
-            </div>
-            <div>
-              <div className="flex items-center gap-2 mb-3">
-                <BookOpen className="w-4 h-4 text-[oklch(0.72_0.15_75)]" />
-                <span className="habari-rubrique text-[oklch(0.72_0.15_75)]">Kiosque numérique</span>
-              </div>
-              <h2 className="font-serif text-3xl md:text-4xl font-bold text-white leading-tight mb-4">
-                Téléchargez le dernier numéro
-              </h2>
-              <div className="w-16 h-1 bg-[oklch(0.72_0.15_75)] mb-5"></div>
-              <p className="text-white/60 font-sans leading-relaxed mb-4">
-                <strong className="text-white">Habari N°000 — Juin 2024</strong> : Mahamat Idriss Deby, le pari de l'union et de la réconciliation nationale. 67 pages d'analyses, d'interviews et de décryptages sur l'actualité africaine.
-              </p>
-              <div className="flex items-center gap-6 mb-6 text-sm font-sans text-white/50">
-                <span>67 pages</span>
-                <span>•</span>
-                <span>Format PDF</span>
-                <span>•</span>
-                <span>Gratuit</span>
-              </div>
-              <div className="flex flex-col sm:flex-row gap-3">
-                <a href="https://files.manuscdn.com/user_upload_by_module/session_file/310519663347570863/pqeNdyKiCydqFTQF.pdf" download="Habari-Magazine-N000.pdf" target="_blank" rel="noopener noreferrer">
-                  <Button size="lg" className="font-sans bg-[oklch(0.72_0.15_75)] text-[oklch(0.15_0.02_250)] hover:bg-[oklch(0.78_0.15_75)] w-full sm:w-auto font-semibold shadow-lg">
-                    <ArrowRight className="w-4 h-4 mr-2 rotate-90" /> Télécharger le PDF
-                  </Button>
-                </a>
-                <Link href="/telecharger">
-                  <Button size="lg" variant="outline" className="font-sans border-white/25 text-white hover:bg-white/10 w-full sm:w-auto">
-                    Tous les numéros
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* ═══════ SERVICES HABARI ═══════ */}
       <section className="py-16 bg-muted/30 border-t border-border">
         <div className="container">
@@ -651,8 +727,8 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
               { icon: Globe2, title: "Annuaire économique", desc: "Répertoire des acteurs clés de la zone CEEAC", href: "/annuaire", badge: null },
-              { icon: Briefcase, title: "Espace investisseurs", desc: "Opportunités d'investissement qualifiées", href: "/investisseurs", badge: "Premium" },
-              { icon: Users, title: "Appels d'offres", desc: "Marchés publics et opportunités commerciales", href: "/appels-offres", badge: null },
+              { icon: Briefcase, title: "Espace investisseurs", desc: "Opportunités d'investissement et baromètre CEEAC", href: "/investisseurs", badge: "Premium" },
+              { icon: Users, title: "Appels d'offres & AMI", desc: "Marchés publics, AMI et opportunités d'emploi", href: "/appels-offres", badge: null },
               { icon: Calendar, title: "Événements", desc: "Conférences, formations et networking", href: "/evenements", badge: null },
             ].map((svc) => (
               <Link key={svc.title} href={svc.href}>
@@ -696,11 +772,11 @@ export default function Home() {
               </Button>
             </Link>
             {!isAuthenticated && (
-              <Link href="/inscription">
+              <a href={getLoginUrl()}>
                 <Button size="lg" variant="outline" className="font-sans border-white/30 text-white hover:bg-white/10">
                   Créer un compte gratuit
                 </Button>
-              </Link>
+              </a>
             )}
           </div>
         </div>

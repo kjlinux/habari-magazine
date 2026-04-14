@@ -8,16 +8,11 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
           {/* Brand */}
           <div className="lg:col-span-1">
-            <div className="mb-4 flex items-center gap-2">
+            <div className="mb-4">
               <img
-                src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663347570863/IqKMUVQDBqpAxFCo.png"
-                alt="HM"
-                className="h-10 w-auto"
-              />
-              <img
-                src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663347570863/sbAbNdCDbWTYdcyx.png"
-                alt="HABARI MAG"
-                className="h-6 w-auto"
+                src="https://d2xsxph8kpxj0f.cloudfront.net/310519663347570863/C6aFnP23nadn7BHJcaRyWP/logoHABARI_transparent_b638ce27.png"
+                alt="Habari Mag"
+                className="h-12 w-auto brightness-[1.8] contrast-[0.9]"
               />
             </div>
             <p className="text-sm text-white/60 leading-relaxed mb-4">
@@ -33,12 +28,13 @@ export default function Footer() {
           <div>
             <h4 className="font-serif font-bold text-white text-sm mb-5 uppercase tracking-wider">Rubriques</h4>
             <ul className="space-y-3 text-sm">
-              <li><Link href="/magazine" className="text-white/60 hover:text-[oklch(0.72_0.15_75)] transition-colors">Éditorial</Link></li>
-              <li><Link href="/magazine" className="text-white/60 hover:text-[oklch(0.72_0.15_75)] transition-colors">Dossier Central</Link></li>
-              <li><Link href="/magazine" className="text-white/60 hover:text-[oklch(0.72_0.15_75)] transition-colors">Interviews</Link></li>
-              <li><Link href="/magazine" className="text-white/60 hover:text-[oklch(0.72_0.15_75)] transition-colors">Business &amp; Innovation</Link></li>
-              <li><Link href="/magazine" className="text-white/60 hover:text-[oklch(0.72_0.15_75)] transition-colors">Analyse Pays</Link></li>
-              <li><Link href="/magazine" className="text-white/60 hover:text-[oklch(0.72_0.15_75)] transition-colors">Culture &amp; Société</Link></li>
+              <li><Link href="/magazine?rubrique=editorial" className="text-white/60 hover:text-[oklch(0.72_0.15_75)] transition-colors">Éditorial</Link></li>
+              <li><Link href="/magazine?rubrique=dossier-central" className="text-white/60 hover:text-[oklch(0.72_0.15_75)] transition-colors">Dossier Central</Link></li>
+              <li><Link href="/magazine?rubrique=interviews" className="text-white/60 hover:text-[oklch(0.72_0.15_75)] transition-colors">Interviews</Link></li>
+              <li><Link href="/magazine?rubrique=business-innovation" className="text-white/60 hover:text-[oklch(0.72_0.15_75)] transition-colors">Business &amp; Innovation</Link></li>
+              <li><Link href="/magazine?rubrique=analyse-pays" className="text-white/60 hover:text-[oklch(0.72_0.15_75)] transition-colors">Analyse Pays</Link></li>
+              <li><Link href="/magazine?rubrique=culture-societe" className="text-white/60 hover:text-[oklch(0.72_0.15_75)] transition-colors">Culture &amp; Société</Link></li>
+              <li><Link href="/habari-green" className="text-white/60 hover:text-[oklch(0.72_0.15_75)] transition-colors">Habari Green</Link></li>
             </ul>
           </div>
 

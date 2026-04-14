@@ -1,0 +1,28 @@
+{
+  "query": "SELECT id, type, title, status FROM opportunities ORDER BY id;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3MYDTqRQXXnCy7D.root --database C6aFnP23nadn7BHJcaRyWP --execute SELECT id, type, title, status FROM opportunities ORDER BY id;",
+  "rows": [
+    {
+      "id": "1",
+      "type": "bid",
+      "title": "VITEST — Appel d'offres Construction",
+      "status": "active"
+    },
+    {
+      "id": "2",
+      "type": "ami",
+      "title": "VITEST — AMI Partenariat",
+      "status": "active"
+    },
+    {
+      "id": "3",
+      "type": "job",
+      "title": "VITEST — Économiste Senior",
+      "status": "active"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttype\ttitle\tstatus\n1\tbid\tVITEST — Appel d'offres Construction\tactive\n2\tami\tVITEST — AMI Partenariat\tactive\n3\tjob\tVITEST — Économiste Senior\tactive\n",
+  "stderr": "",
+  "execution_time_ms": 499
+}

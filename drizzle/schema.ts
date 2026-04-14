@@ -185,6 +185,40 @@ export type CallForBids = typeof callsForBids.$inferSelect;
 export type InsertCallForBids = typeof callsForBids.$inferInsert;
 
 /**
+ * Unified opportunities table (Appels d'offres, AMI/Partenariats, Emplois & Stages)
+ * Managed via admin back-office
+ */
+export const opportunities = mysqlTable("opportunities", {
+  id: int("id").autoincrement().primaryKey(),
+  type: mysqlEnum("type", ["bid", "ami", "job"]).notNull(),
+  title: varchar("title", { length: 512 }).notNull(),
+  slug: varchar("slug", { length: 512 }).notNull().unique(),
+  organization: varchar("organization", { length: 512 }).notNull(),
+  country: varchar("country", { length: 255 }).notNull(),
+  sector: varchar("sector", { length: 255 }),
+  description: longtext("description"),
+  budget: varchar("budget", { length: 100 }),
+  currency: varchar("currency", { length: 10 }).default("USD"),
+  deadline: varchar("deadline", { length: 100 }),
+  // AMI-specific fields
+  amiType: varchar("amiType", { length: 100 }),
+  partners: varchar("partners", { length: 512 }),
+  webinaire: varchar("webinaire", { length: 512 }),
+  externalLink: varchar("externalLink", { length: 1024 }),
+  // Job-specific fields
+  contractType: varchar("contractType", { length: 100 }),
+  experienceLevel: varchar("experienceLevel", { length: 100 }),
+  // Common fields
+  featured: boolean("featured").default(false),
+  status: mysqlEnum("status", ["active", "closed", "draft"]).default("active").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Opportunity = typeof opportunities.$inferSelect;
+export type InsertOpportunity = typeof opportunities.$inferInsert;
+
+/**
  * Events and trainings
  */
 export const events = mysqlTable("events", {

@@ -2,6 +2,7 @@ import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Loader2, ArrowLeft, Clock, User, Bookmark } from "lucide-react";
 import SocialShare from "@/components/SocialShare";
+import { Helmet } from "react-helmet-async";
 import { Link, useParams } from "wouter";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -19,8 +20,19 @@ const IMG = {
   ecoVerte2: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663347570863/PCoXzDyWdHwRLfKw.jpg",
   emploisVerts: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663347570863/oTOnqHICldnZxqIH.jpg",
   emploisVerts2: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663347570863/QiTAGzgXqbChMWfS.jpg",
-  mackosso1: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663347570863/ARoCDHZWpDwKcVeV.jpg",
-  mackosso2: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663347570863/YhRXSzuZRDDtDhSS.jpg",
+  mackosso1: "https://d2xsxph8kpxj0f.cloudfront.net/310519663347570863/C6aFnP23nadn7BHJcaRyWP/mackosso1_cropped_3c196986.jpg",
+  mackosso2: "https://d2xsxph8kpxj0f.cloudfront.net/310519663347570863/C6aFnP23nadn7BHJcaRyWP/mackosso2_cropped_b4430dc8.jpg",
+  cobaltMine: "https://d2xsxph8kpxj0f.cloudfront.net/310519663347570863/C6aFnP23nadn7BHJcaRyWP/nhhpqOsQjMrA_e4729627.jpg",
+  cobaltOre: "https://d2xsxph8kpxj0f.cloudfront.net/310519663347570863/C6aFnP23nadn7BHJcaRyWP/DnMwsHIdHFCF_b7dc1960.jpg",
+  villesAfrique: "https://d2xsxph8kpxj0f.cloudfront.net/310519663347570863/C6aFnP23nadn7BHJcaRyWP/GQwuI2Igxrdy_a1957686.jpg",
+  brtDakar: "https://d2xsxph8kpxj0f.cloudfront.net/310519663347570863/C6aFnP23nadn7BHJcaRyWP/Mt48hpMTzr03_338528cd.jpg",
+  villeDurable: "https://d2xsxph8kpxj0f.cloudfront.net/310519663347570863/C6aFnP23nadn7BHJcaRyWP/EdN7l9Al3W9c_024d36f8.jpg",
+  femmesAwief: "https://d2xsxph8kpxj0f.cloudfront.net/310519663347570863/C6aFnP23nadn7BHJcaRyWP/q66ZJPQU1SQY_02c30c67.jpg",
+  femmesRdc: "https://d2xsxph8kpxj0f.cloudfront.net/310519663347570863/C6aFnP23nadn7BHJcaRyWP/wB2pF3dEwqRN_76c911c0.jpg",
+  femmesTech: "https://d2xsxph8kpxj0f.cloudfront.net/310519663347570863/C6aFnP23nadn7BHJcaRyWP/LjH0VpBKRnda_20c1a7e4.jpg",
+  mobileMoney1: "https://d2xsxph8kpxj0f.cloudfront.net/310519663347570863/C6aFnP23nadn7BHJcaRyWP/qIZrLdK4gbPn_90cf748f.jpg",
+  mobileMoney2: "https://d2xsxph8kpxj0f.cloudfront.net/310519663347570863/C6aFnP23nadn7BHJcaRyWP/8E7QdTTH6CYT_9ec63b67.jpg",
+  mobileMoney3: "https://d2xsxph8kpxj0f.cloudfront.net/310519663347570863/C6aFnP23nadn7BHJcaRyWP/heX7F3ftGB56_b9706261.jpg",
 };
 
 /* Articles de démonstration indexés par slug */
@@ -439,6 +451,273 @@ const sampleArticles: Record<string, {
 <p>Et ce soir-là, il n'a pas chanté le passé. Il nous a rappelé que certaines voix attendent simplement que nous grandissions assez pour les entendre.</p>
     `,
   },
+  "cobalt-minerais-verts-afrique": {
+    title: "Cobalt et minerais stratégiques : bénédiction ou piège économique pour l'Afrique ?",
+    rubrique: "Habari Green",
+    author: "La Rédaction Habari",
+    date: "Février 2026",
+    readTime: "4 min",
+    image: IMG.cobaltMine,
+    chapo: "La transition énergétique mondiale repose sur les ressources africaines, mais qui en capture réellement la valeur ? Avec 70 % de la production mondiale de cobalt et des réserves colossales de lithium et de graphite, l'Afrique centrale et australe se trouve au c\u0153ur de la révolution énergétique. Pourtant, le continent reste largement exclu des segments \u00e0 forte valeur ajoutée.",
+    infobox: [
+      { label: "Cobalt RDC", value: "70 % mondial" },
+      { label: "Demande 2030", value: "\u00d7 3" },
+      { label: "Raffinage Chine", value: "73 %" },
+      { label: "Valeur marché 2040", value: "770 Mds $" },
+    ],
+    content: `
+<p class="italic text-muted-foreground">Les chiffres de l'Agence Internationale de l'\u00c9nergie sont sans appel : la demande en minerais critiques pour les technologies propres devrait tripler d'ici 2030 et quadrupler d'ici 2040. Le lithium conna\u00eetra la croissance la plus spectaculaire, avec une multiplication par neuf de la demande, tandis que le cobalt, le nickel et les terres rares verront leur demande doubler.</p>
+
+<blockquote>\u00ab L'Afrique d\u00e9tient 30 % des r\u00e9serves mondiales prouv\u00e9es de minerais critiques. D'ici 2030, la valeur de march\u00e9 pour la production mini\u00e8re africaine devrait augmenter de 65 % pour atteindre environ 200 milliards USD. \u00bb \u2014 AIE, Global Critical Minerals Outlook 2024</blockquote>
+
+<h2>L'Afrique centrale au c\u0153ur du syst\u00e8me</h2>
+
+<p>La R\u00e9publique D\u00e9mocratique du Congo domine la production mondiale de cobalt avec une position quasi monopolistique : en 2024, les trois principales mines congolaises \u2014 Kisanfu, Tenke Fungurume et Kamoto \u2014 ont produit \u00e0 elles seules plus de 50 % du cobalt mondial. La RDC poss\u00e8de par ailleurs 71 % des r\u00e9serves mondiales prouv\u00e9es de cobalt, un min\u00e9ral essentiel aux batteries des v\u00e9hicules \u00e9lectriques et aux \u00e9quipements d'intelligence artificielle.</p>
+
+<p>Le Zimbabwe s'affirme comme leader continental du lithium, tandis que Madagascar et le Mozambique dominent la production de graphite. L'Afrique d\u00e9tient 26,7 millions de tonnes de ressources lithium identifi\u00e9es, avec des co\u00fbts de production comp\u00e9titifs oscillant entre 250 et 650 USD par tonne, contre 800 USD en Australie.</p>
+
+<img src="${IMG.cobaltOre}" alt="Minerai de cobalt brut" class="w-full rounded-xl my-8" />
+
+<h2>Le paradoxe de la captation de valeur</h2>
+
+<p>Malgr\u00e9 cette position strat\u00e9gique, l'Afrique reste largement exclue des segments \u00e0 forte valeur ajout\u00e9e de la cha\u00eene de batteries. <strong>La Chine contr\u00f4le aujourd'hui 73 % du raffinage du cobalt, 58 % du lithium, 67 % du nickel et 80 % du graphite de qualit\u00e9 batterie.</strong> Les minerais bruts quittent le continent pour \u00eatre raffin\u00e9s en Asie, o\u00f9 la valeur ajout\u00e9e se concentre.</p>
+
+<p>R\u00e9sultat : malgr\u00e9 40 % des r\u00e9serves mondiales de minerais de batteries, l'Afrique reste pi\u00e9g\u00e9e dans l'extraction brute, captant \u00e0 peine 15 \u00e0 20 % de la valeur totale de la cha\u00eene d'approvisionnement.</p>
+
+<h2>Des strat\u00e9gies de souverainet\u00e9 \u00e9mergent</h2>
+
+<p>Face \u00e0 ce constat, plusieurs \u00c9tats africains adoptent des politiques de souverainet\u00e9 mini\u00e8re. En 2025, la RDC a temporairement interdit les exportations de cobalt brut. Le Zimbabwe a interdit l'exportation de lithium brut et investit 270 millions USD dans une usine de concentration. La Namibie a \u00e9galement banni les exportations de lithium brut.</p>
+
+<p>L'ambition ultime est la fabrication locale de batteries. Au Maroc, le groupe Gotion High-Tech construit une gigafactory \u00e0 Kenitra (1,3 milliard USD, 20 GWh). Le Nigeria a sign\u00e9 un accord pour une usine de batteries de 150 millions USD. Ces initiatives s'inscrivent dans la dynamique de la ZLECAF, qui place la cha\u00eene de valeur des batteries parmi ses priorit\u00e9s.</p>
+
+<blockquote>\u00ab La transition \u00e9nerg\u00e9tique mondiale ne se fera pas sans l'Afrique. Reste \u00e0 savoir si l'Afrique la fera avec ou sans les Africains. \u00bb</blockquote>
+
+<p>Les minerais \u00ab verts \u00bb repr\u00e9sentent une opportunit\u00e9 historique pour l'Afrique de briser le cycle de l'extraction brute. Mais cette opportunit\u00e9 ne se concr\u00e9tisera que si les \u00c9tats africains parviennent \u00e0 coordonner leurs politiques, \u00e0 investir massivement dans les infrastructures et \u00e0 n\u00e9gocier collectivement avec les investisseurs \u00e9trangers. Le risque, en cas d'\u00e9chec, est de reproduire le sch\u00e9ma colonial d'extraction sans d\u00e9veloppement \u00e9conomique durable.</p>
+
+<p class="text-xs text-muted-foreground mt-8"><em>Sources : AIE, Global Critical Minerals Outlook 2024-2025 ; Banque mondiale ; Manufacturing Africa & Faraday Institution ; ECA-ONU ; S&P Global ; Center for Global Development.</em></p>
+    `,
+  },
+
+  "villes-africaines-defi-climatique": {
+    title: "Les villes africaines face au défi climatique : entre contraintes et opportunités",
+    rubrique: "Habari Green",
+    author: "La Rédaction Habari",
+    date: "Février 2026",
+    readTime: "4 min de lecture",
+    image: IMG.villesAfrique,
+    chapo: "Avec 700 millions de nouveaux citadins attendus d'ici 2050, l'Afrique doit construire des villes durables sans répéter les erreurs des pays industrialisés. Transport, financement, solutions fondées sur la nature : les leviers existent.",
+    infobox: [
+      { label: "700 M", value: "Nouveaux citadins d'ici 2050" },
+      { label: "70 %", value: "Émissions CO2 mondiales (villes)" },
+      { label: "53 %", value: "Urbains en habitat informel" },
+      { label: "6 BRT", value: "Systèmes opérationnels en Afrique" },
+    ],
+    content: `
+<p>Les villes génèrent 70 % des émissions mondiales de CO2, mais elles constituent aussi les laboratoires de la transition écologique. En Afrique, où l'urbanisation s'accélère à un rythme sans précédent, les enjeux sont colossaux : comment accueillir 2 milliards d'habitants urbains supplémentaires d'ici 2050 tout en réduisant l'empreinte carbone du continent ?</p>
+
+<h2>L'explosion urbaine : une bombe à retardement climatique ?</h2>
+
+<p>Les chiffres donnent le vertige. Selon la Banque africaine de développement, la population africaine devrait croître de 900 millions de personnes d'ici 2050, dont <strong>700 millions concentrés dans les villes</strong>. Deux Africains sur trois vivront en milieu urbain d'ici le milieu du siècle. Les surfaces urbaines devraient s'étendre d'un million de kilomètres carrés, soit l'équivalent de la superficie combinée du Japon, de l'Allemagne et de l'Italie.</p>
+
+<p>Le paradoxe africain est saisissant : alors que plus de 100 millions de citadins n'ont pas accès à l'électricité — dont 90 % en Afrique subsaharienne —, le continent doit simultanément prévenir une explosion des émissions urbaines. Les villes africaines sont aujourd'hui responsables d'émissions relativement faibles, mais une urbanisation non maîtrisée menace de transformer cet avantage en catastrophe climatique.</p>
+
+<blockquote>« La population africaine devrait croître de 900 millions de personnes d'ici 2050, avec 700 millions de cette croissance dans les villes. La planification de cette expansion urbaine doit commencer maintenant. » — Stefan Atchia, Directeur du Développement urbain, Banque africaine de développement</blockquote>
+
+<h2>Des infrastructures à bout de souffle</h2>
+
+<p>La réalité des villes africaines est celle d'un développement chaotique. Selon UN-Habitat, <strong>53 % de la population urbaine africaine vit dans des établissements informels</strong> dépourvus d'accès à l'eau potable et à l'assainissement. L'indice de Gini moyen des villes africaines atteint 0,58, faisant d'elles les deuxièmes plus inégalitaires au monde.</p>
+
+<p>L'état des transports est particulièrement alarmant. Seulement 23,3 % des zones urbaines d'Afrique subsaharienne disposent d'un système de transport public — le taux le plus faible au monde. Plus de 40 % des habitants marchent faute d'alternatives viables. À Dakar, seulement 4 % des routes urbaines disposent de trottoirs.</p>
+
+<img src="${IMG.brtDakar}" alt="Bus Rapid Transit électrique à Dakar" class="w-full rounded-xl my-8" />
+
+<h2>Le BRT électrique : une solution viable</h2>
+
+<p>Face à ces défis, le Bus Rapid Transit (BRT) s'impose progressivement. Contrairement aux métros (plus de 100 millions USD/km), les systèmes BRT reviennent à environ <strong>10 millions USD/km</strong>, tout en offrant une capacité proche des métros légers. Six systèmes BRT sont déjà opérationnels en Afrique (Lagos, Dar es Salaam, Le Cap, Johannesburg, Dakar, Addis-Abeba).</p>
+
+<p>En décembre 2023, Dakar a inauguré le <strong>premier BRT 100 % électrique d'Afrique subsaharienne</strong> : 18,3 kilomètres, 23 stations, 121 bus électriques. Ce système devrait réduire les émissions de 67 700 tonnes de CO2 par an, soit l'équivalent de retirer 250 000 voitures à essence de la circulation pendant un an.</p>
+
+<h2>Financer la ville durable</h2>
+
+<p>L'adoption d'un scénario « High Shift » — privilégiant les transports publics et les modes non motorisés — permettrait de réduire les émissions cumulées de <strong>5 078 millions de tonnes de CO2 d'ici 2050</strong>, tout en économisant plus de 2 140 milliards USD en coûts d'infrastructures. Sur la dernière décennie, la Banque mondiale a approuvé 28 projets de transport urbain en Afrique pour 5,7 milliards USD. Mais ces montants restent insuffisants.</p>
+
+<h2>Solutions fondées sur la nature</h2>
+
+<p>Au-delà des transports, les villes africaines explorent des approches combinant infrastructures traditionnelles et solutions basées sur la nature. À Kigali, des projets pilotes combinent drainage amélioré, reboisement et gestion durable des eaux pluviales. Le projet SUNCASA, mis en œuvre en Éthiopie, au Rwanda et en Afrique du Sud, démontre comment les données climatiques peuvent guider la planification urbaine.</p>
+
+<blockquote>« La participation citoyenne n'est pas un 'bonus'. C'est la force vitale d'une ville résiliente. » — Forum économique mondial</blockquote>
+
+<p>Les villes africaines se trouvent à un carrefour historique. Contrairement aux pays industrialisés qui doivent « décarboner » des infrastructures existantes à grands frais, <strong>l'Afrique peut concevoir ses villes de manière durable dès le départ</strong>. La majorité des infrastructures qui accueilleront les 700 millions de nouveaux citadins restent à construire. Les solutions existent — BRT électrique, solutions fondées sur la nature, financements innovants. Ce qui manque, c'est la volonté politique de rompre avec le modèle du « tout-voiture » et la vision stratégique pour transformer la contrainte climatique en opportunité de développement.</p>
+
+<p class="text-xs text-muted-foreground mt-8"><em>Sources : Banque mondiale, Cutting Global Carbon Emissions 2025 ; AIE, Empowering Urban Energy Transitions 2024 ; UN-Habitat, Annual Report 2024 ; BAD, OCDE & Cities Alliance, Africa's Urbanisation Dynamics 2025 ; ITDP & BAD, Sustainable Cities Through Transport 2024.</em></p>
+    `,
+  },
+  "femmes-entrepreneuses-afrique": {
+    title: "La montée des femmes entrepreneuses change-t-elle l'économie africaine ?",
+    rubrique: "CULTURE & SOCIÉTÉ",
+    author: "La Rédaction Habari",
+    date: "Mars 2026",
+    readTime: "4 min",
+    chapo: "L'Afrique détient le taux d'entrepreneuriat féminin le plus élevé au monde. Pourtant, moins de 5 % du financement des startups africaines va à des CEO femmes. Entre dynamisme record et paradoxe du financement, enquête sur une force économique sous-estimée.",
+    image: IMG.femmesAwief,
+    infobox: [
+      { label: "Taux entrepreneuriat féminin", value: "26 %" },
+      { label: "Contribution au PIB", value: "250-300 Mds $" },
+      { label: "Écart de financement", value: "42 Mds $" },
+      { label: "Retour par dollar investi (femmes)", value: "0,78 $" },
+    ],
+    content: `
+      <p class="italic text-muted-foreground">26 % des femmes adultes en Afrique subsaharienne sont engagées dans des activités entrepreneuriales, soit cinq fois le taux européen. Elles contribuent entre 250 et 300 milliards de dollars au PIB continental. Mais le système financier peine encore à les reconnaître comme ce qu'elles sont : le plus grand gisement de croissance inexploité du continent.</p>
+
+      <h2 class="font-serif text-2xl md:text-3xl font-bold mt-12 mb-6">Un poids économique massif, une reconnaissance minimale</h2>
+
+      <p>Les chiffres sont sans appel. Au Rwanda, les femmes représentent 61 % des entrepreneurs. Au Zimbabwe, 56 % des PME sont détenues par des femmes et contribuent à 60 % du PIB national. À l'échelle du continent, 58 % de la population auto-employée est féminine. Selon l'Organisation internationale du travail, les entreprises détenues par des femmes génèrent environ 18 millions d'emplois en Afrique, dont 11 millions au seul Nigeria.</p>
+
+      <p>Plus frappant encore : les femmes réinvestissent jusqu'à <strong>90 % de leurs revenus</strong> dans l'éducation, la santé et la nutrition de leurs familles, contre 40 % pour les hommes. Ce différentiel de 50 points génère un effet multiplicateur sur le capital humain qui dépasse la simple mesure du PIB.</p>
+
+      <img src="${IMG.femmesRdc}" alt="Femmes entrepreneuses en RDC" class="w-full rounded-xl my-8" />
+      <p class="text-sm text-muted-foreground text-center -mt-4 mb-8">Femmes entrepreneuses en République Démocratique du Congo — Photo : Banque mondiale</p>
+
+      <h2 class="font-serif text-2xl md:text-3xl font-bold mt-12 mb-6">Le paradoxe du financement : 78 cents contre 31</h2>
+
+      <p>Malgré cette puissance entrepreneuriale, l'accès au capital reste un mur. En 2024, les CEO femmes ont levé <strong>48 millions de dollars</strong> contre 2,2 milliards pour les CEO hommes — un ratio de 1 pour 46. La Banque africaine de développement chiffre l'écart de financement à 42 milliards de dollars, dont 15,6 milliards dans le seul secteur agricole.</p>
+
+      <p>L'ironie est cruelle : les données du Boston Consulting Group montrent que pour chaque dollar investi, les entreprises fondées par des femmes génèrent un retour de <strong>78 cents, contre 31 cents</strong> pour celles fondées par des hommes. Les portefeuilles féminins affichent des taux de non-remboursement plus faibles et une discipline financière supérieure. Autrement dit, le système financier sous-investit précisément là où les rendements sont les meilleurs.</p>
+
+      <blockquote class="border-l-4 border-[oklch(0.72_0.15_75)] pl-6 py-4 my-8 bg-muted/30 rounded-r-lg">
+        <p class="italic text-lg">« Investir dans les femmes entrepreneuses africaines n'est pas une concession à l'équité sociale au détriment de la rentabilité, c'est l'optimisation économique rationnelle. »</p>
+      </blockquote>
+
+      <h2 class="font-serif text-2xl md:text-3xl font-bold mt-12 mb-6">Les biais invisibles qui verrouillent le système</h2>
+
+      <p>Le rapport <em>Women, Business and the Law 2024</em> de la Banque mondiale attribue à l'Afrique subsaharienne un score de 57,4 sur 100 pour les cadres juridiques régissant l'opportunité économique féminine. Derrière ce chiffre, des réalités concrètes : dans plusieurs juridictions, les femmes mariées ne peuvent enregistrer une entreprise sans l'autorisation de leur époux. Le droit coutumier prime souvent sur le droit statutaire, limitant l'accès à la propriété foncière — et donc au collatéral exigé par les banques.</p>
+
+      <p>Les biais cognitifs aggravent ces barrières structurelles. Les études sur les <em>pitch sessions</em> révèlent que les femmes reçoivent majoritairement des questions de prévention de risque (« comment allez-vous éviter l'échec ? ») tandis que les hommes reçoivent des questions de promotion (« comment allez-vous maximiser l'opportunité ? »). Les entrepreneurs recevant des questions orientées potentiel lèvent en moyenne <strong>cinq fois plus de capital</strong>.</p>
+
+      <img src="${IMG.femmesTech}" alt="Femmes dans la tech en Afrique" class="w-full rounded-xl my-8" />
+      <p class="text-sm text-muted-foreground text-center -mt-4 mb-8">Femmes leaders dans la tech en Afrique — Photo : The Borgen Project</p>
+
+      <h2 class="font-serif text-2xl md:text-3xl font-bold mt-12 mb-6">Les signaux d'un basculement</h2>
+
+      <p>L'écosystème commence à bouger. L'initiative AFAWA de la Banque africaine de développement a mobilisé plus de 1,5 milliard de dollars d'investissements pour les PME dirigées par des femmes. 72 % des banques commerciales africaines ciblent désormais les femmes avec des produits financiers spécifiques. Le financement digital — prêts automatisés, sans collatéral physique — réduit significativement les disparités de genre : plus de 50 % des entreprises féminines utilisant ces prêts ont connu une croissance significative.</p>
+
+      <p>McKinsey estime que la participation économique accrue des jeunes femmes africaines pourrait ajouter <strong>287 milliards de dollars</strong> au PIB africain et créer 23 millions d'emplois. La Banque mondiale projette des retours dépassant 2,4 trillions de dollars d'ici 2040 avec des investissements ciblés dans les adolescentes africaines.</p>
+
+      <p>La transformation est en cours. Elle est réelle, mesurable, et contrainte. Le véritable changement interviendra lorsque l'inclusion financière des femmes entrepreneuses cessera d'être perçue comme une politique de genre pour être reconnue comme <strong>la stratégie de croissance la plus efficiente disponible pour le continent africain</strong>.</p>
+    `,
+  },
+  "revolution-mobile-money-afrique": {
+    title: "La r\u00e9volution du mobile money change-t-elle les comportements sociaux en Afrique ?",
+    rubrique: "Culture & Soci\u00e9t\u00e9",
+    author: "La R\u00e9daction Habari",
+    date: "Mars 2026",
+    readTime: "6 min de lecture",
+    image: IMG.mobileMoney1,
+    chapo: "En moins de vingt ans, le mobile money a fait basculer l\u2019Afrique dans une \u00e8re financi\u00e8re nouvelle. Avec 856 millions de comptes et plus de 1 000 milliards de dollars de transactions annuelles, cette r\u00e9volution d\u00e9passe la simple innovation technologique : elle red\u00e9finit les solidarit\u00e9s familiales, l\u2019autonomie des femmes et la fronti\u00e8re entre \u00e9conomie formelle et informelle.",
+    infobox: [
+      { label: "Comptes mobile money en Afrique", value: "856 M" },
+      { label: "Transactions annuelles", value: "1 000 Mds $" },
+      { label: "Part mondiale de l\u2019Afrique", value: "> 50 %" },
+      { label: "M\u00e9nages sortis de la pauvret\u00e9 (Kenya)", value: "194 000" },
+    ],
+    content: `
+      <h2>Une transformation silencieuse mais radicale</h2>
+      <p>Lorsque Safaricom lance M-Pesa au Kenya en 2007, peu d\u2019\u00e9conomistes imaginent que ce service de transfert d\u2019argent par t\u00e9l\u00e9phone mobile va transformer l\u2019architecture financi\u00e8re d\u2019un continent entier. Dix-sept ans plus tard, les chiffres parlent d\u2019eux-m\u00eames : selon la GSMA, l\u2019Afrique concentre plus de la moiti\u00e9 des comptes de mobile money actifs dans le monde, avec <strong>856 millions de comptes enregistr\u00e9s</strong> et plus de <strong>1 000 milliards de dollars de transactions annuelles</strong> en 2023.</p>
+      <p>Mais r\u00e9duire cette r\u00e9volution \u00e0 une simple innovation financi\u00e8re serait une erreur. Derri\u00e8re les chiffres se cache une mutation plus profonde : le mobile money modifie progressivement les comportements sociaux, les rapports \u00e0 l\u2019argent et m\u00eame les m\u00e9canismes de solidarit\u00e9 dans plusieurs soci\u00e9t\u00e9s africaines. Et cette transformation ne suit pas la m\u00eame trajectoire partout. Une lecture compar\u00e9e entre Afrique de l\u2019Est, Afrique de l\u2019Ouest et Afrique centrale r\u00e9v\u00e8le des dynamiques sociales distinctes, fa\u00e7onn\u00e9es par l\u2019histoire \u00e9conomique, les r\u00e9gulations financi\u00e8res et la structure des march\u00e9s locaux.</p>
+
+      <h2>Afrique de l\u2019Est : le t\u00e9l\u00e9phone devenu banque universelle</h2>
+      <p>L\u2019Afrique de l\u2019Est est le laboratoire mondial du mobile money. Au Kenya, le taux d\u2019adoption atteint <strong>79 % des adultes</strong>. Le service M-Pesa compte plusieurs dizaines de millions d\u2019utilisateurs et permet d\u2019effectuer une multitude d\u2019op\u00e9rations : transferts d\u2019argent, paiements marchands, \u00e9pargne, micro-cr\u00e9dit ou r\u00e8glement de factures.</p>
+      <p>Une \u00e9tude publi\u00e9e dans la revue <em>Science</em> par les \u00e9conomistes Tavneet Suri (MIT) et William Jack (Georgetown University) a montr\u00e9 que l\u2019expansion de M-Pesa a permis \u00e0 <strong>194 000 m\u00e9nages kenyans de sortir de la pauvret\u00e9</strong>, notamment gr\u00e2ce \u00e0 une meilleure gestion des chocs \u00e9conomiques et \u00e0 l\u2019augmentation des transferts financiers entre proches.</p>
+      <p>La transformation sociale est particuli\u00e8rement visible dans les m\u00e9canismes de solidarit\u00e9 familiale. Autrefois, envoyer de l\u2019argent impliquait de passer par un transporteur informel ou une agence de transfert. Aujourd\u2019hui, quelques secondes suffisent pour transf\u00e9rer une somme, m\u00eame dans des zones rurales \u00e9loign\u00e9es. Cette fluidit\u00e9 a renforc\u00e9 la r\u00e9silience \u00e9conomique de nombreuses familles : lorsqu\u2019un choc survient \u2014 maladie, perte d\u2019emploi, s\u00e9cheresse \u2014 les transferts num\u00e9riques permettent une r\u00e9ponse financi\u00e8re quasi imm\u00e9diate.</p>
+      <p>Selon la GSMA, les femmes utilisatrices de mobile money ont davantage tendance \u00e0 \u00e9pargner et \u00e0 investir dans des activit\u00e9s g\u00e9n\u00e9ratrices de revenus. En Afrique de l\u2019Est, le mobile money est donc devenu bien plus qu\u2019un syst\u00e8me de paiement : c\u2019est une <strong>infrastructure sociale et \u00e9conomique centrale</strong>.</p>
+
+      <img src=\"${IMG.mobileMoney2}\" alt=\"Mobile money en Afrique \u2014 transactions num\u00e9riques\" style=\"width:100%;border-radius:12px;margin:2rem 0\" />
+      <p style=\"font-size:0.85rem;color:#94a3b8;margin-top:-1rem;margin-bottom:2rem\">L\u2019essor du mobile money transforme les transactions quotidiennes en Afrique \u2014 Photo : International Finance Magazine</p>
+
+      <h2>Afrique de l\u2019Ouest : la r\u00e9volution des paiements et de la fintech</h2>
+      <p>L\u2019Afrique de l\u2019Ouest conna\u00eet une dynamique diff\u00e9rente. Ici, le mobile money s\u2019impose principalement comme un moteur de transformation du commerce et des paiements num\u00e9riques. Au S\u00e9n\u00e9gal (58 % d\u2019adoption), en C\u00f4te d\u2019Ivoire (56 %) ou au Ghana (60 %), les services propos\u00e9s par Orange Money, MTN MoMo ou Wave ont profond\u00e9ment modifi\u00e9 les pratiques de paiement urbain.</p>
+      <p>L\u2019arriv\u00e9e de la fintech Wave, qui a consid\u00e9rablement r\u00e9duit les co\u00fbts de transfert d\u2019argent, a marqu\u00e9 un tournant. L\u2019entreprise revendiquait en 2023 plus de <strong>20 millions d\u2019utilisateurs actifs</strong>. Dans les grandes m\u00e9tropoles ouest-africaines, les paiements mobiles deviennent progressivement la norme pour les transactions quotidiennes : transports, restauration, petits commerces ou factures domestiques.</p>
+      <p>Cette transformation s\u2019inscrit dans un contexte de bancarisation historiquement faible. Selon la Banque mondiale, le taux d\u2019acc\u00e8s aux services bancaires dans plusieurs pays de l\u2019UEMOA restait inf\u00e9rieur \u00e0 20 % au milieu des ann\u00e9es 2010. Le mobile money a permis de contourner les barri\u00e8res traditionnelles du syst\u00e8me bancaire. Pour des millions d\u2019utilisateurs, le compte mobile constitue aujourd\u2019hui le <strong>premier point d\u2019acc\u00e8s aux services financiers</strong>.</p>
+
+      <img src=\"${IMG.mobileMoney3}\" alt=\"Kiosque mobile money en Afrique de l\u2019Ouest\" style=\"width:100%;border-radius:12px;margin:2rem 0\" />
+      <p style=\"font-size:0.85rem;color:#94a3b8;margin-top:-1rem;margin-bottom:2rem\">Un kiosque de mobile money en Afrique de l\u2019Ouest \u2014 Photo : The Guardian</p>
+
+      <h2>Afrique centrale : une transition encore incompl\u00e8te</h2>
+      <p>Compar\u00e9e aux deux r\u00e9gions pr\u00e9c\u00e9dentes, l\u2019Afrique centrale reste en retrait dans l\u2019adoption du mobile money. Dans des pays comme le Cameroun, le Gabon ou le Congo, les services de paiement mobile existent et progressent, mais leur int\u00e9gration dans l\u2019\u00e9conomie quotidienne reste plus limit\u00e9e.</p>
+      <p>Plusieurs facteurs expliquent cette situation. Le cadre r\u00e9glementaire de la zone CEMAC est historiquement plus strict concernant les services financiers num\u00e9riques. Les r\u00e9formes engag\u00e9es depuis 2018 par la BEAC visent \u00e0 faciliter le d\u00e9veloppement des services de paiement \u00e9lectronique, mais l\u2019environnement r\u00e9glementaire reste plus complexe. L\u2019\u00e9cosyst\u00e8me fintech y est moins dense, et la structure \u00e9conomique de plusieurs pays \u2014 notamment ceux fortement d\u00e9pendants des ressources p\u00e9troli\u00e8res \u2014 ne repose pas autant sur le commerce de masse ou les micro-transactions urbaines.</p>
+      <p>Pour autant, la GSMA note que l\u2019Afrique centrale figure parmi les r\u00e9gions o\u00f9 la <strong>croissance du nombre de comptes actifs est la plus rapide</strong>. Avec environ <strong>70 milliards de dollars de transactions annuelles</strong>, la r\u00e9gion pourrait conna\u00eetre une acc\u00e9l\u00e9ration dans les prochaines ann\u00e9es, notamment avec l\u2019essor du commerce num\u00e9rique.</p>
+
+      <h2>Les tendances de fond qui red\u00e9finissent le continent</h2>
+      <p>Malgr\u00e9 ces diff\u00e9rences r\u00e9gionales, plusieurs tendances communes se dessinent. La premi\u00e8re est l\u2019<strong>instantan\u00e9it\u00e9 des transactions financi\u00e8res</strong>. L\u00e0 o\u00f9 l\u2019argent circulait lentement et physiquement, il devient d\u00e9sormais imm\u00e9diat et num\u00e9rique. Cette \u00e9volution modifie la gestion quotidienne des d\u00e9penses, mais aussi la mani\u00e8re dont les individus font face aux impr\u00e9vus \u00e9conomiques.</p>
+      <p>La seconde transformation concerne la <strong>fronti\u00e8re entre \u00e9conomie formelle et informelle</strong>. En introduisant une trace num\u00e9rique dans les transactions, le mobile money cr\u00e9e une nouvelle forme de visibilit\u00e9 \u00e9conomique. Cette donn\u00e9e transactionnelle pourrait, \u00e0 terme, servir de base \u00e0 de nouveaux services : cr\u00e9dit algorithmique, assurance num\u00e9rique ou fiscalit\u00e9 digitale.</p>
+      <p>Enfin, l\u2019essor du mobile money red\u00e9finit le paysage financier africain. Dans plusieurs pays, les op\u00e9rateurs t\u00e9l\u00e9com g\u00e8rent aujourd\u2019hui davantage de comptes actifs que les banques traditionnelles. Entre 2011 et 2021, l\u2019acc\u00e8s aux services financiers en Afrique subsaharienne est pass\u00e9 de <strong>23 % \u00e0 55 % des adultes</strong>, et le mobile money explique une part majeure de cette progression.</p>
+
+      <blockquote style=\"border-left:4px solid #D4A017;padding:1rem 1.5rem;margin:2rem 0;font-style:italic;color:#cbd5e1\">\u00ab Les op\u00e9rateurs t\u00e9l\u00e9com et les fintech sont-ils en train de devenir les v\u00e9ritables banques de l\u2019Afrique num\u00e9rique ? La question n\u2019est plus th\u00e9orique. \u00bb</blockquote>
+
+      <h2>Vers une infrastructure financi\u00e8re continentale</h2>
+      <p>Le mobile money n\u2019a probablement pas encore atteint son plein potentiel. La prochaine \u00e9tape pourrait \u00eatre l\u2019int\u00e9gration de nouveaux services financiers directement dans les plateformes mobiles : cr\u00e9dit instantan\u00e9, assurance, paiement transfrontalier ou interconnexion avec les monnaies num\u00e9riques de banque centrale.</p>
+      <p>Dans un continent o\u00f9 l\u2019int\u00e9gration financi\u00e8re reste fragment\u00e9e, ces technologies pourraient contribuer \u00e0 construire une <strong>infrastructure financi\u00e8re panafricaine plus fluide et plus accessible</strong>. Si tel est le cas, la r\u00e9volution du mobile money ne se limitera pas \u00e0 transformer les paiements. Elle pourrait redessiner, \u00e0 terme, l\u2019architecture \u00e9conomique et sociale de l\u2019Afrique elle-m\u00eame.</p>
+
+      <div style=\"background:linear-gradient(135deg,rgba(21,101,160,0.15),rgba(212,160,23,0.10));border:1px solid rgba(212,160,23,0.3);border-radius:12px;padding:1.5rem 2rem;margin:2rem 0\">
+        <h3 style=\"color:#D4A017;margin-bottom:1rem\">\ud83d\udcca Encadr\u00e9 DATA \u2014 Mobile Money en Afrique : les chiffres cl\u00e9s</h3>
+        <table style=\"width:100%;border-collapse:collapse;font-size:0.95rem\">
+          <thead><tr style=\"border-bottom:2px solid rgba(212,160,23,0.4)\">
+            <th style=\"text-align:left;padding:0.5rem 0;color:#D4A017\">Indicateur</th>
+            <th style=\"text-align:right;padding:0.5rem 0;color:#D4A017\">Chiffre</th>
+          </tr></thead>
+          <tbody>
+            <tr style=\"border-bottom:1px solid rgba(255,255,255,0.1)\"><td style=\"padding:0.5rem 0\">Comptes enregistr\u00e9s en Afrique</td><td style=\"text-align:right;font-weight:bold\">856 millions</td></tr>
+            <tr style=\"border-bottom:1px solid rgba(255,255,255,0.1)\"><td style=\"padding:0.5rem 0\">Comptes actifs</td><td style=\"text-align:right;font-weight:bold\">400+ millions</td></tr>
+            <tr style=\"border-bottom:1px solid rgba(255,255,255,0.1)\"><td style=\"padding:0.5rem 0\">Transactions annuelles (2023)</td><td style=\"text-align:right;font-weight:bold\">1 000+ Mds $</td></tr>
+            <tr style=\"border-bottom:1px solid rgba(255,255,255,0.1)\"><td style=\"padding:0.5rem 0\">Part mondiale de l\u2019Afrique</td><td style=\"text-align:right;font-weight:bold\">> 50 %</td></tr>
+            <tr style=\"border-bottom:1px solid rgba(255,255,255,0.1)\"><td style=\"padding:0.5rem 0\">Inclusion financi\u00e8re (2011 \u2192 2021)</td><td style=\"text-align:right;font-weight:bold\">23 % \u2192 55 %</td></tr>
+            <tr style=\"border-bottom:1px solid rgba(255,255,255,0.1)\"><td style=\"padding:0.5rem 0\">M\u00e9nages sortis de la pauvret\u00e9 (Kenya)</td><td style=\"text-align:right;font-weight:bold\">194 000</td></tr>
+          </tbody>
+        </table>
+        <h4 style=\"color:#D4A017;margin:1.5rem 0 0.5rem\">Taux d\u2019adoption par pays</h4>
+        <table style=\"width:100%;border-collapse:collapse;font-size:0.95rem\">
+          <thead><tr style=\"border-bottom:2px solid rgba(212,160,23,0.4)\">
+            <th style=\"text-align:left;padding:0.5rem 0;color:#D4A017\">Pays</th>
+            <th style=\"text-align:right;padding:0.5rem 0;color:#D4A017\">Adoption</th>
+          </tr></thead>
+          <tbody>
+            <tr style=\"border-bottom:1px solid rgba(255,255,255,0.1)\"><td style=\"padding:0.5rem 0\">Kenya</td><td style=\"text-align:right;font-weight:bold\">~79 %</td></tr>
+            <tr style=\"border-bottom:1px solid rgba(255,255,255,0.1)\"><td style=\"padding:0.5rem 0\">Ghana</td><td style=\"text-align:right;font-weight:bold\">~60 %</td></tr>
+            <tr style=\"border-bottom:1px solid rgba(255,255,255,0.1)\"><td style=\"padding:0.5rem 0\">S\u00e9n\u00e9gal</td><td style=\"text-align:right;font-weight:bold\">~58 %</td></tr>
+            <tr style=\"border-bottom:1px solid rgba(255,255,255,0.1)\"><td style=\"padding:0.5rem 0\">C\u00f4te d\u2019Ivoire</td><td style=\"text-align:right;font-weight:bold\">~56 %</td></tr>
+            <tr style=\"border-bottom:1px solid rgba(255,255,255,0.1)\"><td style=\"padding:0.5rem 0\">Tanzanie</td><td style=\"text-align:right;font-weight:bold\">~53 %</td></tr>
+          </tbody>
+        </table>
+        <h4 style=\"color:#D4A017;margin:1.5rem 0 0.5rem\">Volumes de transactions par r\u00e9gion (2023)</h4>
+        <table style=\"width:100%;border-collapse:collapse;font-size:0.95rem\">
+          <thead><tr style=\"border-bottom:2px solid rgba(212,160,23,0.4)\">
+            <th style=\"text-align:left;padding:0.5rem 0;color:#D4A017\">R\u00e9gion</th>
+            <th style=\"text-align:right;padding:0.5rem 0;color:#D4A017\">Volume annuel</th>
+          </tr></thead>
+          <tbody>
+            <tr style=\"border-bottom:1px solid rgba(255,255,255,0.1)\"><td style=\"padding:0.5rem 0\">Afrique de l\u2019Est</td><td style=\"text-align:right;font-weight:bold\">~460 Mds $</td></tr>
+            <tr style=\"border-bottom:1px solid rgba(255,255,255,0.1)\"><td style=\"padding:0.5rem 0\">Afrique de l\u2019Ouest</td><td style=\"text-align:right;font-weight:bold\">~330 Mds $</td></tr>
+            <tr style=\"border-bottom:1px solid rgba(255,255,255,0.1)\"><td style=\"padding:0.5rem 0\">Afrique centrale</td><td style=\"text-align:right;font-weight:bold\">~70 Mds $</td></tr>
+          </tbody>
+        </table>
+        <h4 style=\"color:#D4A017;margin:1.5rem 0 0.5rem\">Principaux acteurs</h4>
+        <table style=\"width:100%;border-collapse:collapse;font-size:0.95rem\">
+          <thead><tr style=\"border-bottom:2px solid rgba(212,160,23,0.4)\">
+            <th style=\"text-align:left;padding:0.5rem 0;color:#D4A017\">Acteur</th>
+            <th style=\"text-align:left;padding:0.5rem 0;color:#D4A017\">R\u00e9gion</th>
+            <th style=\"text-align:right;padding:0.5rem 0;color:#D4A017\">Utilisateurs</th>
+          </tr></thead>
+          <tbody>
+            <tr style=\"border-bottom:1px solid rgba(255,255,255,0.1)\"><td style=\"padding:0.5rem 0\">M-Pesa (Safaricom)</td><td>Afrique de l\u2019Est</td><td style=\"text-align:right;font-weight:bold\">~50 M</td></tr>
+            <tr style=\"border-bottom:1px solid rgba(255,255,255,0.1)\"><td style=\"padding:0.5rem 0\">MTN MoMo</td><td>Afrique Ouest & Centrale</td><td style=\"text-align:right;font-weight:bold\">~60 M</td></tr>
+            <tr style=\"border-bottom:1px solid rgba(255,255,255,0.1)\"><td style=\"padding:0.5rem 0\">Orange Money</td><td>Afrique francophone</td><td style=\"text-align:right;font-weight:bold\">~40 M</td></tr>
+            <tr style=\"border-bottom:1px solid rgba(255,255,255,0.1)\"><td style=\"padding:0.5rem 0\">Wave</td><td>Afrique de l\u2019Ouest</td><td style=\"text-align:right;font-weight:bold\">~20 M</td></tr>
+          </tbody>
+        </table>
+        <p style=\"font-size:0.8rem;color:#94a3b8;margin-top:1rem\">Sources : GSMA State of the Industry Report 2024, World Bank Global Findex Database 2021, Suri & Jack (Science, 2016), TechCrunch 2023.</p>
+      </div>
+    `,
+  },
 };
 
 /* Fallback par défaut */
@@ -464,6 +743,24 @@ export default function ArticlePage() {
         </div>
       ) : (
         <article>
+          {/* Dynamic Open Graph meta tags for social sharing */}
+          <Helmet>
+            <title>{(displayArticle?.title || sample.title)} — Habari Magazine</title>
+            <meta name="description" content={displayArticle?.excerpt || sample.chapo} />
+            <meta property="og:type" content="article" />
+            <meta property="og:title" content={displayArticle?.title || sample.title} />
+            <meta property="og:description" content={displayArticle?.excerpt || sample.chapo} />
+            <meta property="og:image" content={displayArticle?.featuredImage || sample.image} />
+            <meta property="og:site_name" content="Habari Magazine" />
+            <meta property="og:locale" content="fr_FR" />
+            <meta property="article:section" content={displayArticle ? "Article" : sample.rubrique} />
+            <meta name="twitter:card" content="summary_large_image" />
+            <meta name="twitter:site" content="@HabariMag" />
+            <meta name="twitter:title" content={displayArticle?.title || sample.title} />
+            <meta name="twitter:description" content={displayArticle?.excerpt || sample.chapo} />
+            <meta name="twitter:image" content={displayArticle?.featuredImage || sample.image} />
+          </Helmet>
+
           {/* Article Header with hero image */}
           <header className="relative bg-[oklch(0.20_0.02_250)]">
             {/* Hero image */}
@@ -471,7 +768,7 @@ export default function ArticlePage() {
               <img
                 src={displayArticle?.featuredImage || sample.image}
                 alt={displayArticle?.title || sample.title}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover object-[center_20%]"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[oklch(0.15_0.02_250)] via-[oklch(0.15_0.02_250)]/60 to-transparent" />
             </div>
@@ -503,6 +800,13 @@ export default function ArticlePage() {
               </div>
             </div>
           </header>
+
+          {/* Sticky floating share bar (desktop) */}
+          <SocialShare
+            title={displayArticle?.title || sample.title}
+            excerpt={displayArticle?.excerpt || sample.chapo}
+            variant="sticky"
+          />
 
           {/* Article Body */}
           <div className="max-w-4xl mx-auto px-4 py-12 md:py-16">
@@ -560,6 +864,14 @@ export default function ArticlePage() {
                   ? "La zone CEEAC pourrait atteindre dix millions d'emplois verts d'ici 2030, mais cela exige de passer de la logique de projet à la logique de filière. Aquaculture, hydroélectricité, solaire : les initiatives existent. Ce qui manque, c'est l'ingénierie, la certification régionale et l'inclusion systématique des jeunes, des femmes et des ruraux."
                   : slug === "interview-mackosso-rester-debout"
                   ? "Loïc Mackosso livre un témoignage puissant sur la résilience, l'entrepreneuriat en Afrique et la construction d'un parcours de banquier d'affaires dans un environnement complexe. De la guerre civile au Congo à la fondation d'Aries Investissements et Aries Énergies, il incarne une philosophie : rester debout, c'est décider de se renforcer."
+                  : slug === "cobalt-minerais-verts-afrique"
+                  ? "L'Afrique détient 70 % de la production mondiale de cobalt et 30 % des réserves de minerais critiques, mais reste piégée dans l'extraction brute. La Chine contrôle 73 % du raffinage. Plusieurs États africains tentent de remonter la chaîne de valeur par des interdictions d'exportation et des projets industriels, mais les obstacles structurels demeurent considérables."
+                  : slug === "villes-africaines-defi-climatique"
+                  ? "L'Afrique doit accueillir 700 millions de nouveaux citadins d'ici 2050. Les villes génèrent 70 % des émissions mondiales de CO2, mais le continent peut concevoir ses infrastructures de manière durable dès le départ. Le BRT électrique de Dakar, les solutions fondées sur la nature et les financements innovants montrent la voie."
+                  : slug === "femmes-entrepreneuses-afrique"
+                  ? "L'Afrique détient le taux d'entrepreneuriat féminin le plus élevé au monde (26 %), mais moins de 5 % du financement startup va aux CEO femmes. Pourtant, chaque dollar investi dans les entreprises féminines rapporte 78 cents contre 31 pour les masculines. Combler cet écart pourrait ajouter 287 milliards de dollars au PIB africain."
+                  : slug === "revolution-mobile-money-afrique"
+                  ? "L'Afrique concentre plus de 50 % des comptes mobile money mondiaux, avec 856 millions de comptes et 1 000 milliards de dollars de transactions annuelles. Au-delà de l'innovation financière, le mobile money transforme les solidarités familiales, l'autonomie des femmes et la frontière entre économie formelle et informelle. L'Afrique de l'Est mène la révolution, l'Afrique de l'Ouest accélère, l'Afrique centrale rattrape son retard."
                   : "La CEMAC traverse une crise institutionnelle et financière sans précédent. La réforme du financement communautaire, l'accélération de l'intégration commerciale et la mobilisation de la finance verte constituent les principaux leviers de sortie de crise."
                 }
               </p>
@@ -583,7 +895,7 @@ export default function ArticlePage() {
                   <Link href="/article/interview-gweth-cemac">
                     <div className="p-5 border border-border rounded-lg hover:shadow-md transition-shadow cursor-pointer group">
                       <div className="flex gap-4">
-                        <img src={IMG.gweth1} alt="" className="w-20 h-20 rounded-lg object-cover shrink-0" />
+                        <img src={IMG.gweth1} alt="" className="w-20 h-20 rounded-lg object-cover object-top shrink-0" />
                         <div>
                           <div className="habari-rubrique text-xs mb-1">La Grande Interview</div>
                           <h4 className="font-serif font-bold text-foreground group-hover:text-primary transition-colors line-clamp-2">Dr Guy Gweth : « Aucune intégration ne progresse sans leadership »</h4>
@@ -596,7 +908,7 @@ export default function ArticlePage() {
                   <Link href="/article/gabon-oligui-mur-argent">
                     <div className="p-5 border border-border rounded-lg hover:shadow-md transition-shadow cursor-pointer group">
                       <div className="flex gap-4">
-                        <img src={IMG.gabon} alt="" className="w-20 h-20 rounded-lg object-cover shrink-0" />
+                        <img src={IMG.gabon} alt="" className="w-20 h-20 rounded-lg object-cover object-top shrink-0" />
                         <div>
                           <div className="habari-rubrique text-xs mb-1">Enquête</div>
                           <h4 className="font-serif font-bold text-foreground group-hover:text-primary transition-colors line-clamp-2">Gabon — Oligui Nguema face au mur de l'argent</h4>
@@ -609,7 +921,7 @@ export default function ArticlePage() {
                   <Link href="/article/ceeac-paradoxe-vert">
                     <div className="p-5 border border-border rounded-lg hover:shadow-md transition-shadow cursor-pointer group">
                       <div className="flex gap-4">
-                        <img src={IMG.ceeacVert} alt="" className="w-20 h-20 rounded-lg object-cover shrink-0" />
+                        <img src={IMG.ceeacVert} alt="" className="w-20 h-20 rounded-lg object-cover object-top shrink-0" />
                         <div>
                           <div className="habari-rubrique text-xs mb-1">Dossier Stratégique</div>
                           <h4 className="font-serif font-bold text-foreground group-hover:text-primary transition-colors line-clamp-2">La CEEAC face au paradoxe vert</h4>
@@ -622,7 +934,7 @@ export default function ArticlePage() {
                   <Link href="/article/cemac-panne-seche">
                     <div className="p-5 border border-border rounded-lg hover:shadow-md transition-shadow cursor-pointer group">
                       <div className="flex gap-4">
-                        <img src={IMG.cemac} alt="" className="w-20 h-20 rounded-lg object-cover shrink-0" />
+                        <img src={IMG.cemac} alt="" className="w-20 h-20 rounded-lg object-cover object-top shrink-0" />
                         <div>
                           <div className="habari-rubrique text-xs mb-1">Dossier Central</div>
                           <h4 className="font-serif font-bold text-foreground group-hover:text-primary transition-colors line-clamp-2">Panne sèche à la CEMAC</h4>
@@ -635,7 +947,7 @@ export default function ArticlePage() {
                   <Link href="/article/economie-verte-doctrine-competitivite">
                     <div className="p-5 border border-border rounded-lg hover:shadow-md transition-shadow cursor-pointer group">
                       <div className="flex gap-4">
-                        <img src={IMG.ecoVerte} alt="" className="w-20 h-20 rounded-lg object-cover shrink-0" />
+                        <img src={IMG.ecoVerte} alt="" className="w-20 h-20 rounded-lg object-cover object-top shrink-0" />
                         <div>
                           <div className="habari-rubrique text-xs mb-1">Habari Green</div>
                           <h4 className="font-serif font-bold text-foreground group-hover:text-primary transition-colors line-clamp-2">L'économie verte, doctrine de compétitivité pour l'Afrique Centrale</h4>
@@ -648,7 +960,7 @@ export default function ArticlePage() {
                   <Link href="/article/emplois-verts-ceeac">
                     <div className="p-5 border border-border rounded-lg hover:shadow-md transition-shadow cursor-pointer group">
                       <div className="flex gap-4">
-                        <img src={IMG.emploisVerts} alt="" className="w-20 h-20 rounded-lg object-cover shrink-0" />
+                        <img src={IMG.emploisVerts} alt="" className="w-20 h-20 rounded-lg object-cover object-top shrink-0" />
                         <div>
                           <div className="habari-rubrique text-xs mb-1">Business & Innovation</div>
                           <h4 className="font-serif font-bold text-foreground group-hover:text-primary transition-colors line-clamp-2">Emplois verts en CEEAC : le potentiel existe, la structuration manque</h4>
@@ -661,10 +973,62 @@ export default function ArticlePage() {
                   <Link href="/article/interview-mackosso-rester-debout">
                     <div className="p-5 border border-border rounded-lg hover:shadow-md transition-shadow cursor-pointer group">
                       <div className="flex gap-4">
-                        <img src={IMG.mackosso1} alt="" className="w-20 h-20 rounded-lg object-cover shrink-0" />
+                        <img src={IMG.mackosso1} alt="" className="w-20 h-20 rounded-lg object-cover object-top shrink-0" />
                         <div>
                           <div className="habari-rubrique text-xs mb-1">La Grande Interview</div>
                           <h4 className="font-serif font-bold text-foreground group-hover:text-primary transition-colors line-clamp-2">Loïc Mackosso : « Rester debout, c'est décider de se renforcer »</h4>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                )}
+                {slug !== "cobalt-minerais-verts-afrique" && (
+                  <Link href="/article/cobalt-minerais-verts-afrique">
+                    <div className="p-5 border border-border rounded-lg hover:shadow-md transition-shadow cursor-pointer group">
+                      <div className="flex gap-4">
+                        <img src={IMG.cobaltMine} alt="" className="w-20 h-20 rounded-lg object-cover object-top shrink-0" />
+                        <div>
+                          <div className="habari-rubrique text-xs mb-1">Habari Green</div>
+                          <h4 className="font-serif font-bold text-foreground group-hover:text-primary transition-colors line-clamp-2">Cobalt et minerais stratégiques : bénédiction ou piège pour l'Afrique ?</h4>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                )}
+                {slug !== "villes-africaines-defi-climatique" && (
+                  <Link href="/article/villes-africaines-defi-climatique">
+                    <div className="p-5 border border-border rounded-lg hover:shadow-md transition-shadow cursor-pointer group">
+                      <div className="flex gap-4">
+                        <img src={IMG.villesAfrique} alt="" className="w-20 h-20 rounded-lg object-cover object-top shrink-0" />
+                        <div>
+                          <div className="habari-rubrique text-xs mb-1">Habari Green</div>
+                          <h4 className="font-serif font-bold text-foreground group-hover:text-primary transition-colors line-clamp-2">Les villes africaines face au défi climatique</h4>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                )}
+                {slug !== "femmes-entrepreneuses-afrique" && (
+                  <Link href="/article/femmes-entrepreneuses-afrique">
+                    <div className="p-5 border border-border rounded-lg hover:shadow-md transition-shadow cursor-pointer group">
+                      <div className="flex gap-4">
+                        <img src={IMG.femmesAwief} alt="" className="w-20 h-20 rounded-lg object-cover object-top shrink-0" />
+                        <div>
+                          <div className="habari-rubrique text-xs mb-1">Culture & Société</div>
+                          <h4 className="font-serif font-bold text-foreground group-hover:text-primary transition-colors line-clamp-2">La montée des femmes entrepreneuses change-t-elle l'économie africaine ?</h4>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                )}
+                {slug !== "revolution-mobile-money-afrique" && (
+                  <Link href="/article/revolution-mobile-money-afrique">
+                    <div className="p-5 border border-border rounded-lg hover:shadow-md transition-shadow cursor-pointer group">
+                      <div className="flex gap-4">
+                        <img src={IMG.mobileMoney1} alt="" className="w-20 h-20 rounded-lg object-cover object-top shrink-0" />
+                        <div>
+                          <div className="habari-rubrique text-xs mb-1">Culture & Société</div>
+                          <h4 className="font-serif font-bold text-foreground group-hover:text-primary transition-colors line-clamp-2">La révolution du mobile money change-t-elle les comportements sociaux en Afrique ?</h4>
                         </div>
                       </div>
                     </div>

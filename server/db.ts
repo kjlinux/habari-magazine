@@ -17,7 +17,9 @@ import {
   contactMessages,
   InsertContactMessage,
   magazineIssues,
-  InsertMagazineIssue
+  InsertMagazineIssue,
+  opportunities,
+  InsertOpportunity
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -1106,4 +1108,255 @@ export async function isProfileCompleted(userId: number): Promise<boolean> {
     .limit(1);
 
   return result.length > 0 && result[0].profileCompleted === true;
+}
+
+// ═══════════════════════════════════════════════════════════
+// OPPORTUNITIES HELPERS (Appels d'offres, AMI, Emplois)
+// ═══════════════════════════════════════════════════════════
+
+/**
+ * Public: List active opportunities by type
+ */
+export async function getActiveOpportunities(type?: 'bid' | 'ami' | 'job', limit: number = 50, offset: number = 0) {
+  const db = await getDb();
+  if (!db) return [];
+
+  const conditions = [eq(opportunities.status, 'active')];
+  if (type) {
+    conditions.push(eq(opportunities.type, type));
+  }
+
+  return await db
+    .select()
+    .from(opportunities)
+    .where(and(...conditions))
+    .orderBy(desc(opportunities.featured), desc(opportunities.createdAt))
+    .limit(limit)
+    .offset(offset);
+}
+
+/**
+ * Public: Get opportunity by slug
+ */
+export async function getOpportunityBySlug(slug: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db
+    .select()
+    .from(opportunities)
+    .where(eq(opportunities.slug, slug))
+    .limit(1);
+
+  return result[0];
+}
+
+/**
+ * Public: Count active opportunities by type
+ */
+export async function countActiveOpportunities() {
+  const db = await getDb();
+  if (!db) return { bids: 0, ami: 0, jobs: 0 };
+
+  const [bids] = await db.select({ c: count() }).from(opportunities).where(and(eq(opportunities.status, 'active'), eq(opportunities.type, 'bid')));
+  const [ami] = await db.select({ c: count() }).from(opportunities).where(and(eq(opportunities.status, 'active'), eq(opportunities.type, 'ami')));
+  const [jobs] = await db.select({ c: count() }).from(opportunities).where(and(eq(opportunities.status, 'active'), eq(opportunities.type, 'job')));
+
+  return { bids: bids?.c ?? 0, ami: ami?.c ?? 0, jobs: jobs?.c ?? 0 };
+}
+
+/**
+ * Admin: List all opportunities (including draft/closed)
+ */
+export async function adminGetAllOpportunities(filters?: {
+  type?: 'bid' | 'ami' | 'job';
+  status?: 'active' | 'closed' | 'draft';
+  search?: string;
+  limit?: number;
+  offset?: number;
+}) {
+  const db = await getDb();
+  if (!db) return { items: [], total: 0 };
+
+  const conditions: ReturnType<typeof eq>[] = [];
+
+  if (filters?.type) {
+    conditions.push(eq(opportunities.type, filters.type));
+  }
+  if (filters?.status) {
+    conditions.push(eq(opportunities.status, filters.status));
+  }
+  if (filters?.search) {
+    conditions.push(
+      or(
+        like(opportunities.title, `%${filters.search}%`),
+        like(opportunities.organization, `%${filters.search}%`)
+      )! as any
+    );
+  }
+
+  const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+  const limit = filters?.limit ?? 50;
+  const offset = filters?.offset ?? 0;
+
+  const [totalResult, items] = await Promise.all([
+    db.select({ c: count() }).from(opportunities).where(whereClause),
+    db
+      .select()
+      .from(opportunities)
+      .where(whereClause)
+      .orderBy(desc(opportunities.featured), desc(opportunities.createdAt))
+      .limit(limit)
+      .offset(offset),
+  ]);
+
+  return { items, total: totalResult[0]?.c ?? 0 };
+}
+
+/**
+ * Admin: Get opportunity by ID
+ */
+export async function adminGetOpportunityById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db
+    .select()
+    .from(opportunities)
+    .where(eq(opportunities.id, id))
+    .limit(1);
+
+  return result[0];
+}
+
+/**
+ * Admin: Create opportunity
+ */
+export async function adminCreateOpportunity(data: {
+  type: 'bid' | 'ami' | 'job';
+  title: string;
+  organization: string;
+  country: string;
+  sector?: string;
+  description?: string;
+  budget?: string;
+  currency?: string;
+  deadline?: string;
+  amiType?: string;
+  partners?: string;
+  webinaire?: string;
+  externalLink?: string;
+  contractType?: string;
+  experienceLevel?: string;
+  featured?: boolean;
+  status?: 'active' | 'closed' | 'draft';
+}) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  // Generate slug from title
+  const slug = data.title
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
+    .substring(0, 200) + "-" + Date.now().toString(36);
+
+  const result = await db.insert(opportunities).values({
+    type: data.type,
+    title: data.title,
+    slug,
+    organization: data.organization,
+    country: data.country,
+    sector: data.sector ?? null,
+    description: data.description ?? null,
+    budget: data.budget ?? null,
+    currency: data.currency ?? "USD",
+    deadline: data.deadline ?? null,
+    amiType: data.amiType ?? null,
+    partners: data.partners ?? null,
+    webinaire: data.webinaire ?? null,
+    externalLink: data.externalLink ?? null,
+    contractType: data.contractType ?? null,
+    experienceLevel: data.experienceLevel ?? null,
+    featured: data.featured ?? false,
+    status: data.status ?? 'active',
+  });
+
+  return { success: true, insertId: result[0].insertId };
+}
+
+/**
+ * Admin: Update opportunity
+ */
+export async function adminUpdateOpportunity(id: number, data: {
+  type?: 'bid' | 'ami' | 'job';
+  title?: string;
+  organization?: string;
+  country?: string;
+  sector?: string | null;
+  description?: string | null;
+  budget?: string | null;
+  currency?: string | null;
+  deadline?: string | null;
+  amiType?: string | null;
+  partners?: string | null;
+  webinaire?: string | null;
+  externalLink?: string | null;
+  contractType?: string | null;
+  experienceLevel?: string | null;
+  featured?: boolean;
+  status?: 'active' | 'closed' | 'draft';
+}) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  await db.update(opportunities).set(data).where(eq(opportunities.id, id));
+  return { success: true };
+}
+
+/**
+ * Admin: Delete opportunity
+ */
+export async function adminDeleteOpportunity(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  await db.delete(opportunities).where(eq(opportunities.id, id));
+  return { success: true };
+}
+
+/**
+ * Admin: Toggle featured status
+ */
+export async function adminToggleOpportunityFeatured(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const existing = await adminGetOpportunityById(id);
+  if (!existing) return undefined;
+
+  await db.update(opportunities).set({ featured: !existing.featured }).where(eq(opportunities.id, id));
+  return { success: true, featured: !existing.featured };
+}
+
+/**
+ * Admin: Count all opportunities (for dashboard stats)
+ */
+export async function adminCountOpportunities() {
+  const db = await getDb();
+  if (!db) return { total: 0, active: 0, draft: 0, closed: 0 };
+
+  const [total] = await db.select({ c: count() }).from(opportunities);
+  const [active] = await db.select({ c: count() }).from(opportunities).where(eq(opportunities.status, 'active'));
+  const [draft] = await db.select({ c: count() }).from(opportunities).where(eq(opportunities.status, 'draft'));
+  const [closed] = await db.select({ c: count() }).from(opportunities).where(eq(opportunities.status, 'closed'));
+
+  return {
+    total: total?.c ?? 0,
+    active: active?.c ?? 0,
+    draft: draft?.c ?? 0,
+    closed: closed?.c ?? 0,
+  };
 }

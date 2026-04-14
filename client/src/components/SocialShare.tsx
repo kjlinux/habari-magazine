@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -6,7 +6,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { toast } from "sonner";
-import { Share2, Link2, Check } from "lucide-react";
+import { Share2, Link2, Check, Mail, ChevronUp } from "lucide-react";
 
 interface SocialShareProps {
   /** Article title for sharing text */
@@ -15,8 +15,8 @@ interface SocialShareProps {
   url?: string;
   /** Short excerpt for sharing context */
   excerpt?: string;
-  /** Display variant: "bar" shows inline buttons, "compact" shows a single button with popover */
-  variant?: "bar" | "compact";
+  /** Display variant: "bar" shows inline buttons, "compact" shows a single button with popover, "sticky" shows a floating sidebar */
+  variant?: "bar" | "compact" | "sticky";
   /** Additional CSS classes */
   className?: string;
 }
@@ -54,6 +54,14 @@ function WhatsAppIcon({ className }: { className?: string }) {
   );
 }
 
+function TelegramIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+      <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.479.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z" />
+    </svg>
+  );
+}
+
 function getShareUrl(platform: string, url: string, title: string, excerpt?: string) {
   const encodedUrl = encodeURIComponent(url);
   const encodedTitle = encodeURIComponent(title);
@@ -68,6 +76,10 @@ function getShareUrl(platform: string, url: string, title: string, excerpt?: str
       return `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`;
     case "whatsapp":
       return `https://wa.me/?text=${encodedText}%20${encodedUrl}`;
+    case "telegram":
+      return `https://t.me/share/url?url=${encodedUrl}&text=${encodedTitle}`;
+    case "email":
+      return `mailto:?subject=${encodedTitle}&body=${encodedText}%0A%0A${encodedUrl}`;
     default:
       return "#";
   }
@@ -94,7 +106,11 @@ function ShareButton({
     e.preventDefault();
     e.stopPropagation();
     const shareUrl = getShareUrl(platform, url, title, excerpt);
-    window.open(shareUrl, "_blank", "noopener,noreferrer,width=600,height=500");
+    if (platform === "email") {
+      window.location.href = shareUrl;
+    } else {
+      window.open(shareUrl, "_blank", "noopener,noreferrer,width=600,height=500");
+    }
   };
 
   return (
@@ -138,8 +154,128 @@ function CopyLinkButton({ url, compact }: { url: string; compact?: boolean }) {
   );
 }
 
+/* Sticky floating sidebar for article pages */
+function StickyShareBar({ title, url, excerpt }: { title: string; url: string; excerpt?: string }) {
+  const [visible, setVisible] = useState(false);
+  const [showBackToTop, setShowBackToTop] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      setVisible(scrollY > 400);
+      setShowBackToTop(scrollY > 1200);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const handleShare = (platform: string) => {
+    const shareUrl = getShareUrl(platform, url, title, excerpt);
+    if (platform === "email") {
+      window.location.href = shareUrl;
+    } else {
+      window.open(shareUrl, "_blank", "noopener,noreferrer,width=600,height=500");
+    }
+  };
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(url).then(() => {
+      toast.success("Lien copié !");
+    }).catch(() => {
+      toast.error("Impossible de copier le lien.");
+    });
+  };
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  return (
+    <div
+      className={`fixed left-4 top-1/2 -translate-y-1/2 z-40 hidden xl:flex flex-col gap-2 transition-all duration-500 ${
+        visible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-8 pointer-events-none"
+      }`}
+    >
+      <div className="flex flex-col gap-1.5 bg-card/95 backdrop-blur-sm border border-border rounded-xl p-2 shadow-lg">
+        <p className="text-[0.6rem] font-sans font-semibold text-muted-foreground text-center uppercase tracking-wider px-1 py-1">Partager</p>
+        <button
+          onClick={() => handleShare("facebook")}
+          className="w-10 h-10 rounded-lg bg-[#1877F2]/10 text-[#1877F2] hover:bg-[#1877F2] hover:text-white flex items-center justify-center transition-all duration-200 hover:scale-110"
+          title="Facebook"
+          aria-label="Partager sur Facebook"
+        >
+          <FacebookIcon className="w-4.5 h-4.5" />
+        </button>
+        <button
+          onClick={() => handleShare("twitter")}
+          className="w-10 h-10 rounded-lg bg-foreground/5 text-foreground hover:bg-foreground hover:text-background flex items-center justify-center transition-all duration-200 hover:scale-110"
+          title="X (Twitter)"
+          aria-label="Partager sur X"
+        >
+          <XTwitterIcon className="w-4.5 h-4.5" />
+        </button>
+        <button
+          onClick={() => handleShare("linkedin")}
+          className="w-10 h-10 rounded-lg bg-[#0A66C2]/10 text-[#0A66C2] hover:bg-[#0A66C2] hover:text-white flex items-center justify-center transition-all duration-200 hover:scale-110"
+          title="LinkedIn"
+          aria-label="Partager sur LinkedIn"
+        >
+          <LinkedInIcon className="w-4.5 h-4.5" />
+        </button>
+        <button
+          onClick={() => handleShare("whatsapp")}
+          className="w-10 h-10 rounded-lg bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366] hover:text-white flex items-center justify-center transition-all duration-200 hover:scale-110"
+          title="WhatsApp"
+          aria-label="Partager sur WhatsApp"
+        >
+          <WhatsAppIcon className="w-4.5 h-4.5" />
+        </button>
+        <button
+          onClick={() => handleShare("telegram")}
+          className="w-10 h-10 rounded-lg bg-[#0088cc]/10 text-[#0088cc] hover:bg-[#0088cc] hover:text-white flex items-center justify-center transition-all duration-200 hover:scale-110"
+          title="Telegram"
+          aria-label="Partager sur Telegram"
+        >
+          <TelegramIcon className="w-4.5 h-4.5" />
+        </button>
+        <button
+          onClick={() => handleShare("email")}
+          className="w-10 h-10 rounded-lg bg-orange-500/10 text-orange-500 hover:bg-orange-500 hover:text-white flex items-center justify-center transition-all duration-200 hover:scale-110"
+          title="Email"
+          aria-label="Partager par email"
+        >
+          <Mail className="w-4.5 h-4.5" />
+        </button>
+        <div className="border-t border-border my-0.5" />
+        <button
+          onClick={handleCopy}
+          className="w-10 h-10 rounded-lg bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground flex items-center justify-center transition-all duration-200 hover:scale-110"
+          title="Copier le lien"
+          aria-label="Copier le lien"
+        >
+          <Link2 className="w-4.5 h-4.5" />
+        </button>
+      </div>
+      {showBackToTop && (
+        <button
+          onClick={scrollToTop}
+          className="w-10 h-10 mx-auto rounded-lg bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground flex items-center justify-center transition-all duration-200 hover:scale-110 mt-1"
+          title="Retour en haut"
+          aria-label="Retour en haut"
+        >
+          <ChevronUp className="w-4.5 h-4.5" />
+        </button>
+      )}
+    </div>
+  );
+}
+
 export default function SocialShare({ title, url, excerpt, variant = "bar", className = "" }: SocialShareProps) {
   const shareUrl = url || (typeof window !== "undefined" ? window.location.href : "");
+
+  if (variant === "sticky") {
+    return <StickyShareBar title={title} url={shareUrl} excerpt={excerpt} />;
+  }
 
   if (variant === "compact") {
     return (
@@ -157,7 +293,7 @@ export default function SocialShare({ title, url, excerpt, variant = "bar", clas
         </PopoverTrigger>
         <PopoverContent className="w-auto p-3" align="start" onClick={(e) => e.stopPropagation()}>
           <p className="text-xs font-sans font-medium text-muted-foreground mb-2.5">Partager cet article</p>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -198,6 +334,27 @@ export default function SocialShare({ title, url, excerpt, variant = "bar", clas
             >
               <WhatsAppIcon className="w-4 h-4" />
             </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                window.open(getShareUrl("telegram", shareUrl, title, excerpt), "_blank", "noopener,noreferrer,width=600,height=500");
+              }}
+              className="w-9 h-9 rounded-lg bg-[#0088cc]/10 text-[#0088cc] hover:bg-[#0088cc]/20 flex items-center justify-center transition-colors"
+              title="Telegram"
+            >
+              <TelegramIcon className="w-4 h-4" />
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                const emailUrl = getShareUrl("email", shareUrl, title, excerpt);
+                window.location.href = emailUrl;
+              }}
+              className="w-9 h-9 rounded-lg bg-orange-500/10 text-orange-500 hover:bg-orange-500/20 flex items-center justify-center transition-colors"
+              title="Email"
+            >
+              <Mail className="w-4 h-4" />
+            </button>
             <CopyLinkButton url={shareUrl} compact />
           </div>
         </PopoverContent>
@@ -220,6 +377,12 @@ export default function SocialShare({ title, url, excerpt, variant = "bar", clas
       </ShareButton>
       <ShareButton platform="whatsapp" url={shareUrl} title={title} excerpt={excerpt} label="WhatsApp" bgClass="bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366]/20">
         <WhatsAppIcon className="w-4 h-4" />
+      </ShareButton>
+      <ShareButton platform="telegram" url={shareUrl} title={title} excerpt={excerpt} label="Telegram" bgClass="bg-[#0088cc]/10 text-[#0088cc] hover:bg-[#0088cc]/20">
+        <TelegramIcon className="w-4 h-4" />
+      </ShareButton>
+      <ShareButton platform="email" url={shareUrl} title={title} excerpt={excerpt} label="Email" bgClass="bg-orange-500/10 text-orange-500 hover:bg-orange-500/20">
+        <Mail className="w-4 h-4" />
       </ShareButton>
       <CopyLinkButton url={shareUrl} />
     </div>

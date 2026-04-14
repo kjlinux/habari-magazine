@@ -11,7 +11,7 @@ import {
 import { Link, useLocation } from "wouter";
 import {
   LayoutDashboard, FileText, Users, Mail, ChevronLeft,
-  LogOut, Menu, X, Shield, MessageSquare, BookOpen
+  LogOut, Menu, X, Shield, MessageSquare, BookOpen, Megaphone
 } from "lucide-react";
 import { useState } from "react";
 
@@ -21,6 +21,7 @@ const adminMenuItems = [
   { icon: BookOpen, label: "Magazine PDF", path: "/admin/magazine" },
   { icon: Users, label: "Utilisateurs", path: "/admin/utilisateurs" },
   { icon: Mail, label: "Newsletter", path: "/admin/newsletter" },
+  { icon: Megaphone, label: "Opportunités", path: "/admin/opportunites" },
   { icon: MessageSquare, label: "Messages", path: "/admin/messages" },
 ];
 

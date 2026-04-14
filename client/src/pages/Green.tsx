@@ -378,9 +378,12 @@ export default function Green() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
+              { day: "26-29", month: "Mars", title: "OMC MC14 — 14ᵉ Conférence ministérielle", location: "Yaoundé, Cameroun", type: "Sommet mondial", desc: "Événement historique pour la CEEAC. Renforce le commerce régional avec le tarif externe commun CEEAC appliqué dès janvier 2026." },
+              { day: "Mars", month: "2026", title: "Trade and Sustainability Hub", location: "Yaoundé, Cameroun", type: "En marge OMC MC14", desc: "Pour la première fois en Afrique Centrale, les ministres discuteront des échanges de biens et services environnementaux." },
+              { day: "11-12", month: "Mai", title: "Sommet Afrique-France \"Africa Forward\"", location: "Nairobi, Kenya", type: "Sommet international", desc: "Premier sommet du genre en pays anglophone. Innovation et climat au cœur des discussions." },
               { day: "—", month: "2026", title: "HABARI GREEN SUMMIT", location: "Douala, Cameroun", type: "Conférence annuelle", desc: "Le rendez-vous annuel des acteurs de la transition verte en Afrique Centrale." },
-              { day: "—", month: "Mensuel", title: "Petit-déjeuner climat", location: "Libreville / Douala / Kinshasa", type: "Networking", desc: "Rencontres mensuelles entre décideurs et acteurs de l'économie verte." },
               { day: "Nov.", month: "2026", title: "COP31 — Belem", location: "Belem, Brésil", type: "Agenda partenaire", desc: "Suivi de la participation des pays CEEAC à la COP31 sur le climat." },
+              { day: "—", month: "Mensuel", title: "Petit-déjeuner climat", location: "Libreville / Douala / Kinshasa", type: "Networking", desc: "Rencontres mensuelles entre décideurs et acteurs de l'économie verte." },
             ].map((ev, i) => (
               <div key={i} className="bg-background border border-border rounded-xl p-6 hover:shadow-md transition-shadow">
                 <div className="flex items-start gap-4">
