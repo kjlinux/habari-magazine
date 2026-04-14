@@ -1,6 +1,5 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { getLoginUrl } from "@/const";
 import { Link, useLocation } from "wouter";
 import { Menu, X, Shield, Leaf, BarChart3, TreePine, Zap, Landmark, Users, FileText, ChevronDown, Search } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
@@ -165,7 +164,7 @@ export default function Navbar() {
                 </Link>
               </div>
             ) : (
-              <a href={getLoginUrl()} className="hidden sm:block">
+              <a href="/login" className="hidden sm:block">
                 <Button size="sm" className="font-sans bg-primary hover:bg-primary/90">
                   Se connecter
                 </Button>
@@ -266,7 +265,7 @@ export default function Navbar() {
                     </Link>
                   </>
                 ) : (
-                  <a href={getLoginUrl()}>
+                  <a href="/login">
                     <Button className="w-full font-sans bg-primary">Se connecter</Button>
                   </a>
                 )}

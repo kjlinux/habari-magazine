@@ -2,7 +2,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { getLoginUrl } from "@/const";
+
 import { trpc } from "@/lib/trpc";
 import { Download, FileText, Eye, Calendar, BookOpen, ArrowRight, Lock, Crown, Shield, CheckCircle2, Gift, Clock, Sparkles } from "lucide-react";
 import { Link } from "wouter";
@@ -72,7 +72,7 @@ function LaunchBanner() {
             <span className="font-sans text-xs font-semibold">{launchStatus.daysRemaining} jours restants</span>
           </div>
           {!isAuthenticated && (
-            <a href={getLoginUrl()}>
+            <a href={"/login"}>
               <Button size="sm" className="font-sans bg-[oklch(0.15_0.02_250)] text-white hover:bg-[oklch(0.25_0.02_250)] text-xs h-7">
                 S'inscrire gratuitement
               </Button>
@@ -187,7 +187,7 @@ function DownloadButton({ issue }: { issue: MagazineIssue }) {
           </div>
         </div>
         <div className="flex flex-col sm:flex-row gap-3">
-          <a href={getLoginUrl()}>
+          <a href={"/login"}>
             <Button size="lg" className={`font-sans w-full sm:w-auto ${isLaunch ? "bg-[oklch(0.72_0.15_75)] text-[oklch(0.15_0.02_250)] hover:bg-[oklch(0.78_0.15_75)]" : "bg-primary hover:bg-primary/90"}`}>
               {isLaunch ? <><Gift className="w-4 h-4 mr-2" /> S'inscrire gratuitement</> : "Se connecter"}
             </Button>
@@ -553,7 +553,7 @@ export default function Downloads() {
 
           <div className="text-center mt-10">
             {launchStatus?.isLaunchPeriod ? (
-              <a href={getLoginUrl()}>
+              <a href={"/login"}>
                 <Button className="font-sans bg-[oklch(0.72_0.15_75)] text-[oklch(0.15_0.02_250)] hover:bg-[oklch(0.78_0.15_75)] font-semibold">
                   <Gift className="w-4 h-4 mr-2" /> S'inscrire pour accéder gratuitement
                 </Button>
@@ -620,7 +620,7 @@ export default function Downloads() {
 
             <div className="text-center mt-8">
               {launchStatus?.isLaunchPeriod ? (
-                <a href={getLoginUrl()}>
+                <a href={"/login"}>
                   <Button size="lg" className="font-sans bg-[oklch(0.72_0.15_75)] text-[oklch(0.15_0.02_250)] hover:bg-[oklch(0.78_0.15_75)] shadow-md">
                     Créer mon compte gratuitement <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>

@@ -2,7 +2,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { trpc } from "@/lib/trpc";
-import { getLoginUrl } from "@/const";
+
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import {
@@ -528,7 +528,7 @@ export default function Home() {
               <p className="text-sm text-muted-foreground font-sans mt-2">Jusqu'au 1er juin 2026, tout le contenu premium est accessible gratuitement. Inscrivez-vous !</p>
               <div className="habari-separator mt-3"></div>
             </div>
-            <a href={getLoginUrl()}>
+            <a href={"/login"}>
               <Button className="font-sans gap-2 bg-[oklch(0.72_0.15_75)] text-[oklch(0.15_0.02_250)] hover:bg-[oklch(0.78_0.15_75)]">
                 <Gift className="w-4 h-4" /> S'inscrire gratuitement
               </Button>
@@ -560,7 +560,7 @@ export default function Home() {
                   </CardContent>
                 </Card>
                 <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center pb-6">
-                  <a href={getLoginUrl()}>
+                  <a href={"/login"}>
                     <Button size="sm" className="font-sans bg-[oklch(0.72_0.15_75)] text-[oklch(0.15_0.02_250)] hover:bg-[oklch(0.78_0.15_75)]">
                       <Gift className="w-3.5 h-3.5 mr-1.5" /> S'inscrire pour lire
                     </Button>
@@ -772,7 +772,7 @@ export default function Home() {
               </Button>
             </Link>
             {!isAuthenticated && (
-              <a href={getLoginUrl()}>
+              <a href={"/login"}>
                 <Button size="lg" variant="outline" className="font-sans border-white/30 text-white hover:bg-white/10">
                   Créer un compte gratuit
                 </Button>

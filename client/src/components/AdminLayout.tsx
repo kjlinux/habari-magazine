@@ -1,5 +1,4 @@
 import { useAuth } from "@/_core/hooks/useAuth";
-import { getLoginUrl } from "@/const";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -53,7 +52,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <p className="text-sm text-muted-foreground font-sans mb-8">
             Connectez-vous pour accéder au panneau d'administration.
           </p>
-          <a href={getLoginUrl()}>
+          <a href="/login">
             <Button className="w-full font-sans bg-primary hover:bg-primary/90" size="lg">
               Se connecter
             </Button>

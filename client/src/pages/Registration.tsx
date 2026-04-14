@@ -4,7 +4,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { trpc } from "@/lib/trpc";
-import { getLoginUrl } from "@/const";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
@@ -170,14 +169,14 @@ export default function Registration() {
                 </div>
               )}
               <div className="flex flex-col sm:flex-row gap-4 justify-center mt-6">
-                <a href={getLoginUrl()}>
+                <a href="/login">
                   <Button size="lg" className="font-sans gap-2 bg-[oklch(0.72_0.15_75)] text-[oklch(0.15_0.02_250)] hover:bg-[oklch(0.78_0.15_75)] font-semibold text-base px-8">
                     <Gift className="w-5 h-5" /> S'inscrire gratuitement
                   </Button>
                 </a>
               </div>
               <p className="text-xs text-white/40 font-sans mt-4">
-                Inscription rapide via votre compte Manus. Aucun paiement requis.
+                Inscription gratuite. Aucun paiement requis.
               </p>
             </div>
           </section>
@@ -215,7 +214,7 @@ export default function Registration() {
               <p className="text-muted-foreground font-sans mb-6">
                 Rejoignez déjà des centaines de professionnels et décideurs inscrits sur Habari Magazine.
               </p>
-              <a href={getLoginUrl()}>
+              <a href="/login">
                 <Button size="lg" className="font-sans gap-2 bg-primary text-primary-foreground hover:bg-primary/90 font-semibold">
                   <ArrowRight className="w-5 h-5" /> Créer mon compte gratuit
                 </Button>

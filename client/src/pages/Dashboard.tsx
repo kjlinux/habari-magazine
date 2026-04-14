@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { trpc } from "@/lib/trpc";
 import { Link } from "wouter";
-import { getLoginUrl } from "@/const";
+
 import { Loader2, LogOut, Bell, Bookmark, MessageSquare, Settings, Eye, Heart, ArrowRight } from "lucide-react";
 import { useState } from "react";
 import Navbar from "@/components/Navbar";
@@ -43,7 +43,7 @@ export default function Dashboard() {
             <CardContent className="p-8 text-center">
               <h2 className="font-serif text-2xl font-bold text-primary mb-3">Espace réservé aux membres</h2>
               <p className="text-muted-foreground font-sans mb-6">Connectez-vous pour accéder à votre tableau de bord personnalisé.</p>
-              <a href={getLoginUrl()}>
+              <a href={"/login"}>
                 <Button className="font-sans bg-primary hover:bg-primary/90">Se connecter <ArrowRight className="w-4 h-4 ml-1" /></Button>
               </a>
             </CardContent>

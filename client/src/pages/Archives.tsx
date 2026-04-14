@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { getLoginUrl } from "@/const";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -294,7 +294,7 @@ export default function Archives() {
             <p className="text-gray-300 mb-6">
               Inscrivez-vous gratuitement pour profiter de l'offre de lancement et accéder à tous les contenus premium jusqu'au 1er juin 2026.
             </p>
-            <a href={getLoginUrl()} className="inline-block">
+            <a href={"/login"} className="inline-block">
               <Button size="lg" className="bg-habari-gold hover:bg-habari-gold/90 text-habari-dark font-semibold px-8">
                 Créer un compte gratuit
               </Button>

@@ -2,7 +2,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { getLoginUrl } from "@/const";
+
 import { trpc } from "@/lib/trpc";
 import { SECTORS, COUNTRIES_CEEAC } from "@/lib/constants";
 import { Link } from "wouter";
@@ -156,7 +156,7 @@ export default function MyAccount() {
               <p className="text-muted-foreground font-sans mb-8">
                 Connectez-vous pour accéder à votre espace personnel, gérer votre abonnement et consulter votre historique.
               </p>
-              <a href={getLoginUrl()}>
+              <a href={"/login"}>
                 <Button size="lg" className="font-sans bg-primary hover:bg-primary/90">
                   Se connecter
                 </Button>

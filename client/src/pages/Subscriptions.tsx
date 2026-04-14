@@ -3,7 +3,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { trpc } from "@/lib/trpc";
-import { getLoginUrl } from "@/const";
+
 import { toast } from "sonner";
 import {
   CheckCircle2, Lock, Mail, Shield, ArrowRight,
@@ -50,7 +50,7 @@ export default function Subscriptions() {
 
   const handleCheckout = async (productKey: "premiumAccess" | "newsletterPremium" | "bundle") => {
     if (!isAuthenticated) {
-      window.location.href = getLoginUrl();
+      window.location.href = "/login";
       return;
     }
     setCheckoutLoading(productKey);
@@ -165,7 +165,7 @@ export default function Subscriptions() {
                   </li>
                 </ul>
                 {!isAuthenticated ? (
-                  <a href={getLoginUrl()}>
+                  <a href={"/login"}>
                     <Button className="w-full font-sans bg-primary hover:bg-primary/90">
                       Créer un compte gratuit
                     </Button>
