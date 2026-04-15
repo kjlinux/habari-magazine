@@ -1,17 +1,17 @@
 import Stripe from "stripe";
 import { HABARI_PRODUCTS, type ProductKey, type PriceInterval } from "./products";
 
-// Initialize Stripe with the secret key
-const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+// Initialize Stripe with the restricted key (rk_...)
+const stripeRestrictedKey = process.env.STRIPE_RESTRICTED_KEY;
 
 let stripe: Stripe | null = null;
 
 export function getStripe(): Stripe {
   if (!stripe) {
-    if (!stripeSecretKey) {
-      throw new Error("STRIPE_SECRET_KEY is not configured");
+    if (!stripeRestrictedKey) {
+      throw new Error("STRIPE_RESTRICTED_KEY is not configured");
     }
-    stripe = new Stripe(stripeSecretKey, {
+    stripe = new Stripe(stripeRestrictedKey, {
       apiVersion: "2025-01-27.acacia" as any,
     });
   }
