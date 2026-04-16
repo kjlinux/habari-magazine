@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "wouter";
 import { Menu, X, Shield, Leaf, BarChart3, TreePine, Zap, Landmark, Users, FileText, ChevronDown, Search } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
+import TrialBanner from "@/components/TrialBanner";
 
 const navLinks = [
   { href: "/magazine", label: "Magazine" },
@@ -48,6 +49,7 @@ export default function Navbar() {
 
   return (
     <>
+      <TrialBanner />
       {/* Top bar */}
       <div className="bg-[oklch(0.20_0.02_250)] text-white/80 text-xs py-1.5 hidden md:block">
         <div className="container flex items-center justify-between">

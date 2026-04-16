@@ -28,6 +28,8 @@ import Downloads from "./pages/Downloads";
 import Archives from "./pages/Archives";
 import Registration from "./pages/Registration";
 import Login from "./pages/Login";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import Green from "./pages/Green";
 import GreenCarbone from "./pages/GreenCarbone";
 import GreenForets from "./pages/GreenForets";
@@ -55,6 +57,8 @@ function Router() {
       <Route path={"/archives"} component={Archives} />
       <Route path={"/inscription"} component={Registration} />
       <Route path={"/login"} component={Login} />
+      <Route path={"/mot-de-passe-oublie"} component={ForgotPassword} />
+      <Route path={"/reinitialiser-mot-de-passe"} component={ResetPassword} />
       <Route path={"/partenaires"} component={Partners} />
       <Route path={"/recherche"} component={SearchPage} />
 

@@ -4,8 +4,16 @@ import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { createCheckoutSession, getCheckoutSession, cancelSubscription } from "./stripe/stripe";
-import { HABARI_PRODUCTS, type ProductKey, type PriceInterval } from "./stripe/products";
+import {
+  canAccessArticle,
+  getTrialDaysRemaining,
+  hasActiveSubscription,
+  isLaunchPeriod,
+  stripPremiumContent,
+  TRIAL_DURATION_DAYS,
+} from "./_core/access";
+import { createCheckoutSession, getCheckoutSession, cancelSubscription, createMagazinePdfCheckoutSession } from "./stripe/stripe";
+import { HABARI_PRODUCTS, MAGAZINE_PDF_PRICE, type ProductKey, type PriceInterval } from "./stripe/products";
 import {
   getPublishedArticles,
   getArticleBySlug,
@@ -35,6 +43,10 @@ import {
   adminUpdateContactMessageStatus,
   adminCountNewContactMessages,
   adminDeleteContactMessage,
+  // Magazine purchases
+  getMagazineIssueByPk,
+  hasUserPurchasedMagazine,
+  listUserMagazinePurchases,
   // Admin helpers
   getAdminStats,
   adminGetAllArticles,
@@ -96,6 +108,31 @@ export const appRouter = router({
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
       return { success: true } as const;
     }),
+    trialStatus: publicProcedure.query(async ({ ctx }) => {
+      if (!ctx.user) {
+        return {
+          authenticated: false,
+          daysRemaining: 0,
+          expiresAt: null,
+          hasActiveSubscription: false,
+          isLaunchPeriod: isLaunchPeriod(),
+          trialDurationDays: TRIAL_DURATION_DAYS,
+        };
+      }
+      const activeSub = await getUserSubscription(ctx.user.id);
+      const daysRemaining = getTrialDaysRemaining(ctx.user);
+      const expiresAt = new Date(
+        new Date(ctx.user.createdAt).getTime() + TRIAL_DURATION_DAYS * 24 * 60 * 60 * 1000,
+      );
+      return {
+        authenticated: true,
+        daysRemaining,
+        expiresAt: expiresAt.toISOString(),
+        hasActiveSubscription: hasActiveSubscription(ctx.user, activeSub ?? null),
+        isLaunchPeriod: isLaunchPeriod(),
+        trialDurationDays: TRIAL_DURATION_DAYS,
+      };
+    }),
   }),
 
   // ═══════════════════════════════════════════════
@@ -117,7 +154,42 @@ export const appRouter = router({
 
     bySlug: publicProcedure
       .input(z.object({ slug: z.string() }))
-      .query(async ({ input }) => await getArticleBySlug(input.slug)),
+      .query(async ({ ctx, input }) => {
+        const article = await getArticleBySlug(input.slug);
+        if (!article) {
+          return { article: null, access: null };
+        }
+        const activeSub = ctx.user ? await getUserSubscription(ctx.user.id) : null;
+        const access = canAccessArticle(ctx.user, article, activeSub ?? null);
+        const safeArticle = access.allowed ? article : stripPremiumContent(article);
+        return { article: safeArticle, access };
+      }),
+
+    checkAccess: publicProcedure
+      .input(z.object({ slug: z.string() }))
+      .query(async ({ ctx, input }) => {
+        const article = await getArticleBySlug(input.slug);
+        if (!article) {
+          return { allowed: false, reason: "free" as const, trialDaysRemaining: 0, isLaunchPeriod: false };
+        }
+        const activeSub = ctx.user ? await getUserSubscription(ctx.user.id) : null;
+        return canAccessArticle(ctx.user, article, activeSub ?? null);
+      }),
+
+    downloadUrl: protectedProcedure
+      .input(z.object({ slug: z.string() }))
+      .mutation(async ({ ctx, input }) => {
+        const article = await getArticleBySlug(input.slug);
+        if (!article) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Article introuvable" });
+        }
+        const activeSub = await getUserSubscription(ctx.user.id);
+        const access = canAccessArticle(ctx.user, article, activeSub ?? null);
+        if (!access.allowed) {
+          throw new TRPCError({ code: "FORBIDDEN", message: "Abonnement requis pour télécharger cet article" });
+        }
+        return { url: `/api/articles/${encodeURIComponent(article.slug)}/pdf`, slug: article.slug };
+      }),
 
     byCategory: publicProcedure
       .input(z.object({ categoryId: z.number(), limit: z.number().default(10) }))
@@ -200,7 +272,24 @@ export const appRouter = router({
   newsletter: router({
     subscribe: publicProcedure
       .input(z.object({ email: z.string().email(), name: z.string().optional(), tier: z.enum(["free", "premium"]).default("free") }))
-      .mutation(async ({ input }) => await subscribeToNewsletter({ email: input.email, name: input.name, tier: input.tier })),
+      .mutation(async ({ ctx, input }) => {
+        if (input.tier === "premium") {
+          if (!ctx.user) {
+            throw new TRPCError({
+              code: "UNAUTHORIZED",
+              message: "Vous devez être connecté et abonné pour la newsletter premium",
+            });
+          }
+          const activeSub = await getUserSubscription(ctx.user.id);
+          if (!hasActiveSubscription(ctx.user, activeSub ?? null)) {
+            throw new TRPCError({
+              code: "FORBIDDEN",
+              message: "La newsletter premium nécessite un abonnement actif (Newsletter Premium ou Habari Intégral)",
+            });
+          }
+        }
+        return await subscribeToNewsletter({ email: input.email, name: input.name, tier: input.tier });
+      }),
 
     status: publicProcedure
       .input(z.object({ email: z.string().email() }))
@@ -608,8 +697,11 @@ export const appRouter = router({
         const isPremiumIssue = PREMIUM_ISSUES.includes(input.issueId);
         const isFreeIssue = FREE_ISSUES.includes(input.issueId);
 
-        // Free issues are always accessible
+        // Free issues require a registered account to download
         if (isFreeIssue || !isPremiumIssue) {
+          if (!ctx.user) {
+            return { hasAccess: false, reason: "not_authenticated" as const, isLaunchPeriod };
+          }
           return { hasAccess: true, reason: "free" as const, isLaunchPeriod };
         }
 
@@ -640,6 +732,15 @@ export const appRouter = router({
           return { hasAccess: true, reason: "subscription" as const, isLaunchPeriod };
         }
 
+        // Check if user bought this specific issue
+        const issueRecord = await getMagazineIssueByNumber(input.issueId);
+        if (issueRecord) {
+          const purchased = await hasUserPurchasedMagazine(ctx.user.id, issueRecord.id);
+          if (purchased) {
+            return { hasAccess: true, reason: "purchased" as const, isLaunchPeriod };
+          }
+        }
+
         return { hasAccess: false, reason: "no_subscription" as const, isLaunchPeriod };
       }),
 
@@ -651,6 +752,55 @@ export const appRouter = router({
       const daysRemaining = isLaunchPeriod ? Math.ceil((LAUNCH_END_DATE.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)) : 0;
       return { isLaunchPeriod, launchEndDate: LAUNCH_END_DATE.toISOString(), daysRemaining };
     }),
+
+    /** Buy a single magazine issue (one-time payment) */
+    purchaseIssue: protectedProcedure
+      .input(z.object({
+        issueNumber: z.string(),
+        origin: z.string(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const issue = await getMagazineIssueByNumber(input.issueNumber);
+        if (!issue) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Numéro introuvable" });
+        }
+        const alreadyPurchased = await hasUserPurchasedMagazine(ctx.user.id, issue.id);
+        if (alreadyPurchased) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Vous avez déjà acheté ce numéro" });
+        }
+        const result = await createMagazinePdfCheckoutSession({
+          issueId: issue.id,
+          issueNumber: issue.issueNumber,
+          issueTitle: issue.title,
+          userId: ctx.user.id,
+          userEmail: ctx.user.email || "",
+          origin: input.origin,
+        });
+        return result;
+      }),
+
+    /** Check if user has purchased a specific issue */
+    hasPurchased: protectedProcedure
+      .input(z.object({ issueNumber: z.string() }))
+      .query(async ({ ctx, input }) => {
+        const issue = await getMagazineIssueByNumber(input.issueNumber);
+        if (!issue) return { purchased: false };
+        const purchased = await hasUserPurchasedMagazine(ctx.user.id, issue.id);
+        return { purchased };
+      }),
+
+    /** List user's purchased magazine issues */
+    myPurchases: protectedProcedure.query(async ({ ctx }) => {
+      return await listUserMagazinePurchases(ctx.user.id);
+    }),
+
+    /** Get magazine PDF unit price */
+    pdfPrice: publicProcedure.query(() => ({
+      amount: MAGAZINE_PDF_PRICE.amount,
+      currency: MAGAZINE_PDF_PRICE.currency,
+      label: MAGAZINE_PDF_PRICE.label,
+      formatted: `${(MAGAZINE_PDF_PRICE.amount / 100).toFixed(2).replace(".", ",")} €`,
+    })),
   }),
 
   // ═══════════════════════════════════════════════

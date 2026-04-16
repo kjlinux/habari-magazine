@@ -33,16 +33,21 @@ export default function Subscriptions() {
   const handleNewsletterSubmit = async (e: React.FormEvent, tier: "free" | "premium") => {
     e.preventDefault();
     if (!nlEmail) return;
+    if (tier === "premium" && !isAuthenticated) {
+      toast.error("Connectez-vous et souscrivez à un abonnement Premium ou Intégral pour la newsletter premium.");
+      window.location.href = "/login";
+      return;
+    }
     setNlLoading(true);
     try {
       await subscribeMutation.mutateAsync({ email: nlEmail, tier });
       setNlDone(true);
       toast.success(tier === "free"
         ? "Inscription à la newsletter gratuite confirmée !"
-        : "Demande d'abonnement premium enregistrée."
+        : "Inscription à la newsletter premium confirmée !"
       );
-    } catch {
-      toast.error("Une erreur est survenue. Veuillez réessayer.");
+    } catch (err: any) {
+      toast.error(err?.message || "Une erreur est survenue. Veuillez réessayer.");
     } finally {
       setNlLoading(false);
     }

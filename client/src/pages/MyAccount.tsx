@@ -32,8 +32,78 @@ import {
   Building2,
   Globe2,
   BarChart3,
+  KeyRound,
+  Lock,
 } from "lucide-react";
 import { useState, useEffect } from "react";
+
+function ChangePasswordForm() {
+  const [currentPw, setCurrentPw] = useState("");
+  const [newPw, setNewPw] = useState("");
+  const [confirmPw, setConfirmPw] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setSuccess(false);
+    if (newPw.length < 8) { setError("Le nouveau mot de passe doit contenir au moins 8 caractères."); return; }
+    if (newPw !== confirmPw) { setError("Les mots de passe ne correspondent pas."); return; }
+    setLoading(true);
+    try {
+      const res = await fetch("/api/auth/change-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ currentPassword: currentPw, newPassword: newPw }),
+        credentials: "include",
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Erreur lors du changement de mot de passe.");
+      }
+      setSuccess(true);
+      setCurrentPw("");
+      setNewPw("");
+      setConfirmPw("");
+      toast.success("Mot de passe modifié avec succès.");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Une erreur est survenue.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-3">
+      <div className="space-y-1.5">
+        <Label htmlFor="current-pw" className="font-sans text-sm flex items-center gap-1.5">
+          <Lock className="w-3.5 h-3.5 text-muted-foreground" /> Mot de passe actuel
+        </Label>
+        <Input id="current-pw" type="password" value={currentPw} onChange={(e) => setCurrentPw(e.target.value)} required className="font-sans" />
+      </div>
+      <div className="space-y-1.5">
+        <Label htmlFor="new-pw" className="font-sans text-sm flex items-center gap-1.5">
+          <Lock className="w-3.5 h-3.5 text-muted-foreground" /> Nouveau mot de passe
+        </Label>
+        <Input id="new-pw" type="password" value={newPw} onChange={(e) => setNewPw(e.target.value)} required minLength={8} className="font-sans" />
+        <p className="text-xs text-muted-foreground">Minimum 8 caractères</p>
+      </div>
+      <div className="space-y-1.5">
+        <Label htmlFor="confirm-pw" className="font-sans text-sm flex items-center gap-1.5">
+          <Lock className="w-3.5 h-3.5 text-muted-foreground" /> Confirmer
+        </Label>
+        <Input id="confirm-pw" type="password" value={confirmPw} onChange={(e) => setConfirmPw(e.target.value)} required minLength={8} className="font-sans" />
+      </div>
+      {error && <p className="text-sm text-destructive font-sans">{error}</p>}
+      {success && <p className="text-sm text-green-700 font-sans flex items-center gap-1"><CheckCircle2 className="w-4 h-4" /> Mot de passe modifié.</p>}
+      <Button type="submit" className="font-sans bg-primary hover:bg-primary/90" disabled={loading} size="sm">
+        {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Modifier le mot de passe"}
+      </Button>
+    </form>
+  );
+}
 
 export default function MyAccount() {
   const { user, isAuthenticated, loading, logout } = useAuth();
@@ -511,6 +581,15 @@ export default function MyAccount() {
                   >
                     <LogOut className="w-4 h-4 mr-2" /> Se déconnecter
                   </Button>
+                </div>
+              </div>
+
+              {/* Change Password Section */}
+              <div className="bg-background rounded-xl border border-border p-6 shadow-sm">
+                <h2 className="font-serif text-lg font-bold text-primary mb-4 flex items-center gap-2">
+                  <KeyRound className="w-5 h-5" /> Changer le mot de passe
+                </h2>
+                <ChangePasswordForm />
                 </div>
               </div>
             </div>

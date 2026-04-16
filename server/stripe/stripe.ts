@@ -1,5 +1,5 @@
 import Stripe from "stripe";
-import { HABARI_PRODUCTS, type ProductKey, type PriceInterval } from "./products";
+import { HABARI_PRODUCTS, MAGAZINE_PDF_PRICE, type ProductKey, type PriceInterval } from "./products";
 
 // Initialize Stripe with the restricted key (rk_...)
 const stripeRestrictedKey = process.env.STRIPE_RESTRICTED_KEY;
@@ -116,4 +116,53 @@ export async function cancelSubscription(subscriptionId: string) {
 export async function getSubscriptionDetails(subscriptionId: string) {
   const s = getStripe();
   return s.subscriptions.retrieve(subscriptionId);
+}
+
+/**
+ * One-time checkout for a single magazine PDF issue
+ */
+export async function createMagazinePdfCheckoutSession(params: {
+  issueId: number;
+  issueNumber: string;
+  issueTitle: string;
+  userId: number;
+  userEmail: string;
+  origin: string;
+}): Promise<{ url: string; sessionId: string }> {
+  const s = getStripe();
+
+  const session = await s.checkout.sessions.create({
+    mode: "payment",
+    payment_method_types: ["card"],
+    customer_email: params.userEmail,
+    client_reference_id: params.userId.toString(),
+    allow_promotion_codes: true,
+    line_items: [
+      {
+        price_data: {
+          currency: MAGAZINE_PDF_PRICE.currency,
+          unit_amount: MAGAZINE_PDF_PRICE.amount,
+          product_data: {
+            name: `Habari Magazine ${params.issueNumber}`,
+            description: params.issueTitle,
+          },
+        },
+        quantity: 1,
+      },
+    ],
+    metadata: {
+      kind: "magazine_pdf",
+      user_id: params.userId.toString(),
+      issue_id: params.issueId.toString(),
+      issue_number: params.issueNumber,
+    },
+    success_url: `${params.origin}/telecharger?purchase=success&issue=${encodeURIComponent(params.issueNumber)}&session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${params.origin}/telecharger?purchase=cancelled`,
+  });
+
+  if (!session.url) {
+    throw new Error("Failed to create Stripe checkout session");
+  }
+
+  return { url: session.url, sessionId: session.id };
 }

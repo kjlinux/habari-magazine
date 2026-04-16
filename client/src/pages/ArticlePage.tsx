@@ -1,11 +1,14 @@
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
-import { Loader2, ArrowLeft, Clock, User, Bookmark } from "lucide-react";
+import { Loader2, ArrowLeft, Clock, User, Bookmark, Download } from "lucide-react";
 import SocialShare from "@/components/SocialShare";
 import { Helmet } from "react-helmet-async";
 import { Link, useParams } from "wouter";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import Paywall from "@/components/Paywall";
+import { useAuth } from "@/_core/hooks/useAuth";
+import { toast } from "sonner";
 
 /* CDN image URLs */
 const IMG = {
@@ -725,13 +728,34 @@ const defaultArticle = sampleArticles["cemac-panne-seche"];
 
 export default function ArticlePage() {
   const { slug } = useParams<{ slug: string }>();
-  const { data: article, isLoading } = trpc.articles.bySlug.useQuery(
+  const { isAuthenticated } = useAuth();
+  const { data, isLoading } = trpc.articles.bySlug.useQuery(
     { slug: slug || "" },
     { enabled: !!slug }
   );
 
-  const displayArticle = article || null;
+  const displayArticle = data?.article || null;
+  const access = data?.access || null;
   const sample = (slug && sampleArticles[slug]) || defaultArticle;
+  const isFromDb = !!displayArticle;
+  const accessAllowed = !isFromDb || (access?.allowed ?? true);
+
+  const downloadMutation = trpc.articles.downloadUrl.useMutation({
+    onSuccess: (res) => {
+      window.open(res.url, "_blank");
+    },
+    onError: (err) => {
+      toast.error(err.message || "Téléchargement impossible");
+    },
+  });
+
+  const handleDownload = () => {
+    if (!isAuthenticated) {
+      toast.error("Connectez-vous pour télécharger l'article");
+      return;
+    }
+    if (slug) downloadMutation.mutate({ slug });
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -840,13 +864,37 @@ export default function ArticlePage() {
               </div>
             </div>
 
-            {/* Article content */}
-            <div
-              className="habari-prose"
-              dangerouslySetInnerHTML={{
-                __html: displayArticle?.content || sample.content,
-              }}
-            />
+            {/* Article content (gated for premium articles from DB) */}
+            {isFromDb && !accessAllowed ? (
+              <Paywall
+                reason={(access?.reason as any) || "not_authenticated"}
+                trialDaysRemaining={access?.trialDaysRemaining || 0}
+                excerpt={displayArticle?.excerpt}
+              />
+            ) : (
+              <>
+                <div
+                  className="habari-prose"
+                  dangerouslySetInnerHTML={{
+                    __html: displayArticle?.content || sample.content,
+                  }}
+                />
+                {isFromDb && (
+                  <div className="mt-8 flex justify-end">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleDownload}
+                      disabled={downloadMutation.isPending}
+                      className="gap-2"
+                    >
+                      <Download className="w-4 h-4" />
+                      {isAuthenticated ? "Télécharger l'article (PDF)" : "Se connecter pour télécharger"}
+                    </Button>
+                  </div>
+                )}
+              </>
+            )}
 
             {/* En résumé box */}
             <div className="mt-12 p-6 border border-border rounded-lg bg-muted/30">

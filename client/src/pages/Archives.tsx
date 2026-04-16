@@ -308,14 +308,20 @@ export default function Archives() {
 
 // ─── Article Card Component ──────────────────────────────────
 function ArticleCard({ article, categories }: { article: any; categories: any[] | undefined }) {
+  const { user } = useAuth();
   const category = categories?.find((c) => c.id === article.categoryId);
   const rubrique = getRubriqueFromCategory(category?.slug);
   const publishedDate = article.publishedAt
     ? new Date(article.publishedAt).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })
     : null;
+  const isPremium = article.minSubscriptionTier !== "free";
+  const targetHref =
+    isPremium && !user
+      ? `/login?redirect=${encodeURIComponent(`/article/${article.slug}`)}`
+      : `/article/${article.slug}`;
 
   return (
-    <Link href={`/article/${article.slug}`}>
+    <Link href={targetHref}>
       <div className="group bg-card rounded-xl border border-border overflow-hidden hover:border-habari-gold/50 hover:shadow-lg transition-all duration-300 cursor-pointer h-full flex flex-col">
         {/* Image */}
         <div className="relative h-48 bg-muted overflow-hidden">

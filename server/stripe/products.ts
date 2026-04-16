@@ -75,3 +75,12 @@ export const HABARI_PRODUCTS = {
 
 export type ProductKey = keyof typeof HABARI_PRODUCTS;
 export type PriceInterval = "monthly" | "annual";
+
+// ═══════════════════════════════════════════════
+// MAGAZINE PDF — ACHAT À L'UNITÉ (one-time)
+// ═══════════════════════════════════════════════
+export const MAGAZINE_PDF_PRICE = {
+  amount: 499, // 4,99 €
+  currency: "eur" as const,
+  label: "4,99 € (offre lancement, prix normal 9,99 €)",
+} as const;

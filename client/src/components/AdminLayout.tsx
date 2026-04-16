@@ -12,7 +12,7 @@ import {
   LayoutDashboard, FileText, Users, Mail, ChevronLeft,
   LogOut, Menu, X, Shield, MessageSquare, BookOpen, Megaphone
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const adminMenuItems = [
   { icon: LayoutDashboard, label: "Tableau de bord", path: "/admin" },
@@ -26,9 +26,21 @@ const adminMenuItems = [
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, loading, logout } = useAuth();
-  const [location] = useLocation();
+  const [location, navigate] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate("/login?redirect=" + encodeURIComponent(window.location.pathname));
+    }
+  }, [loading, user, navigate]);
+
+  useEffect(() => {
+    if (!loading && user && user.role !== "admin") {
+      navigate("/");
+    }
+  }, [loading, user, navigate]);
 
   if (loading) {
     return (

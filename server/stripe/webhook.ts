@@ -2,8 +2,8 @@ import type { Express, Request, Response } from "express";
 import express from "express";
 import { constructWebhookEvent } from "./stripe";
 import { getDb } from "../db";
-import { users, userSubscriptions, newsletterSubscribers } from "../../drizzle/schema";
-import { eq } from "drizzle-orm";
+import { users, userSubscriptions, newsletterSubscribers, magazinePurchases } from "../../drizzle/schema";
+import { and, eq } from "drizzle-orm";
 
 /**
  * Register the Stripe webhook endpoint.
@@ -53,6 +53,29 @@ export function registerStripeWebhook(app: Express) {
 
             const db = await getDb();
             if (!db) break;
+
+            // ── One-time magazine PDF purchase ──
+            if (session.metadata?.kind === "magazine_pdf") {
+              const issueId = parseInt(session.metadata.issue_id || "0");
+              const issueNumber = session.metadata.issue_number || "";
+              if (!issueId) {
+                console.error("[Webhook] magazine_pdf without issue_id");
+                break;
+              }
+              await db.insert(magazinePurchases).values({
+                userId,
+                issueId,
+                issueNumber,
+                amount: session.amount_total ?? 499,
+                currency: (session.currency as string) ?? "eur",
+                stripeSessionId: session.id,
+                stripePaymentIntentId: (session.payment_intent as string) ?? null,
+                status: "paid",
+                paidAt: new Date(),
+              });
+              console.log(`[Webhook] User ${userId} purchased magazine PDF ${issueNumber}`);
+              break;
+            }
 
             // Update user's stripe customer ID
             if (stripeCustomerId) {

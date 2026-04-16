@@ -19,7 +19,8 @@ import {
   magazineIssues,
   InsertMagazineIssue,
   opportunities,
-  InsertOpportunity
+  InsertOpportunity,
+  magazinePurchases,
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -1363,4 +1364,50 @@ export async function adminCountOpportunities() {
     draft: draft?.c ?? 0,
     closed: closed?.c ?? 0,
   };
+}
+
+/**
+ * Password management
+ */
+export async function updateUserPassword(userId: number, newPasswordHash: string) {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(users).set({ passwordHash: newPasswordHash }).where(eq(users.id, userId));
+}
+
+/**
+ * Magazine PDF purchases (one-time)
+ */
+export async function getMagazineIssueByPk(issueId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(magazineIssues).where(eq(magazineIssues.id, issueId)).limit(1);
+  return result[0];
+}
+
+export async function hasUserPurchasedMagazine(userId: number, issueId: number) {
+  const db = await getDb();
+  if (!db) return false;
+  const result = await db
+    .select({ id: magazinePurchases.id })
+    .from(magazinePurchases)
+    .where(
+      and(
+        eq(magazinePurchases.userId, userId),
+        eq(magazinePurchases.issueId, issueId),
+        eq(magazinePurchases.status, "paid"),
+      ),
+    )
+    .limit(1);
+  return result.length > 0;
+}
+
+export async function listUserMagazinePurchases(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return await db
+    .select()
+    .from(magazinePurchases)
+    .where(and(eq(magazinePurchases.userId, userId), eq(magazinePurchases.status, "paid")))
+    .orderBy(desc(magazinePurchases.paidAt));
 }

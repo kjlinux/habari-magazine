@@ -4,9 +4,10 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/_core/hooks/useAuth";
 
 import { trpc } from "@/lib/trpc";
-import { Download, FileText, Eye, Calendar, BookOpen, ArrowRight, Lock, Crown, Shield, CheckCircle2, Gift, Clock, Sparkles } from "lucide-react";
-import { Link } from "wouter";
+import { Download, FileText, Eye, Calendar, BookOpen, ArrowRight, Lock, Crown, Shield, CheckCircle2, Gift, Clock, Sparkles, ShoppingCart } from "lucide-react";
+import { Link, useSearch } from "wouter";
 import { toast } from "sonner";
+import { useState } from "react";
 
 const PDF_URL = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663347570863/pqeNdyKiCydqFTQF.pdf";
 const COVER_URL = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663347570863/TDJnjIvMMFwogdcg.webp";
@@ -111,6 +112,8 @@ function AccessBadge({ level, isLaunchPeriod }: { level: "free" | "premium"; isL
 function DownloadButton({ issue }: { issue: MagazineIssue }) {
   const { isAuthenticated } = useAuth();
   const { data: access, isLoading } = trpc.magazine.checkAccess.useQuery({ issueId: issue.id });
+  const [buyLoading, setBuyLoading] = useState(false);
+  const purchaseMutation = trpc.magazine.purchaseIssue.useMutation();
 
   if (isLoading) {
     return (
@@ -205,6 +208,22 @@ function DownloadButton({ issue }: { issue: MagazineIssue }) {
   }
 
   // Authenticated but no premium subscription (after launch period)
+  const handleBuyIssue = async () => {
+    setBuyLoading(true);
+    try {
+      const result = await purchaseMutation.mutateAsync({
+        issueNumber: issue.id,
+        origin: window.location.origin,
+      });
+      toast.info("Redirection vers le paiement sécurisé...");
+      window.open(result.url, "_blank");
+    } catch (err: any) {
+      toast.error(err?.message || "Erreur lors de l'achat.");
+    } finally {
+      setBuyLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-5">
@@ -213,31 +232,33 @@ function DownloadButton({ issue }: { issue: MagazineIssue }) {
           <div>
             <p className="font-sans font-semibold text-amber-800 mb-1">Accès réservé aux abonnés Premium</p>
             <p className="text-sm font-sans text-amber-700/80 mb-3">
-              Ce numéro est exclusivement disponible pour les abonnés Premium et Enterprise.
-              Passez à l'abonnement supérieur pour télécharger tous les numéros du magazine.
+              Ce numéro est disponible pour les abonnés Premium et Enterprise, ou à l'achat à l'unité.
             </p>
             <ul className="space-y-1.5 text-sm font-sans text-amber-700/70">
-              <li className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-amber-600" /> Accès à tous les numéros en PDF</li>
-              <li className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-amber-600" /> Analyses exclusives et données premium</li>
-              <li className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-amber-600" /> Invitations aux événements Habari</li>
+              <li className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-amber-600" /> Abonnement : accès à tous les numéros</li>
+              <li className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-amber-600" /> Achat à l'unité : 4,99 € ce numéro</li>
             </ul>
           </div>
         </div>
       </div>
       <div className="flex flex-col sm:flex-row gap-3">
-        <Link href="/abonnements">
-          <Button size="lg" className="font-sans bg-[oklch(0.72_0.15_75)] text-[oklch(0.15_0.02_250)] hover:bg-[oklch(0.78_0.15_75)] w-full sm:w-auto font-semibold shadow-md">
-            <Crown className="w-4 h-4 mr-2" /> Passer à Premium
-          </Button>
-        </Link>
         <Button
           size="lg"
-          variant="outline"
-          className="font-sans border-muted-foreground/20 text-muted-foreground w-full sm:w-auto"
-          onClick={() => toast.info("Consultez nos offres d'abonnement pour accéder à ce numéro.")}
+          className="font-sans bg-primary hover:bg-primary/90 w-full sm:w-auto font-semibold shadow-md"
+          onClick={handleBuyIssue}
+          disabled={buyLoading}
         >
-          <Lock className="w-4 h-4 mr-2" /> Téléchargement verrouillé
+          {buyLoading ? (
+            <><Sparkles className="w-4 h-4 animate-spin mr-2" /> Redirection...</>
+          ) : (
+            <><ShoppingCart className="w-4 h-4 mr-2" /> Acheter ce numéro — 4,99 €</>
+          )}
         </Button>
+        <Link href="/abonnements">
+          <Button size="lg" variant="outline" className="font-sans border-[oklch(0.72_0.15_75)] text-[oklch(0.55_0.12_75)] hover:bg-[oklch(0.72_0.15_75)]/10 w-full sm:w-auto">
+            <Crown className="w-4 h-4 mr-2" /> Ou s'abonner
+          </Button>
+        </Link>
       </div>
     </div>
   );
@@ -315,6 +336,11 @@ export default function Downloads() {
   const { data: launchStatus } = trpc.magazine.launchStatus.useQuery();
   const { data: dbIssues } = trpc.magazineIssues.list.useQuery();
 
+  const searchString = useSearch();
+  const params = new URLSearchParams(searchString);
+  const purchaseResult = params.get("purchase");
+  const purchasedIssue = params.get("issue");
+
   // Merge static N°000 with dynamic DB issues, DB issues take priority
   const allMagazines: MagazineIssue[] = (() => {
     const staticIssues = [...magazines];
@@ -349,6 +375,21 @@ export default function Downloads() {
     <div className="min-h-screen bg-background">
       <Navbar />
       <LaunchBanner />
+
+      {/* Purchase success banner */}
+      {purchaseResult === "success" && (
+        <div className="bg-green-50 border-b border-green-200 py-4">
+          <div className="container flex items-center justify-center gap-3">
+            <CheckCircle2 className="w-6 h-6 text-green-600" />
+            <div>
+              <p className="font-serif font-bold text-green-800">Achat confirmé !</p>
+              <p className="text-sm text-green-700 font-sans">
+                Votre achat du numéro {purchasedIssue || ""} est confirmé. Vous pouvez maintenant télécharger le PDF.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Hero */}
       <section className="bg-[oklch(0.20_0.02_250)] text-white py-16 md:py-24">

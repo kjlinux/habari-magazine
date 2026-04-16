@@ -5,7 +5,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LOGIN_URL, REGISTER_URL } from "@/const";
-import { Loader2, Mail, Lock, User } from "lucide-react";
+import { Loader2, Mail, Lock, User, KeyRound } from "lucide-react";
+import { Link } from "wouter";
+
+function getRedirectUrl(): string {
+  const params = new URLSearchParams(window.location.search);
+  return params.get("redirect") || "/";
+}
 
 export default function Login() {
   // Login state
@@ -34,9 +40,9 @@ export default function Login() {
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data.message || "Email ou mot de passe incorrect.");
+        throw new Error(data.error || data.message || "Email ou mot de passe incorrect.");
       }
-      window.location.href = "/";
+      window.location.href = getRedirectUrl();
     } catch (err: unknown) {
       setLoginError(err instanceof Error ? err.message : "Erreur de connexion.");
     } finally {
@@ -47,6 +53,10 @@ export default function Login() {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setRegisterError("");
+    if (registerPassword.length < 8) {
+      setRegisterError("Le mot de passe doit contenir au moins 8 caractères.");
+      return;
+    }
     setRegisterLoading(true);
     try {
       const res = await fetch(REGISTER_URL, {
@@ -57,9 +67,9 @@ export default function Login() {
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data.message || "Erreur lors de la création du compte.");
+        throw new Error(data.error || data.message || "Erreur lors de la création du compte.");
       }
-      window.location.href = "/";
+      window.location.href = getRedirectUrl();
     } catch (err: unknown) {
       setRegisterError(err instanceof Error ? err.message : "Erreur lors de l'inscription.");
     } finally {
@@ -137,6 +147,11 @@ export default function Login() {
                   >
                     {loginLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Se connecter"}
                   </Button>
+                  <div className="text-center">
+                    <Link href="/mot-de-passe-oublie" className="text-xs text-muted-foreground hover:text-primary font-sans underline">
+                      Mot de passe oublié ?
+                    </Link>
+                  </div>
                 </form>
               </TabsContent>
 
@@ -182,8 +197,10 @@ export default function Login() {
                       value={registerPassword}
                       onChange={(e) => setRegisterPassword(e.target.value)}
                       required
+                      minLength={8}
                       className="font-sans"
                     />
+                    <p className="text-xs text-muted-foreground">Minimum 8 caractères</p>
                   </div>
                   {registerError && (
                     <p className="text-sm text-destructive font-sans">{registerError}</p>

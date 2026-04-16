@@ -408,3 +408,23 @@ export const magazineIssues = mysqlTable("magazineIssues", {
 
 export type MagazineIssue = typeof magazineIssues.$inferSelect;
 export type InsertMagazineIssue = typeof magazineIssues.$inferInsert;
+
+/**
+ * One-time PDF magazine purchases (4,99 €/numéro)
+ */
+export const magazinePurchases = mysqlTable("magazinePurchases", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").references(() => users.id).notNull(),
+  issueId: int("issueId").references(() => magazineIssues.id).notNull(),
+  issueNumber: varchar("issueNumber", { length: 20 }).notNull(),
+  amount: int("amount").notNull(),
+  currency: varchar("currency", { length: 10 }).default("eur").notNull(),
+  stripeSessionId: varchar("stripeSessionId", { length: 255 }),
+  stripePaymentIntentId: varchar("stripePaymentIntentId", { length: 255 }),
+  status: mysqlEnum("status", ["pending", "paid", "refunded", "failed"]).default("pending").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  paidAt: timestamp("paidAt"),
+});
+
+export type MagazinePurchase = typeof magazinePurchases.$inferSelect;
+export type InsertMagazinePurchase = typeof magazinePurchases.$inferInsert;
