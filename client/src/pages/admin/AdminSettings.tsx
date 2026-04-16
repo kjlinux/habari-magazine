@@ -390,6 +390,50 @@ function SeoSettings() {
   );
 }
 
+// ─── Code promo actif ─────────────────────────────────────────────────────────
+
+function ActivePromoSettings() {
+  const { data: settings, refetch } = trpc.admin.settings.list.useQuery();
+  const setMutation = trpc.admin.settings.set.useMutation({
+    onSuccess: () => { toast.success("Enregistré"); refetch(); },
+    onError: (e) => toast.error(e.message),
+  });
+
+  const getVal = (key: string) => settings?.find(s => s.key === key)?.value ?? "";
+  const [form, setForm] = useState<Record<string, string>>({});
+  const field = (key: string) => (key in form ? form[key] : getVal(key));
+  const set = (key: string, val: string) => setForm(f => ({ ...f, [key]: val }));
+  const save = (key: string) => setMutation.mutate({ key, value: field(key) });
+
+  return (
+    <div className="bg-background border border-border rounded-xl p-6 shadow-sm">
+      <h2 className="font-serif text-lg font-bold text-primary mb-1 flex items-center gap-2">
+        <Tag className="w-5 h-5" /> Code promo affiché sur le site
+      </h2>
+      <p className="text-sm text-muted-foreground font-sans mb-4">
+        Ce code et ce message seront visibles sur la page d'abonnements et dans la bannière du site.
+        Laissez vide pour ne rien afficher.
+      </p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="space-y-1">
+          <Label className="font-sans text-xs">Code promo à afficher</Label>
+          <div className="flex gap-2">
+            <Input placeholder="ex: LANCEMENT20" value={field("promo_code_active")} onChange={e => set("promo_code_active", e.target.value)} className="font-sans text-sm font-mono" />
+            <Button size="sm" onClick={() => save("promo_code_active")} disabled={setMutation.isPending} className="font-sans shrink-0">OK</Button>
+          </div>
+        </div>
+        <div className="space-y-1">
+          <Label className="font-sans text-xs">Message d'accompagnement</Label>
+          <div className="flex gap-2">
+            <Input placeholder="ex: -20% sur votre abonnement" value={field("promo_message")} onChange={e => set("promo_message", e.target.value)} className="font-sans text-sm" />
+            <Button size="sm" onClick={() => save("promo_message")} disabled={setMutation.isPending} className="font-sans shrink-0">OK</Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Période de lancement ─────────────────────────────────────────────────────
 
 function LaunchSettings() {
@@ -514,6 +558,7 @@ export default function AdminSettings() {
         <SocialSettings />
         <SeoSettings />
         <LaunchSettings />
+        <ActivePromoSettings />
         <PdfPriceSettings />
         <SubscriptionPriceSettings />
         <PromoCodeSettings />

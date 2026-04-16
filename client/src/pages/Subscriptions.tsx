@@ -7,7 +7,7 @@ import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import {
   CheckCircle2, Lock, Mail, Shield, ArrowRight,
-  BookOpen, Loader2, Check, Crown, Zap, Star
+  BookOpen, Loader2, Check, Crown, Zap, Star, Tag
 } from "lucide-react";
 import { Link, useSearch } from "wouter";
 import Navbar from "@/components/Navbar";
@@ -25,6 +25,7 @@ export default function Subscriptions() {
 
   const subscribeMutation = trpc.newsletter.subscribe.useMutation();
   const checkoutMutation = trpc.stripe.createCheckout.useMutation();
+  const { data: promo } = trpc.siteConfig.promo.useQuery(undefined, { staleTime: 1000 * 60 * 10 });
 
   const searchString = useSearch();
   const params = new URLSearchParams(searchString);
@@ -91,6 +92,23 @@ export default function Subscriptions() {
           </p>
         </div>
       </section>
+
+      {/* Promo Banner */}
+      {promo?.active && (
+        <div className="bg-[oklch(0.72_0.15_75)]/10 border-b border-[oklch(0.72_0.15_75)]/20 py-3">
+          <div className="container flex items-center justify-center gap-3 text-sm font-sans flex-wrap">
+            <Tag className="w-4 h-4 text-[oklch(0.50_0.15_75)] shrink-0" />
+            <span className="text-foreground">
+              {promo.message && <span className="mr-1">{promo.message} —</span>}
+              Utilisez le code{" "}
+              <span className="font-mono font-bold text-base bg-white border border-[oklch(0.72_0.15_75)]/40 px-2 py-0.5 rounded tracking-widest">
+                {promo.code}
+              </span>{" "}
+              lors du paiement pour bénéficier de la réduction.
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* Success Banner */}
       {sessionId && (

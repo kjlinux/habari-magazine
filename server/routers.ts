@@ -989,6 +989,24 @@ export const appRouter = router({
   }),
 
   // ═══════════════════════════════════════════════
+  // PUBLIC SITE SETTINGS
+  // ═══════════════════════════════════════════════
+
+  siteConfig: router({
+    promo: publicProcedure.query(async () => {
+      const [code, message] = await Promise.all([
+        getSetting("promo_code_active"),
+        getSetting("promo_message"),
+      ]);
+      return {
+        code: code || null,
+        message: message || null,
+        active: !!(code && code.trim()),
+      };
+    }),
+  }),
+
+  // ═══════════════════════════════════════════════
   // PUBLIC ARCHIVES
   // ═══════════════════════════════════════════════
 

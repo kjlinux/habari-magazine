@@ -1,6 +1,7 @@
 import AdminLayout from "@/components/AdminLayout";
 import { trpc } from "@/lib/trpc";
-import { FileText, Users, Mail, TrendingUp, Eye, PenLine, BookOpen, Download } from "lucide-react";
+import { FileText, Users, Mail, TrendingUp, Eye, PenLine, BookOpen, Download, CreditCard, CheckCircle } from "lucide-react";
+import { Link } from "wouter";
 
 function StatCard({ icon: Icon, label, value, accent }: { icon: any; label: string; value: number | string; accent?: boolean }) {
   return (
@@ -15,6 +16,19 @@ function StatCard({ icon: Icon, label, value, accent }: { icon: any; label: stri
     </div>
   );
 }
+
+const STATUS_LABELS: Record<string, { label: string; className: string }> = {
+  published: { label: "Publié", className: "bg-green-100 text-green-700" },
+  draft: { label: "Brouillon", className: "bg-yellow-100 text-yellow-700" },
+  archived: { label: "Archivé", className: "bg-gray-100 text-gray-500" },
+};
+
+const TIER_LABELS: Record<string, { label: string; className: string }> = {
+  free: { label: "Libre", className: "bg-blue-100 text-blue-600" },
+  standard: { label: "Standard", className: "bg-purple-100 text-purple-600" },
+  premium: { label: "Premium", className: "bg-amber-100 text-amber-700" },
+  enterprise: { label: "Enterprise", className: "bg-red-100 text-red-700" },
+};
 
 export default function AdminDashboard() {
   const { data: stats, isLoading } = trpc.admin.stats.useQuery();
@@ -33,7 +47,7 @@ export default function AdminDashboard() {
         {/* Stats grid */}
         {isLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[...Array(6)].map((_, i) => (
+            {[...Array(8)].map((_, i) => (
               <div key={i} className="bg-background border border-border rounded-xl p-5 animate-pulse">
                 <div className="flex items-start gap-4">
                   <div className="w-10 h-10 bg-muted rounded-lg" />
@@ -55,8 +69,61 @@ export default function AdminDashboard() {
             <StatCard icon={TrendingUp} label="Abonnés premium" value={stats?.premiumSubscribers ?? 0} />
             <StatCard icon={BookOpen} label="Numéros magazine" value={stats?.totalMagazineIssues ?? 0} accent />
             <StatCard icon={Download} label="Téléchargements PDF" value={stats?.totalDownloads ?? 0} />
+            <StatCard icon={CheckCircle} label="Abonnements actifs" value={stats?.activeSubscriptions ?? 0} accent />
           </div>
         )}
+
+        {/* Recent articles */}
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-serif font-bold text-foreground">Articles récents</h2>
+            <Link href="/admin/articles" className="text-sm text-primary hover:underline font-sans">Voir tous</Link>
+          </div>
+          <div className="bg-background border border-border rounded-xl shadow-sm overflow-hidden">
+            {isLoading ? (
+              <div className="p-6 space-y-3">
+                {[...Array(5)].map((_, i) => <div key={i} className="h-10 bg-muted animate-pulse rounded" />)}
+              </div>
+            ) : !stats?.recentArticles?.length ? (
+              <p className="text-sm text-muted-foreground p-6 font-sans">Aucun article pour l'instant.</p>
+            ) : (
+              <table className="w-full text-sm font-sans">
+                <thead>
+                  <tr className="border-b border-border bg-muted/30">
+                    <th className="text-left px-5 py-3 font-medium text-muted-foreground">Titre</th>
+                    <th className="text-left px-5 py-3 font-medium text-muted-foreground hidden sm:table-cell">Accès</th>
+                    <th className="text-left px-5 py-3 font-medium text-muted-foreground hidden md:table-cell">Date</th>
+                    <th className="text-left px-5 py-3 font-medium text-muted-foreground">Statut</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {stats.recentArticles.map((a) => {
+                    const status = STATUS_LABELS[a.status] ?? { label: a.status, className: "bg-gray-100 text-gray-500" };
+                    const tier = TIER_LABELS[a.minSubscriptionTier] ?? { label: a.minSubscriptionTier, className: "bg-gray-100 text-gray-500" };
+                    return (
+                      <tr key={a.id} className="border-b border-border last:border-0 hover:bg-muted/20 transition-colors">
+                        <td className="px-5 py-3">
+                          <Link href={`/admin/articles/${a.id}`} className="font-medium text-foreground hover:text-primary transition-colors line-clamp-1">
+                            {a.title}
+                          </Link>
+                        </td>
+                        <td className="px-5 py-3 hidden sm:table-cell">
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${tier.className}`}>{tier.label}</span>
+                        </td>
+                        <td className="px-5 py-3 text-muted-foreground hidden md:table-cell">
+                          {a.createdAt ? new Date(a.createdAt).toLocaleDateString("fr-FR") : "—"}
+                        </td>
+                        <td className="px-5 py-3">
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${status.className}`}>{status.label}</span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </div>
 
         {/* Quick actions */}
         <div>
@@ -103,6 +170,17 @@ export default function AdminDashboard() {
                 <div>
                   <p className="font-sans font-medium text-foreground">Newsletter</p>
                   <p className="text-xs text-muted-foreground mt-0.5">Voir les abonnés</p>
+                </div>
+              </div>
+            </a>
+            <a href="/admin/parametres" className="bg-background border border-border rounded-xl p-5 hover:border-primary/30 hover:shadow-md transition-all group">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                  <CreditCard className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <p className="font-sans font-medium text-foreground">Paramètres</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Abonnements & promo</p>
                 </div>
               </div>
             </a>

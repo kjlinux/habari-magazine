@@ -5,6 +5,7 @@ import { useLocation, useParams } from "wouter";
 import { ArrowLeft, Save, Eye, Loader2 } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { toast } from "sonner";
+import RichEditor from "@/components/RichEditor";
 
 function slugify(text: string): string {
   return text
@@ -126,7 +127,7 @@ export default function AdminArticleForm() {
         {/* Header */}
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div className="flex items-center gap-3">
-            <button onClick={() => setLocation("/admin/articles")} className="p-2 rounded-lg hover:bg-muted transition-colors">
+            <button onClick={() => setLocation("/admin/articles")} title="Retour aux articles" className="p-2 rounded-lg hover:bg-muted transition-colors">
               <ArrowLeft className="w-5 h-5 text-muted-foreground" />
             </button>
             <div>
@@ -189,12 +190,10 @@ export default function AdminArticleForm() {
 
             <div>
               <label className="block text-sm font-sans font-medium text-foreground mb-1.5">Contenu *</label>
-              <textarea
+              <RichEditor
                 value={content}
-                onChange={(e) => setContent(e.target.value)}
-                placeholder="Contenu complet de l'article (Markdown supporté)..."
-                rows={16}
-                className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-foreground font-sans text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors resize-y font-mono leading-relaxed"
+                onChange={setContent}
+                placeholder="Rédigez le contenu de l'article ici..."
               />
             </div>
           </div>
@@ -207,6 +206,7 @@ export default function AdminArticleForm() {
               <div>
                 <label className="block text-sm font-sans font-medium text-foreground mb-1.5">Rubrique</label>
                 <select
+                  title="Rubrique"
                   value={categoryId ?? ""}
                   onChange={(e) => setCategoryId(e.target.value ? parseInt(e.target.value) : undefined)}
                   className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-foreground font-sans text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors"
@@ -221,6 +221,7 @@ export default function AdminArticleForm() {
               <div>
                 <label className="block text-sm font-sans font-medium text-foreground mb-1.5">Pays</label>
                 <select
+                  title="Pays"
                   value={countryId ?? ""}
                   onChange={(e) => setCountryId(e.target.value ? parseInt(e.target.value) : undefined)}
                   className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-foreground font-sans text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors"
@@ -235,6 +236,7 @@ export default function AdminArticleForm() {
               <div>
                 <label className="block text-sm font-sans font-medium text-foreground mb-1.5">Niveau d'accès</label>
                 <select
+                  title="Niveau d'accès"
                   value={accessLevel}
                   onChange={(e) => setAccessLevel(e.target.value as any)}
                   className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-foreground font-sans text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors"
@@ -249,6 +251,7 @@ export default function AdminArticleForm() {
               <div>
                 <label className="block text-sm font-sans font-medium text-foreground mb-1.5">Statut</label>
                 <select
+                  title="Statut"
                   value={status}
                   onChange={(e) => setStatus(e.target.value as any)}
                   className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-foreground font-sans text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors"

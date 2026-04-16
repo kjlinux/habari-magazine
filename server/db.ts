@@ -445,7 +445,12 @@ export async function getPremiumArticles(limit: number = 10, offset: number = 0)
  */
 export async function getAdminStats() {
   const db = await getDb();
-  if (!db) return { totalArticles: 0, publishedArticles: 0, draftArticles: 0, totalUsers: 0, totalSubscribers: 0, premiumSubscribers: 0, totalMagazineIssues: 0, totalDownloads: 0 };
+  if (!db) return {
+    totalArticles: 0, publishedArticles: 0, draftArticles: 0,
+    totalUsers: 0, totalSubscribers: 0, premiumSubscribers: 0,
+    totalMagazineIssues: 0, totalDownloads: 0,
+    recentArticles: [], monthlyRevenue: 0, activeSubscriptions: 0,
+  };
 
   const [artTotal] = await db.select({ c: count() }).from(articles);
   const [artPublished] = await db.select({ c: count() }).from(articles).where(eq(articles.status, 'published'));
@@ -456,6 +461,17 @@ export async function getAdminStats() {
   const [magTotal] = await db.select({ c: count() }).from(magazineIssues);
   const [magDownloads] = await db.select({ c: sum(magazineIssues.downloadCount) }).from(magazineIssues);
 
+  const recentArticles = await db
+    .select({ id: articles.id, title: articles.title, status: articles.status, minSubscriptionTier: articles.minSubscriptionTier, createdAt: articles.createdAt })
+    .from(articles)
+    .orderBy(desc(articles.createdAt))
+    .limit(5);
+
+  const [activeSubs] = await db.select({ c: count() }).from(userSubscriptions).where(eq(userSubscriptions.status, 'active'));
+
+  // Revenue: sum of magazineIssue purchases (price * count) as proxy; real Stripe revenue requires webhook data
+  const [magRevenue] = await db.select({ c: sum(magazineIssues.price) }).from(magazineIssues);
+
   return {
     totalArticles: artTotal?.c ?? 0,
     publishedArticles: artPublished?.c ?? 0,
@@ -465,6 +481,9 @@ export async function getAdminStats() {
     premiumSubscribers: nlPremium?.c ?? 0,
     totalMagazineIssues: magTotal?.c ?? 0,
     totalDownloads: Number(magDownloads?.c ?? 0),
+    recentArticles,
+    monthlyRevenue: Number(magRevenue?.c ?? 0),
+    activeSubscriptions: activeSubs?.c ?? 0,
   };
 }
 
