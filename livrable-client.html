@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Habari Magazine - Fonctionnalités implémentées</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: Georgia, serif;
+      font-size: 11pt;
+      color: #000;
+      background: #fff;
+      padding: 40px 55px;
+      max-width: 800px;
+      margin: auto;
+      line-height: 1.55;
+    }
+    h1 {
+      font-size: 17pt;
+      font-weight: bold;
+      border-bottom: 2px solid #000;
+      padding-bottom: 8px;
+      margin-bottom: 6px;
+    }
+    .subtitle {
+      font-size: 9.5pt;
+      color: #444;
+      margin-bottom: 24px;
+      font-family: Arial, sans-serif;
+    }
+    h2 {
+      font-size: 11.5pt;
+      font-weight: bold;
+      margin-top: 20px;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      border-left: 3px solid #000;
+      padding-left: 8px;
+    }
+    ul {
+      list-style: none;
+      padding-left: 12px;
+    }
+    ul li {
+      padding: 3px 0;
+      font-family: Arial, sans-serif;
+      font-size: 10.5pt;
+    }
+    ul li::before {
+      content: "- ";
+      font-weight: bold;
+    }
+    .note {
+      margin-top: 22px;
+      font-family: Arial, sans-serif;
+      font-size: 9.5pt;
+      color: #333;
+      border-top: 1px solid #bbb;
+      padding-top: 10px;
+      font-style: italic;
+    }
+    @media print {
+      body { padding: 30px 45px; }
+      @page { margin: 1.5cm; }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Habari Magazine - Récapitulatif des fonctionnalités implémentées</h1>
+  <div class="subtitle">Document remis au client - Avril 2026</div>
+
+  <h2>Gestion des accès et abonnements</h2>
+  <ul>
+    <li>Les articles "freemium" sont accessibles à tous les visiteurs, connectés ou non.</li>
+    <li>Les articles "premium" sont réservés aux abonnés. Tout nouveau compte bénéficie de 90 jours d'accès gratuit à ces contenus dès son inscription.</li>
+    <li>Passé ce délai, un message clair invite l'utilisateur à souscrire un abonnement pour continuer à lire.</li>
+    <li>Une bannière informative rappelle aux utilisateurs en période d'essai le nombre de jours restants et les invite à s'abonner.</li>
+    <li>Les contenus premium ne sont jamais envoyés au navigateur si l'accès n'est pas autorisé : la protection est appliquée côté serveur.</li>
+    <li>Les administrateurs ont accès à l'intégralité des contenus sans restriction.</li>
+  </ul>
+
+  <h2>Téléchargements et magazines PDF</h2>
+  <ul>
+    <li>Le téléchargement d'articles en PDF nécessite d'être connecté.</li>
+    <li>Il est désormais possible d'acheter un numéro du magazine à l'unité pour 4,99 EUR via Stripe, sans souscrire d'abonnement.</li>
+    <li>Les abonnés aux formules incluant le magazine PDF ont accès à tous les numéros directement depuis leur espace.</li>
+    <li>Les achats à l'unité sont enregistrés et consultables depuis la page des téléchargements.</li>
+  </ul>
+
+  <h2>Gestion du compte utilisateur</h2>
+  <ul>
+    <li>La page "Mon Compte" permet de consulter et modifier ses informations personnelles (nom, poste, organisation, secteur, pays).</li>
+    <li>Chaque utilisateur peut changer son mot de passe directement depuis son espace, après vérification de l'ancien mot de passe.</li>
+    <li>Une page "Mot de passe oublié" permet de demander une réinitialisation de mot de passe par lien.</li>
+    <li>La page de réinitialisation vérifie la validité du lien avant d'autoriser la saisie du nouveau mot de passe.</li>
+    <li>Les messages d'erreur lors de la connexion ou de l'inscription sont désormais clairs et affichés correctement.</li>
+    <li>Après connexion, l'utilisateur est redirigé vers la page qu'il tentait d'atteindre avant d'être invité à se connecter.</li>
+  </ul>
+
+  <h2>Espace administration</h2>
+  <ul>
+    <li>Un compte administrateur dédié a été configuré avec les identifiants fournis.</li>
+    <li>L'espace administration est protégé : toute tentative d'accès sans connexion redirige automatiquement vers la page de connexion.</li>
+    <li>Un utilisateur connecté sans droits d'administration est redirigé automatiquement vers le site public.</li>
+    <li>L'espace administration donne accès à la gestion des articles, des utilisateurs, du magazine, des newsletters, des opportunités et des messages.</li>
+  </ul>
+
+  <h2>Paiements Stripe</h2>
+  <ul>
+    <li>Les trois formules d'abonnement (Accès Premium, Habari Intégral, Newsletter Premium) sont actives et fonctionnelles via Stripe.</li>
+    <li>L'achat d'un numéro de magazine à l'unité est géré via un paiement unique Stripe (distinct d'un abonnement).</li>
+    <li>Les paiements sont confirmés automatiquement et les accès accordés en temps réel via les notifications Stripe.</li>
+  </ul>
+
+  <div class="note">
+    Ce document résume les développements livrés. Certaines fonctionnalités (réinitialisation par email, envoi de newsletter) nécessitent la configuration d'un service d'envoi d'emails qui pourra être raccordé ultérieurement.
+  </div>
+
+</body>
+</html>

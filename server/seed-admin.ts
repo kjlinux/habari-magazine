@@ -2,6 +2,9 @@
  * Seed script: create or update the admin account.
  * Run with: npx tsx server/seed-admin.ts
  */
+import { config } from "dotenv";
+config({ path: new URL("../.env", import.meta.url).pathname });
+
 import { drizzle } from "drizzle-orm/mysql2";
 import { eq } from "drizzle-orm";
 import { users } from "../drizzle/schema";
