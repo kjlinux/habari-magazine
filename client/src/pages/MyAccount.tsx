@@ -745,7 +745,6 @@ export default function MyAccount() {
             </div>
           </div>
         </div>
-      </div>
       <Footer />
     </>
   );
