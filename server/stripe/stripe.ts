@@ -1,5 +1,6 @@
 import Stripe from "stripe";
 import { HABARI_PRODUCTS, MAGAZINE_PDF_PRICE, type ProductKey, type PriceInterval } from "./products";
+import { getSetting } from "../db";
 
 // Initialize Stripe with the restricted key (rk_...)
 const stripeRestrictedKey = process.env.STRIPE_RESTRICTED_KEY;
@@ -131,6 +132,10 @@ export async function createMagazinePdfCheckoutSession(params: {
 }): Promise<{ url: string; sessionId: string }> {
   const s = getStripe();
 
+  // Read dynamic price from DB (fallback to hardcoded default)
+  const rawPrice = await getSetting("magazine_pdf_price");
+  const unitAmount = rawPrice ? parseInt(rawPrice, 10) : MAGAZINE_PDF_PRICE.amount;
+
   const session = await s.checkout.sessions.create({
     mode: "payment",
     payment_method_types: ["card"],
@@ -141,7 +146,7 @@ export async function createMagazinePdfCheckoutSession(params: {
       {
         price_data: {
           currency: MAGAZINE_PDF_PRICE.currency,
-          unit_amount: MAGAZINE_PDF_PRICE.amount,
+          unit_amount: unitAmount,
           product_data: {
             name: `Habari Magazine ${params.issueNumber}`,
             description: params.issueTitle,

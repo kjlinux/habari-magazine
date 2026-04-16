@@ -428,3 +428,17 @@ export const magazinePurchases = mysqlTable("magazinePurchases", {
 
 export type MagazinePurchase = typeof magazinePurchases.$inferSelect;
 export type InsertMagazinePurchase = typeof magazinePurchases.$inferInsert;
+
+/**
+ * Site settings (key/value store for admin-configurable values)
+ */
+export const siteSettings = mysqlTable("siteSettings", {
+  id: int("id").autoincrement().primaryKey(),
+  key: varchar("key", { length: 100 }).notNull().unique(),
+  value: text("value").notNull(),
+  label: varchar("label", { length: 255 }),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type SiteSetting = typeof siteSettings.$inferSelect;
+export type InsertSiteSetting = typeof siteSettings.$inferInsert;

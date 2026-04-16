@@ -1,8 +1,8 @@
 import { eq, desc, and, or, sql, count, like, sum, gte, lte } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { 
-  InsertUser, 
-  users, 
+import {
+  InsertUser,
+  users,
   articles,
   economicActors,
   investmentOpportunities,
@@ -21,6 +21,9 @@ import {
   opportunities,
   InsertOpportunity,
   magazinePurchases,
+  siteSettings,
+  authors,
+  InsertAuthor,
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -1410,4 +1413,178 @@ export async function listUserMagazinePurchases(userId: number) {
     .from(magazinePurchases)
     .where(and(eq(magazinePurchases.userId, userId), eq(magazinePurchases.status, "paid")))
     .orderBy(desc(magazinePurchases.paidAt));
+}
+
+// ═══════════════════════════════════════════════
+// SITE SETTINGS
+// ═══════════════════════════════════════════════
+
+const DEFAULT_SETTINGS: Record<string, { value: string; label: string }> = {
+  magazine_pdf_price: { value: "499", label: "Prix PDF magazine à l'unité (centimes)" },
+};
+
+export async function getSetting(key: string): Promise<string | null> {
+  const db = await getDb();
+  if (!db) return DEFAULT_SETTINGS[key]?.value ?? null;
+  const rows = await db.select().from(siteSettings).where(eq(siteSettings.key, key)).limit(1);
+  if (rows.length > 0) return rows[0].value;
+  return DEFAULT_SETTINGS[key]?.value ?? null;
+}
+
+export async function getAllSettings() {
+  const db = await getDb();
+  if (!db) return Object.entries(DEFAULT_SETTINGS).map(([key, v]) => ({ id: 0, key, value: v.value, label: v.label, updatedAt: new Date() }));
+  const rows = await db.select().from(siteSettings);
+  // Merge with defaults for any missing keys
+  const result = [...rows];
+  for (const [key, def] of Object.entries(DEFAULT_SETTINGS)) {
+    if (!rows.find(r => r.key === key)) {
+      result.push({ id: 0, key, value: def.value, label: def.label, updatedAt: new Date() });
+    }
+  }
+  return result;
+}
+
+export async function setSetting(key: string, value: string): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  const label = DEFAULT_SETTINGS[key]?.label ?? key;
+  const existing = await db.select().from(siteSettings).where(eq(siteSettings.key, key)).limit(1);
+  if (existing.length > 0) {
+    await db.update(siteSettings).set({ value }).where(eq(siteSettings.key, key));
+  } else {
+    await db.insert(siteSettings).values({ key, value, label });
+  }
+}
+
+// ═══════════════════════════════════════════════
+// AUTHORS HELPERS
+// ═══════════════════════════════════════════════
+
+export async function adminGetAllAuthors() {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(authors).orderBy(desc(authors.createdAt));
+}
+
+export async function adminGetAuthorById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(authors).where(eq(authors.id, id)).limit(1);
+  return result[0];
+}
+
+export async function adminCreateAuthor(data: {
+  name: string;
+  email?: string;
+  bio?: string;
+  avatar?: string;
+  specialization?: string;
+  userId?: number;
+}) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.insert(authors).values({
+    name: data.name,
+    email: data.email ?? null,
+    bio: data.bio ?? null,
+    avatar: data.avatar ?? null,
+    specialization: data.specialization ?? null,
+    userId: data.userId ?? null,
+  });
+  return { success: true, insertId: result[0].insertId };
+}
+
+export async function adminUpdateAuthor(id: number, data: {
+  name?: string;
+  email?: string | null;
+  bio?: string | null;
+  avatar?: string | null;
+  specialization?: string | null;
+}) {
+  const db = await getDb();
+  if (!db) return undefined;
+  await db.update(authors).set(data).where(eq(authors.id, id));
+  return { success: true };
+}
+
+export async function adminDeleteAuthor(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  await db.delete(authors).where(eq(authors.id, id));
+  return { success: true };
+}
+
+// ═══════════════════════════════════════════════
+// EVENTS HELPERS (Admin CRUD)
+// ═══════════════════════════════════════════════
+
+export async function adminGetAllEvents() {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(events).orderBy(desc(events.startDate));
+}
+
+export async function adminGetEventById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(events).where(eq(events.id, id)).limit(1);
+  return result[0];
+}
+
+export async function adminCreateEvent(data: {
+  title: string;
+  slug: string;
+  description?: string;
+  type: 'conference' | 'webinar' | 'training' | 'workshop' | 'networking';
+  startDate: Date;
+  endDate?: Date;
+  location?: string;
+  countryId?: number;
+  image?: string;
+  capacity?: number;
+  status?: 'upcoming' | 'ongoing' | 'completed' | 'cancelled';
+}) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.insert(events).values({
+    title: data.title,
+    slug: data.slug,
+    description: data.description ?? null,
+    type: data.type,
+    startDate: data.startDate,
+    endDate: data.endDate ?? null,
+    location: data.location ?? null,
+    countryId: data.countryId ?? null,
+    image: data.image ?? null,
+    capacity: data.capacity ?? null,
+    status: data.status ?? 'upcoming',
+  });
+  return { success: true, insertId: result[0].insertId };
+}
+
+export async function adminUpdateEvent(id: number, data: {
+  title?: string;
+  slug?: string;
+  description?: string | null;
+  type?: 'conference' | 'webinar' | 'training' | 'workshop' | 'networking';
+  startDate?: Date;
+  endDate?: Date | null;
+  location?: string | null;
+  countryId?: number | null;
+  image?: string | null;
+  capacity?: number | null;
+  status?: 'upcoming' | 'ongoing' | 'completed' | 'cancelled';
+}) {
+  const db = await getDb();
+  if (!db) return undefined;
+  await db.update(events).set(data).where(eq(events.id, id));
+  return { success: true };
+}
+
+export async function adminDeleteEvent(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  await db.delete(events).where(eq(events.id, id));
+  return { success: true };
 }

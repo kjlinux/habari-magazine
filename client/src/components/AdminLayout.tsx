@@ -10,7 +10,8 @@ import {
 import { Link, useLocation } from "wouter";
 import {
   LayoutDashboard, FileText, Users, Mail, ChevronLeft,
-  LogOut, Menu, X, Shield, MessageSquare, BookOpen, Megaphone
+  LogOut, Menu, X, Shield, MessageSquare, BookOpen, Megaphone, Settings,
+  CalendarDays, UserCheck
 } from "lucide-react";
 import { useState, useEffect } from "react";
 
@@ -18,10 +19,13 @@ const adminMenuItems = [
   { icon: LayoutDashboard, label: "Tableau de bord", path: "/admin" },
   { icon: FileText, label: "Articles", path: "/admin/articles" },
   { icon: BookOpen, label: "Magazine PDF", path: "/admin/magazine" },
+  { icon: UserCheck, label: "Auteurs", path: "/admin/auteurs" },
+  { icon: CalendarDays, label: "Événements", path: "/admin/evenements" },
   { icon: Users, label: "Utilisateurs", path: "/admin/utilisateurs" },
   { icon: Mail, label: "Newsletter", path: "/admin/newsletter" },
   { icon: Megaphone, label: "Opportunités", path: "/admin/opportunites" },
   { icon: MessageSquare, label: "Messages", path: "/admin/messages" },
+  { icon: Settings, label: "Paramètres", path: "/admin/parametres" },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -132,7 +136,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <span className="text-white font-serif font-bold text-sm">H</span>
               </div>
             )}
-            <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-1.5 rounded-md hover:bg-muted transition-colors hidden lg:block">
+            <button onClick={() => setSidebarOpen(!sidebarOpen)} title={sidebarOpen ? "Réduire" : "Agrandir"} className="p-1.5 rounded-md hover:bg-muted transition-colors hidden lg:block">
               <ChevronLeft className={`w-4 h-4 text-muted-foreground transition-transform ${!sidebarOpen ? "rotate-180" : ""}`} />
             </button>
           </div>

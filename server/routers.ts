@@ -12,7 +12,7 @@ import {
   stripPremiumContent,
   TRIAL_DURATION_DAYS,
 } from "./_core/access";
-import { createCheckoutSession, getCheckoutSession, cancelSubscription, createMagazinePdfCheckoutSession } from "./stripe/stripe";
+import { createCheckoutSession, getCheckoutSession, cancelSubscription, createMagazinePdfCheckoutSession, getStripe } from "./stripe/stripe";
 import { HABARI_PRODUCTS, MAGAZINE_PDF_PRICE, type ProductKey, type PriceInterval } from "./stripe/products";
 import {
   getPublishedArticles,
@@ -47,6 +47,10 @@ import {
   getMagazineIssueByPk,
   hasUserPurchasedMagazine,
   listUserMagazinePurchases,
+  // Settings helpers
+  getAllSettings,
+  getSetting,
+  setSetting,
   // Admin helpers
   getAdminStats,
   adminGetAllArticles,
@@ -89,6 +93,18 @@ import {
   adminDeleteOpportunity,
   adminToggleOpportunityFeatured,
   adminCountOpportunities,
+  // Authors helpers
+  adminGetAllAuthors,
+  adminGetAuthorById,
+  adminCreateAuthor,
+  adminUpdateAuthor,
+  adminDeleteAuthor,
+  // Events admin helpers
+  adminGetAllEvents,
+  adminGetEventById,
+  adminCreateEvent,
+  adminUpdateEvent,
+  adminDeleteEvent,
 } from "./db";
 
 // Admin-only procedure middleware
@@ -599,6 +615,172 @@ export const appRouter = router({
         .input(z.object({ id: z.number() }))
         .mutation(async ({ input }) => await adminDeleteContactMessage(input.id)),
     }),
+
+    /** Authors CRUD */
+    authors: router({
+      list: adminProcedure.query(async () => await adminGetAllAuthors()),
+
+      byId: adminProcedure
+        .input(z.object({ id: z.number() }))
+        .query(async ({ input }) => await adminGetAuthorById(input.id)),
+
+      create: adminProcedure
+        .input(z.object({
+          name: z.string().min(1),
+          email: z.string().email().optional(),
+          bio: z.string().optional(),
+          avatar: z.string().optional(),
+          specialization: z.string().optional(),
+          userId: z.number().optional(),
+        }))
+        .mutation(async ({ input }) => await adminCreateAuthor(input)),
+
+      update: adminProcedure
+        .input(z.object({
+          id: z.number(),
+          name: z.string().optional(),
+          email: z.string().nullable().optional(),
+          bio: z.string().nullable().optional(),
+          avatar: z.string().nullable().optional(),
+          specialization: z.string().nullable().optional(),
+        }))
+        .mutation(async ({ input }) => {
+          const { id, ...data } = input;
+          return await adminUpdateAuthor(id, data);
+        }),
+
+      delete: adminProcedure
+        .input(z.object({ id: z.number() }))
+        .mutation(async ({ input }) => await adminDeleteAuthor(input.id)),
+    }),
+
+    /** Events CRUD */
+    events: router({
+      list: adminProcedure.query(async () => await adminGetAllEvents()),
+
+      byId: adminProcedure
+        .input(z.object({ id: z.number() }))
+        .query(async ({ input }) => await adminGetEventById(input.id)),
+
+      create: adminProcedure
+        .input(z.object({
+          title: z.string().min(1),
+          slug: z.string().min(1),
+          description: z.string().optional(),
+          type: z.enum(['conference', 'webinar', 'training', 'workshop', 'networking']),
+          startDate: z.string(),
+          endDate: z.string().optional(),
+          location: z.string().optional(),
+          countryId: z.number().optional(),
+          image: z.string().optional(),
+          capacity: z.number().optional(),
+          status: z.enum(['upcoming', 'ongoing', 'completed', 'cancelled']).default('upcoming'),
+        }))
+        .mutation(async ({ input }) => await adminCreateEvent({
+          ...input,
+          startDate: new Date(input.startDate),
+          endDate: input.endDate ? new Date(input.endDate) : undefined,
+        })),
+
+      update: adminProcedure
+        .input(z.object({
+          id: z.number(),
+          title: z.string().optional(),
+          slug: z.string().optional(),
+          description: z.string().nullable().optional(),
+          type: z.enum(['conference', 'webinar', 'training', 'workshop', 'networking']).optional(),
+          startDate: z.string().optional(),
+          endDate: z.string().nullable().optional(),
+          location: z.string().nullable().optional(),
+          countryId: z.number().nullable().optional(),
+          image: z.string().nullable().optional(),
+          capacity: z.number().nullable().optional(),
+          status: z.enum(['upcoming', 'ongoing', 'completed', 'cancelled']).optional(),
+        }))
+        .mutation(async ({ input }) => {
+          const { id, startDate, endDate, ...rest } = input;
+          return await adminUpdateEvent(id, {
+            ...rest,
+            ...(startDate ? { startDate: new Date(startDate) } : {}),
+            ...(endDate !== undefined ? { endDate: endDate ? new Date(endDate) : null } : {}),
+          });
+        }),
+
+      delete: adminProcedure
+        .input(z.object({ id: z.number() }))
+        .mutation(async ({ input }) => await adminDeleteEvent(input.id)),
+    }),
+
+    /** Site settings (prix, config) */
+    settings: router({
+      list: adminProcedure.query(async () => await getAllSettings()),
+
+      get: adminProcedure
+        .input(z.object({ key: z.string() }))
+        .query(async ({ input }) => {
+          const value = await getSetting(input.key);
+          return { key: input.key, value };
+        }),
+
+      set: adminProcedure
+        .input(z.object({ key: z.string(), value: z.string() }))
+        .mutation(async ({ input }) => {
+          await setSetting(input.key, input.value);
+          return { success: true };
+        }),
+    }),
+
+    /** Stripe promo codes (coupons) */
+    promoCodes: router({
+      list: adminProcedure.query(async () => {
+        const s = getStripe();
+        const coupons = await s.coupons.list({ limit: 50 });
+        return coupons.data.map(c => ({
+          id: c.id,
+          name: c.name,
+          percentOff: c.percent_off,
+          amountOff: c.amount_off,
+          currency: c.currency,
+          duration: c.duration,
+          redeemBy: c.redeem_by,
+          timesRedeemed: c.times_redeemed,
+          maxRedemptions: c.max_redemptions,
+          valid: c.valid,
+        }));
+      }),
+
+      create: adminProcedure
+        .input(z.object({
+          name: z.string().min(1),
+          percentOff: z.number().min(1).max(100).optional(),
+          amountOff: z.number().min(1).optional(),
+          duration: z.enum(["once", "forever", "repeating"]),
+          durationInMonths: z.number().optional(),
+          maxRedemptions: z.number().optional(),
+          redeemBy: z.string().optional(), // ISO date string
+        }))
+        .mutation(async ({ input }) => {
+          const s = getStripe();
+          const coupon = await s.coupons.create({
+            name: input.name,
+            ...(input.percentOff ? { percent_off: input.percentOff } : {}),
+            ...(input.amountOff ? { amount_off: input.amountOff, currency: "eur" } : {}),
+            duration: input.duration,
+            ...(input.duration === "repeating" && input.durationInMonths ? { duration_in_months: input.durationInMonths } : {}),
+            ...(input.maxRedemptions ? { max_redemptions: input.maxRedemptions } : {}),
+            ...(input.redeemBy ? { redeem_by: Math.floor(new Date(input.redeemBy).getTime() / 1000) } : {}),
+          });
+          return { id: coupon.id, name: coupon.name, valid: coupon.valid };
+        }),
+
+      delete: adminProcedure
+        .input(z.object({ id: z.string() }))
+        .mutation(async ({ input }) => {
+          const s = getStripe();
+          await s.coupons.del(input.id);
+          return { success: true };
+        }),
+    }),
   }),
 
   // ═══════════════════════════════════════════════
@@ -794,13 +976,16 @@ export const appRouter = router({
       return await listUserMagazinePurchases(ctx.user.id);
     }),
 
-    /** Get magazine PDF unit price */
-    pdfPrice: publicProcedure.query(() => ({
-      amount: MAGAZINE_PDF_PRICE.amount,
-      currency: MAGAZINE_PDF_PRICE.currency,
-      label: MAGAZINE_PDF_PRICE.label,
-      formatted: `${(MAGAZINE_PDF_PRICE.amount / 100).toFixed(2).replace(".", ",")} €`,
-    })),
+    /** Get magazine PDF unit price (dynamic, admin-configurable) */
+    pdfPrice: publicProcedure.query(async () => {
+      const raw = await getSetting("magazine_pdf_price");
+      const amount = raw ? parseInt(raw, 10) : MAGAZINE_PDF_PRICE.amount;
+      return {
+        amount,
+        currency: MAGAZINE_PDF_PRICE.currency,
+        formatted: `${(amount / 100).toFixed(2).replace(".", ",")} €`,
+      };
+    }),
   }),
 
   // ═══════════════════════════════════════════════

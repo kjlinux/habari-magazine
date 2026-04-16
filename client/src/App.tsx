@@ -22,6 +22,9 @@ import AdminContact from "./pages/admin/AdminContact";
 import AdminMagazine from "./pages/admin/AdminMagazine";
 import AdminOpportunities from "./pages/admin/AdminOpportunities";
 import AdminOpportunityForm from "./pages/admin/AdminOpportunityForm";
+import AdminSettings from "./pages/admin/AdminSettings";
+import AdminAuthors from "./pages/admin/AdminAuthors";
+import AdminEvents from "./pages/admin/AdminEvents";
 import About from "./pages/About";
 import MyAccount from "./pages/MyAccount";
 import Downloads from "./pages/Downloads";
@@ -85,6 +88,9 @@ function Router() {
       <Route path={"/admin/opportunites"} component={AdminOpportunities} />
       <Route path={"/admin/opportunites/nouveau"} component={AdminOpportunityForm} />
       <Route path={"/admin/opportunites/:id"} component={AdminOpportunityForm} />
+      <Route path={"/admin/parametres"} component={AdminSettings} />
+      <Route path={"/admin/auteurs"} component={AdminAuthors} />
+      <Route path={"/admin/evenements"} component={AdminEvents} />
 
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
