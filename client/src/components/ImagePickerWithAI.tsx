@@ -130,21 +130,23 @@ export default function ImagePickerWithAI({
           </div>
         </div>
       ) : !showAIPanel ? (
-        <div className="flex gap-2">
+        <div className="space-y-2">
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading}
             title="Uploader une image"
-            className="flex-1 h-32 rounded-lg border-2 border-dashed border-border hover:border-primary/50 bg-muted/20 hover:bg-muted/40 transition-colors flex flex-col items-center justify-center gap-2 text-muted-foreground hover:text-foreground"
+            className="w-full h-24 rounded-lg border-2 border-dashed border-border hover:border-primary/50 bg-muted/20 hover:bg-muted/40 transition-colors flex items-center justify-center gap-3 text-muted-foreground hover:text-foreground"
           >
             {uploading ? (
-              <Loader2 className="w-6 h-6 animate-spin" />
+              <Loader2 className="w-5 h-5 animate-spin" />
             ) : (
               <>
-                <Upload className="w-6 h-6" />
-                <span className="text-sm font-sans">Uploader une image</span>
-                <span className="text-xs font-sans">JPG, PNG, WebP — max 50 Mo</span>
+                <Upload className="w-5 h-5 shrink-0" />
+                <div className="text-left">
+                  <div className="text-sm font-sans font-medium">Uploader une image</div>
+                  <div className="text-xs font-sans">JPG, PNG, WebP — max 50 Mo</div>
+                </div>
               </>
             )}
           </button>
@@ -152,11 +154,13 @@ export default function ImagePickerWithAI({
             type="button"
             onClick={openAIPanel}
             title="Générer avec l'IA"
-            className="flex-1 h-32 rounded-lg border-2 border-dashed border-primary/40 hover:border-primary bg-primary/5 hover:bg-primary/10 transition-colors flex flex-col items-center justify-center gap-2 text-primary/70 hover:text-primary"
+            className="w-full h-24 rounded-lg border-2 border-dashed border-primary/40 hover:border-primary bg-primary/5 hover:bg-primary/10 transition-colors flex items-center justify-center gap-3 text-primary/70 hover:text-primary"
           >
-            <Sparkles className="w-6 h-6" />
-            <span className="text-sm font-sans font-medium">Générer avec l'IA</span>
-            <span className="text-xs font-sans text-muted-foreground">DALL-E 3</span>
+            <Sparkles className="w-5 h-5 shrink-0" />
+            <div className="text-left">
+              <div className="text-sm font-sans font-medium">Générer avec l'IA</div>
+              <div className="text-xs font-sans text-muted-foreground">GPT Image 1.5 · High</div>
+            </div>
           </button>
         </div>
       ) : null}
