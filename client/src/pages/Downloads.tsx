@@ -215,6 +215,7 @@ function DownloadButton({ issue }: { issue: MagazineIssue }) {
         issueNumber: issue.id,
         origin: window.location.origin,
       });
+      if (!result?.url) throw new Error("URL de paiement introuvable");
       toast.info("Redirection vers le paiement sécurisé...");
       window.open(result.url, "_blank");
     } catch (err: any) {

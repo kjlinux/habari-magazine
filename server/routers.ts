@@ -733,20 +733,24 @@ export const appRouter = router({
     /** Stripe promo codes (coupons) */
     promoCodes: router({
       list: adminProcedure.query(async () => {
-        const s = getStripe();
-        const coupons = await s.coupons.list({ limit: 50 });
-        return coupons.data.map(c => ({
-          id: c.id,
-          name: c.name,
-          percentOff: c.percent_off,
-          amountOff: c.amount_off,
-          currency: c.currency,
-          duration: c.duration,
-          redeemBy: c.redeem_by,
-          timesRedeemed: c.times_redeemed,
-          maxRedemptions: c.max_redemptions,
-          valid: c.valid,
-        }));
+        try {
+          const s = getStripe();
+          const coupons = await s.coupons.list({ limit: 50 });
+          return coupons.data.map(c => ({
+            id: c.id,
+            name: c.name,
+            percentOff: c.percent_off,
+            amountOff: c.amount_off,
+            currency: c.currency,
+            duration: c.duration,
+            redeemBy: c.redeem_by,
+            timesRedeemed: c.times_redeemed,
+            maxRedemptions: c.max_redemptions,
+            valid: c.valid,
+          }));
+        } catch (err: unknown) {
+          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: err instanceof Error ? err.message : "Stripe error" });
+        }
       }),
 
       create: adminProcedure
@@ -758,27 +762,35 @@ export const appRouter = router({
           durationInMonths: z.number().optional(),
           maxRedemptions: z.number().optional(),
           redeemBy: z.string().optional(), // ISO date string
-        }))
+        }).refine(d => d.percentOff || d.amountOff, { message: "percentOff ou amountOff est requis" }))
         .mutation(async ({ input }) => {
-          const s = getStripe();
-          const coupon = await s.coupons.create({
-            name: input.name,
-            ...(input.percentOff ? { percent_off: input.percentOff } : {}),
-            ...(input.amountOff ? { amount_off: input.amountOff, currency: "eur" } : {}),
-            duration: input.duration,
-            ...(input.duration === "repeating" && input.durationInMonths ? { duration_in_months: input.durationInMonths } : {}),
-            ...(input.maxRedemptions ? { max_redemptions: input.maxRedemptions } : {}),
-            ...(input.redeemBy ? { redeem_by: Math.floor(new Date(input.redeemBy).getTime() / 1000) } : {}),
-          });
-          return { id: coupon.id, name: coupon.name, valid: coupon.valid };
+          try {
+            const s = getStripe();
+            const coupon = await s.coupons.create({
+              name: input.name,
+              ...(input.percentOff ? { percent_off: input.percentOff } : {}),
+              ...(input.amountOff ? { amount_off: input.amountOff, currency: "eur" } : {}),
+              duration: input.duration,
+              ...(input.duration === "repeating" && input.durationInMonths ? { duration_in_months: input.durationInMonths } : {}),
+              ...(input.maxRedemptions ? { max_redemptions: input.maxRedemptions } : {}),
+              ...(input.redeemBy ? { redeem_by: Math.floor(new Date(input.redeemBy).getTime() / 1000) } : {}),
+            });
+            return { id: coupon.id, name: coupon.name, valid: coupon.valid };
+          } catch (err: unknown) {
+            throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: err instanceof Error ? err.message : "Stripe error" });
+          }
         }),
 
       delete: adminProcedure
         .input(z.object({ id: z.string() }))
         .mutation(async ({ input }) => {
-          const s = getStripe();
-          await s.coupons.del(input.id);
-          return { success: true };
+          try {
+            const s = getStripe();
+            await s.coupons.del(input.id);
+            return { success: true };
+          } catch (err: unknown) {
+            throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: err instanceof Error ? err.message : "Stripe error" });
+          }
         }),
     }),
   }),
@@ -809,35 +821,48 @@ export const appRouter = router({
         origin: z.string(),
       }))
       .mutation(async ({ ctx, input }) => {
-        const result = await createCheckoutSession({
-          productKey: input.productKey as ProductKey,
-          interval: input.interval as PriceInterval,
-          userId: ctx.user.id,
-          userEmail: ctx.user.email || "",
-          userName: ctx.user.name || undefined,
-          origin: input.origin,
-        });
-        return result;
+        try {
+          return await createCheckoutSession({
+            productKey: input.productKey as ProductKey,
+            interval: input.interval as PriceInterval,
+            userId: ctx.user.id,
+            userEmail: ctx.user.email || "",
+            userName: ctx.user.name || undefined,
+            origin: input.origin,
+          });
+        } catch (err: unknown) {
+          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: err instanceof Error ? err.message : "Stripe error" });
+        }
       }),
 
     /** Get checkout session result */
     getSession: protectedProcedure
       .input(z.object({ sessionId: z.string() }))
       .query(async ({ input }) => {
-        const session = await getCheckoutSession(input.sessionId);
-        return {
-          status: session.status,
-          paymentStatus: session.payment_status,
-          customerEmail: session.customer_email,
-        };
+        try {
+          const session = await getCheckoutSession(input.sessionId);
+          if (!session) throw new TRPCError({ code: "NOT_FOUND", message: "Session introuvable" });
+          return {
+            status: session.status,
+            paymentStatus: session.payment_status,
+            customerEmail: session.customer_email,
+          };
+        } catch (err: unknown) {
+          if (err instanceof TRPCError) throw err;
+          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: err instanceof Error ? err.message : "Stripe error" });
+        }
       }),
 
     /** Cancel subscription */
     cancelSubscription: protectedProcedure
       .input(z.object({ subscriptionId: z.string() }))
       .mutation(async ({ input }) => {
-        await cancelSubscription(input.subscriptionId);
-        return { success: true };
+        try {
+          await cancelSubscription(input.subscriptionId);
+          return { success: true };
+        } catch (err: unknown) {
+          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: err instanceof Error ? err.message : "Stripe error" });
+        }
       }),
   }),
 
@@ -942,23 +967,27 @@ export const appRouter = router({
         origin: z.string(),
       }))
       .mutation(async ({ ctx, input }) => {
-        const issue = await getMagazineIssueByNumber(input.issueNumber);
-        if (!issue) {
-          throw new TRPCError({ code: "NOT_FOUND", message: "Numéro introuvable" });
+        try {
+          const issue = await getMagazineIssueByNumber(input.issueNumber);
+          if (!issue) {
+            throw new TRPCError({ code: "NOT_FOUND", message: "Numéro introuvable" });
+          }
+          const alreadyPurchased = await hasUserPurchasedMagazine(ctx.user.id, issue.id);
+          if (alreadyPurchased) {
+            throw new TRPCError({ code: "BAD_REQUEST", message: "Vous avez déjà acheté ce numéro" });
+          }
+          return await createMagazinePdfCheckoutSession({
+            issueId: issue.id,
+            issueNumber: issue.issueNumber,
+            issueTitle: issue.title,
+            userId: ctx.user.id,
+            userEmail: ctx.user.email || "",
+            origin: input.origin,
+          });
+        } catch (err: unknown) {
+          if (err instanceof TRPCError) throw err;
+          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: err instanceof Error ? err.message : "Erreur lors de l'achat" });
         }
-        const alreadyPurchased = await hasUserPurchasedMagazine(ctx.user.id, issue.id);
-        if (alreadyPurchased) {
-          throw new TRPCError({ code: "BAD_REQUEST", message: "Vous avez déjà acheté ce numéro" });
-        }
-        const result = await createMagazinePdfCheckoutSession({
-          issueId: issue.id,
-          issueNumber: issue.issueNumber,
-          issueTitle: issue.title,
-          userId: ctx.user.id,
-          userEmail: ctx.user.email || "",
-          origin: input.origin,
-        });
-        return result;
       }),
 
     /** Check if user has purchased a specific issue */

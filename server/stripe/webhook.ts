@@ -132,16 +132,16 @@ export function registerStripeWebhook(app: Express) {
             const db = await getDb();
             if (!db) break;
 
-            // Mark subscription as cancelled
-            await db.update(userSubscriptions)
-              .set({ status: "cancelled", endDate: new Date() })
-              .where(eq(userSubscriptions.stripeSubscriptionId, subscriptionId));
-
-            // Find the user and downgrade
+            // Find the user BEFORE cancelling so we have the userId
             const subResult = await db.select()
               .from(userSubscriptions)
               .where(eq(userSubscriptions.stripeSubscriptionId, subscriptionId))
               .limit(1);
+
+            // Mark subscription as cancelled
+            await db.update(userSubscriptions)
+              .set({ status: "cancelled", endDate: new Date() })
+              .where(eq(userSubscriptions.stripeSubscriptionId, subscriptionId));
 
             if (subResult.length > 0) {
               await db.update(users)

@@ -7,7 +7,7 @@ const DISMISS_KEY = "habari_trial_banner_dismissed_at";
 const REDISPLAY_AFTER_MS = 1000 * 60 * 60 * 24;
 
 export default function TrialBanner() {
-  const [dismissed, setDismissed] = useState(true);
+  const [dismissed, setDismissed] = useState(false);
   const { data } = trpc.auth.trialStatus.useQuery(undefined, {
     staleTime: 1000 * 60 * 5,
     retry: false,

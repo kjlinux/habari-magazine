@@ -71,6 +71,7 @@ export default function AdminOpportunities() {
       toast.success(result?.featured ? "Annonce mise en vedette" : "Annonce retirée de la une");
       refetch();
     },
+    onError: (err) => toast.error(err.message || "Erreur lors de la mise en vedette"),
   });
 
   const items = data?.items ?? [];

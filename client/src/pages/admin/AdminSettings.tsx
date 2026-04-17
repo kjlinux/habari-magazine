@@ -520,13 +520,6 @@ function SubscriptionPriceSettings() {
         <div className="flex justify-center py-4"><Loader2 className="w-5 h-5 animate-spin text-primary" /></div>
       ) : (
         <>
-          {plans && plans.length > 0 && (
-            <div className="mb-4 text-xs text-muted-foreground font-sans space-y-1">
-              {plans.map(p => (
-                <div key={p.key}>Plan Stripe <strong>{p.name}</strong> — mensuel: {p.prices.monthly.label} / annuel: {p.prices.annual.label}</div>
-              ))}
-            </div>
-          )}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {priceKeys.map(pk => (
               <div key={pk.key} className="space-y-1">

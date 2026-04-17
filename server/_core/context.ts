@@ -15,8 +15,11 @@ export async function createContext(
 
   try {
     user = await sdk.authenticateRequest(opts.req);
-  } catch (error) {
+  } catch (error: unknown) {
     // Authentication is optional for public procedures.
+    if (error instanceof Error && !error.message.includes("401") && !error.message.includes("Unauthorized") && !error.message.includes("Unauthenticated")) {
+      console.error("[Context] Unexpected auth error:", error.message);
+    }
     user = null;
   }
 

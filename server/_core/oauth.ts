@@ -11,9 +11,9 @@ const RESET_TOKEN_TTL_MS = 60 * 60 * 1000; // 1 hour
 
 function cleanExpiredTokens() {
   const now = Date.now();
-  for (const [token, data] of resetTokens) {
+  resetTokens.forEach((data, token) => {
     if (data.expiresAt < now) resetTokens.delete(token);
-  }
+  });
 }
 
 export function registerAuthRoutes(app: Express) {
@@ -97,7 +97,7 @@ export function registerAuthRoutes(app: Express) {
         content: `L'utilisateur ${email} a demandé une réinitialisation de mot de passe.\n\nLien de réinitialisation (valide 1h) :\n${resetUrl}\n\nTransmettez ce lien à l'utilisateur.`,
       }).catch((err) => console.warn("[Auth] Reset notification failed:", err));
 
-      console.log(`[Auth] Password reset requested for ${email}. Token: ${token}`);
+      console.log(`[Auth] Password reset requested for ${email}.`);
       res.json({ ok: true });
     } catch (error) {
       console.error("[Auth] Forgot password failed", error);

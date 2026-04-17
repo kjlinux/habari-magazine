@@ -1,6 +1,6 @@
 import { eq, desc, and, or, sql, count, like, sum, gte, lte } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/mysql2";
-import mysql from "mysql2/promise";
+import { drizzle, type MySql2Database } from "drizzle-orm/mysql2";
+import mysql, { type Pool } from "mysql2/promise";
 import {
   InsertUser,
   users,
@@ -28,14 +28,14 @@ import {
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
-let _db: ReturnType<typeof drizzle> | null = null;
+let _db: MySql2Database & { $client: Pool } | null = null;
 
 // Lazily create the drizzle instance so local tooling can run without a DB.
 export async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
     try {
-      const connection = await mysql.createConnection(process.env.DATABASE_URL);
-      _db = drizzle(connection);
+      const pool = mysql.createPool({ uri: process.env.DATABASE_URL, connectionLimit: 10 });
+      _db = drizzle(pool);
     } catch (error) {
       console.warn("[Database] Failed to connect:", error);
       _db = null;
@@ -471,8 +471,8 @@ export async function getAdminStats() {
 
   const [activeSubs] = await db.select({ c: count() }).from(userSubscriptions).where(eq(userSubscriptions.status, 'active'));
 
-  // Revenue: sum of magazineIssue purchases (price * count) as proxy; real Stripe revenue requires webhook data
-  const [magRevenue] = await db.select({ c: sum(magazineIssues.price) }).from(magazineIssues);
+  // Revenue: approximate from download count only (no price column on magazineIssues)
+  const [magRevenue] = await db.select({ c: sum(magazineIssues.downloadCount) }).from(magazineIssues);
 
   return {
     totalArticles: artTotal?.c ?? 0,

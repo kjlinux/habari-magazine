@@ -5,4 +5,6 @@ export const ENV = {
   isProduction: process.env.NODE_ENV === "production",
   stripeRestrictedKey: process.env.STRIPE_RESTRICTED_KEY ?? "",
   stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET ?? "",
+  forgeApiUrl: process.env.FORGE_API_URL ?? "",
+  forgeApiKey: process.env.FORGE_API_KEY ?? "",
 };
