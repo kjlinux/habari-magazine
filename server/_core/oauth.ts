@@ -1,5 +1,6 @@
 import { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
 import type { Express, Request, Response } from "express";
+import bcrypt from "bcryptjs";
 import * as db from "../db";
 import { getSessionCookieOptions } from "./cookies";
 import { sdk } from "./sdk";
@@ -24,7 +25,6 @@ export function registerAuthRoutes(app: Express) {
     try {
       const user = await db.getUserByEmail(email);
       if (!user) { res.status(401).json({ error: "Invalid credentials" }); return; }
-      const bcrypt = await import("bcryptjs");
       const valid = await bcrypt.compare(password, user.passwordHash ?? "");
       if (!valid) { res.status(401).json({ error: "Invalid credentials" }); return; }
       const sessionToken = await sdk.createSessionToken(user.openId, { name: user.name ?? "", expiresInMs: ONE_YEAR_MS });
@@ -44,7 +44,6 @@ export function registerAuthRoutes(app: Express) {
     try {
       const existing = await db.getUserByEmail(email);
       if (existing) { res.status(409).json({ error: "Cette adresse email est déjà utilisée" }); return; }
-      const bcrypt = await import("bcryptjs");
       const passwordHash = await bcrypt.hash(password, 12);
       const openId = crypto.randomUUID();
       await db.upsertUser({ openId, email, name: name ?? null, passwordHash, loginMethod: "email", lastSignedIn: new Date() });
@@ -114,7 +113,6 @@ export function registerAuthRoutes(app: Express) {
       cleanExpiredTokens();
       const tokenData = resetTokens.get(token);
       if (!tokenData) { res.status(400).json({ error: "Lien invalide ou expiré. Veuillez refaire une demande." }); return; }
-      const bcrypt = await import("bcryptjs");
       const newHash = await bcrypt.hash(newPassword, 12);
       await db.updateUserPassword(tokenData.userId, newHash);
       resetTokens.delete(token);
@@ -142,7 +140,6 @@ export function registerAuthRoutes(app: Express) {
       const { currentPassword, newPassword } = req.body ?? {};
       if (!currentPassword || !newPassword) { res.status(400).json({ error: "Les deux mots de passe sont requis" }); return; }
       if (typeof newPassword !== "string" || newPassword.length < 8) { res.status(400).json({ error: "Le nouveau mot de passe doit contenir au moins 8 caractères" }); return; }
-      const bcrypt = await import("bcryptjs");
       const valid = await bcrypt.compare(currentPassword, user.passwordHash ?? "");
       if (!valid) { res.status(401).json({ error: "Mot de passe actuel incorrect" }); return; }
       const newHash = await bcrypt.hash(newPassword, 12);
