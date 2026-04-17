@@ -25,6 +25,7 @@ import AdminOpportunityForm from "./pages/admin/AdminOpportunityForm";
 import AdminSettings from "./pages/admin/AdminSettings";
 import AdminAuthors from "./pages/admin/AdminAuthors";
 import AdminEvents from "./pages/admin/AdminEvents";
+import AdminNotifications from "./pages/admin/AdminNotifications";
 import About from "./pages/About";
 import MyAccount from "./pages/MyAccount";
 import Downloads from "./pages/Downloads";
@@ -91,6 +92,7 @@ function Router() {
       <Route path={"/admin/parametres"} component={AdminSettings} />
       <Route path={"/admin/auteurs"} component={AdminAuthors} />
       <Route path={"/admin/evenements"} component={AdminEvents} />
+      <Route path={"/admin/notifications"} component={AdminNotifications} />
 
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />

@@ -13,6 +13,11 @@ import {
   TRIAL_DURATION_DAYS,
 } from "./_core/access";
 import { createCheckoutSession, getCheckoutSession, cancelSubscription, createMagazinePdfCheckoutSession, getStripe } from "./stripe/stripe";
+import { notifyNewArticle, notifyNewOpportunity, notifyNewEvent, sendNewsletterBroadcast, countTargets, type NotifPreference } from "./_core/notificationService";
+import { getVapidPublicKey, sendBulkPush } from "./_core/webpush";
+import { getDb } from "./db";
+import { pushSubscriptions } from "../drizzle/schema";
+import { eq } from "drizzle-orm";
 import { HABARI_PRODUCTS, MAGAZINE_PDF_PRICE, type ProductKey, type PriceInterval } from "./stripe/products";
 import {
   getPublishedArticles,
@@ -82,6 +87,8 @@ import {
   getUserProfile,
   updateUserProfile,
   isProfileCompleted,
+  getUserNotificationPrefs,
+  updateUserNotificationPrefs,
   // Opportunities helpers
   getActiveOpportunities,
   getOpportunityBySlug,
@@ -428,6 +435,55 @@ export const appRouter = router({
         return { completed };
       } catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la vérification du profil" }); }
     }),
+
+    /** Update notification preferences */
+    updateNotifications: protectedProcedure
+      .input(z.object({
+        notifNewsletter: z.boolean(),
+        notifNewArticles: z.boolean(),
+        notifInvestments: z.boolean(),
+        notifTenders: z.boolean(),
+        notifEvents: z.boolean(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        try { return await updateUserNotificationPrefs(ctx.user.id, input); }
+        catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la mise à jour des notifications" }); }
+      }),
+
+    /** Get VAPID public key for push subscription */
+    getVapidKey: protectedProcedure.query(() => {
+      return { publicKey: getVapidPublicKey() };
+    }),
+
+    /** Save browser push subscription */
+    savePushSubscription: protectedProcedure
+      .input(z.object({
+        endpoint: z.string().url(),
+        p256dh: z.string(),
+        auth: z.string(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        try {
+          const db = await getDb();
+          if (!db) throw new Error("DB unavailable");
+          // Upsert: delete existing for same endpoint then insert
+          await db.delete(pushSubscriptions).where(eq(pushSubscriptions.endpoint, input.endpoint));
+          await db.insert(pushSubscriptions).values({ userId: ctx.user.id, ...input });
+          return { success: true };
+        } catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de l'enregistrement de l'abonnement push" }); }
+      }),
+
+    /** Remove browser push subscription */
+    removePushSubscription: protectedProcedure
+      .input(z.object({ endpoint: z.string() }))
+      .mutation(async ({ input }) => {
+        try {
+          const db = await getDb();
+          if (!db) return { success: true };
+          await db.delete(pushSubscriptions).where(eq(pushSubscriptions.endpoint, input.endpoint));
+          return { success: true };
+        } catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la suppression de l'abonnement push" }); }
+      }),
   }),
 
   // ═══════════════════════════════════════════════
@@ -475,8 +531,13 @@ export const appRouter = router({
           minSubscriptionTier: z.enum(["free", "standard", "premium", "enterprise"]).default("free"),
         }))
         .mutation(async ({ input }) => {
-          try { return await adminCreateArticle(input); }
-          catch (e) {
+          try {
+            const article = await adminCreateArticle(input);
+            if (input.status === "published" && article) {
+              notifyNewArticle({ id: (article as any).id ?? 0, title: input.title, excerpt: input.excerpt, slug: input.slug }).catch(() => {});
+            }
+            return article;
+          } catch (e) {
             if (e instanceof TRPCError) throw e;
             throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la création de l'article" });
           }
@@ -499,7 +560,12 @@ export const appRouter = router({
         .mutation(async ({ input }) => {
           try {
             const { id, ...data } = input;
-            return await adminUpdateArticle(id, data);
+            const article = await adminUpdateArticle(id, data);
+            if (input.status === "published" && article) {
+              const a = article as any;
+              notifyNewArticle({ id, title: a.title ?? "", excerpt: a.excerpt, slug: a.slug ?? "" }).catch(() => {});
+            }
+            return article;
           } catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la mise à jour de l'article" }); }
         }),
 
@@ -692,8 +758,14 @@ export const appRouter = router({
           status: z.enum(['active', 'closed', 'draft']).default('active'),
         }))
         .mutation(async ({ input }) => {
-          try { return await adminCreateOpportunity(input); }
-          catch (e) {
+          try {
+            const opp = await adminCreateOpportunity(input);
+            if (input.status === "active" && opp) {
+              const o = opp as any;
+              notifyNewOpportunity({ id: o.id ?? 0, title: input.title, type: input.type, slug: o.slug }).catch(() => {});
+            }
+            return opp;
+          } catch (e) {
             if (e instanceof TRPCError) throw e;
             throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la création de l'opportunité" });
           }
@@ -877,11 +949,16 @@ export const appRouter = router({
         }))
         .mutation(async ({ input }) => {
           try {
-            return await adminCreateEvent({
+            const event = await adminCreateEvent({
               ...input,
               startDate: new Date(input.startDate),
               endDate: input.endDate ? new Date(input.endDate) : undefined,
             });
+            if (event) {
+              const e = event as any;
+              notifyNewEvent({ id: e.id ?? 0, title: input.title, slug: e.slug, startDate: input.startDate }).catch(() => {});
+            }
+            return event;
           } catch (e) {
             if (e instanceof TRPCError) throw e;
             throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la création de l'événement" });
@@ -945,6 +1022,40 @@ export const appRouter = router({
             await setSetting(input.key, input.value);
             return { success: true };
           } catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la sauvegarde du paramètre" }); }
+        }),
+    }),
+
+    /** Notifications admin */
+    notifications: router({
+      /** Count recipients for a given preference */
+      countTargets: adminProcedure
+        .input(z.object({ pref: z.enum(["notifNewsletter", "notifNewArticles", "notifInvestments", "notifTenders", "notifEvents"]) }))
+        .query(async ({ input }) => {
+          try { return { count: await countTargets(input.pref as NotifPreference) }; }
+          catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du comptage" }); }
+        }),
+
+      /** Send newsletter broadcast to users matching a preference */
+      send: adminProcedure
+        .input(z.object({
+          subject: z.string().min(1),
+          html: z.string().min(1),
+          pref: z.enum(["notifNewsletter", "notifNewArticles", "notifInvestments", "notifTenders", "notifEvents"]),
+        }))
+        .mutation(async ({ input }) => {
+          try { return await sendNewsletterBroadcast(input.subject, input.html, input.pref as NotifPreference); }
+          catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de l'envoi de la notification" }); }
+        }),
+
+      /** Send a test email to a specific address */
+      sendTest: adminProcedure
+        .input(z.object({ email: z.string().email(), subject: z.string(), html: z.string() }))
+        .mutation(async ({ input }) => {
+          try {
+            const { sendEmail } = await import("./_core/email");
+            await sendEmail({ to: input.email, subject: `[TEST] ${input.subject}`, html: input.html });
+            return { success: true };
+          } catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de l'envoi du test" }); }
         }),
     }),
 
@@ -1277,6 +1388,19 @@ export const appRouter = router({
         return { code: null, message: null, active: false };
       }
     }),
+
+    homepageSettings: publicProcedure
+      .input(z.object({ keys: z.array(z.string()) }))
+      .query(async ({ input }) => {
+        try {
+          const entries = await Promise.all(
+            input.keys.map(async (key) => ({ key, value: await getSetting(key) ?? null }))
+          );
+          return Object.fromEntries(entries.map(e => [e.key, e.value]));
+        } catch {
+          return Object.fromEntries(input.keys.map(k => [k, null]));
+        }
+      }),
   }),
 
   // ═══════════════════════════════════════════════

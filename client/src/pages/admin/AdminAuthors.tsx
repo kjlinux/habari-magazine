@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useState } from "react";
 import { Plus, Trash2, Pencil, Loader2, Users, X, Check } from "lucide-react";
+import ImagePickerWithAI from "@/components/ImagePickerWithAI";
 
 type AuthorForm = {
   name: string;
@@ -86,13 +87,23 @@ export default function AdminAuthors() {
                 { key: "name", label: "Nom *", placeholder: "Jean Dupont" },
                 { key: "email", label: "Email", placeholder: "jean@habari.com" },
                 { key: "specialization", label: "Spécialisation", placeholder: "Économie, Finance..." },
-                { key: "avatar", label: "URL avatar", placeholder: "https://..." },
               ].map(f => (
                 <div key={f.key} className="space-y-1">
                   <Label className="font-sans text-xs">{f.label}</Label>
                   <Input placeholder={f.placeholder} value={form[f.key as keyof AuthorForm]} onChange={e => setForm(p => ({ ...p, [f.key]: e.target.value }))} className="font-sans text-sm" />
                 </div>
               ))}
+              <div className="space-y-1">
+                <ImagePickerWithAI
+                  label="Avatar"
+                  value={form.avatar}
+                  onChange={(url) => setForm(p => ({ ...p, avatar: url }))}
+                  folder="avatars"
+                  uploadEndpoint="/api/upload/image?folder=avatars"
+                  aiPromptContext={`Professional portrait avatar photo for a journalist named ${form.name || "journalist"}${form.specialization ? `, specialization: ${form.specialization}` : ""}`}
+                  previewHeight="h-32"
+                />
+              </div>
               <div className="sm:col-span-2 space-y-1">
                 <Label className="font-sans text-xs">Biographie</Label>
                 <textarea placeholder="Courte biographie de l'auteur..." value={form.bio} onChange={e => setForm(p => ({ ...p, bio: e.target.value }))} rows={3} className="w-full border border-input rounded-md px-3 py-2 text-sm font-sans bg-background resize-none" />

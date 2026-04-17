@@ -1084,6 +1084,11 @@ export async function getUserProfile(userId: number) {
       subscriptionTier: users.subscriptionTier,
       role: users.role,
       createdAt: users.createdAt,
+      notifNewsletter: users.notifNewsletter,
+      notifNewArticles: users.notifNewArticles,
+      notifInvestments: users.notifInvestments,
+      notifTenders: users.notifTenders,
+      notifEvents: users.notifEvents,
     })
     .from(users)
     .where(eq(users.id, userId))
@@ -1137,6 +1142,42 @@ export async function isProfileCompleted(userId: number): Promise<boolean> {
     .limit(1);
 
   return result.length > 0 && result[0].profileCompleted === true;
+}
+
+export async function getUserNotificationPrefs(userId: number) {
+  const db = await getDb();
+  if (!db) return null;
+
+  const result = await db
+    .select({
+      notifNewsletter: users.notifNewsletter,
+      notifNewArticles: users.notifNewArticles,
+      notifInvestments: users.notifInvestments,
+      notifTenders: users.notifTenders,
+      notifEvents: users.notifEvents,
+    })
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1);
+
+  return result.length > 0 ? result[0] : null;
+}
+
+export async function updateUserNotificationPrefs(
+  userId: number,
+  data: {
+    notifNewsletter: boolean;
+    notifNewArticles: boolean;
+    notifInvestments: boolean;
+    notifTenders: boolean;
+    notifEvents: boolean;
+  }
+) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db.update(users).set(data).where(eq(users.id, userId));
+  return { success: true };
 }
 
 // ═══════════════════════════════════════════════════════════

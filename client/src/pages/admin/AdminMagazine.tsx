@@ -1,8 +1,9 @@
 import AdminLayout from "@/components/AdminLayout";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
-import { Plus, Pencil, Trash2, Eye, EyeOff, Download, Search, Upload, FileText, X } from "lucide-react";
+import { Plus, Pencil, Trash2, Eye, EyeOff, Download, Upload, FileText, X } from "lucide-react";
 import { useState, useRef } from "react";
+import ImagePickerWithAI from "@/components/ImagePickerWithAI";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -73,9 +74,7 @@ export default function AdminMagazine() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [form, setForm] = useState<FormData>(emptyForm);
   const [uploadingPdf, setUploadingPdf] = useState(false);
-  const [uploadingCover, setUploadingCover] = useState(false);
   const pdfInputRef = useRef<HTMLInputElement>(null);
-  const coverInputRef = useRef<HTMLInputElement>(null);
   const utils = trpc.useUtils();
 
   const { data: issues, isLoading } = trpc.admin.magazineIssues.list.useQuery();
@@ -145,8 +144,8 @@ export default function AdminMagazine() {
     setFormOpen(true);
   };
 
-  const handleUploadFile = async (file: File, type: "pdf" | "cover") => {
-    const setter = type === "pdf" ? setUploadingPdf : setUploadingCover;
+  const handleUploadFile = async (file: File, type: "pdf") => {
+    const setter = setUploadingPdf;
     setter(true);
 
     try {
@@ -156,27 +155,19 @@ export default function AdminMagazine() {
       const response = await fetch("/api/upload/magazine", {
         method: "POST",
         body: formData,
+        credentials: "include",
       });
 
       if (!response.ok) throw new Error("Upload échoué");
 
       const result = await response.json();
 
-      if (type === "pdf") {
-        setForm((prev) => ({
-          ...prev,
-          pdfUrl: result.url,
-          pdfFileKey: result.key,
-        }));
-        toast.success("PDF uploadé avec succès");
-      } else {
-        setForm((prev) => ({
-          ...prev,
-          coverUrl: result.url,
-          coverFileKey: result.key,
-        }));
-        toast.success("Couverture uploadée avec succès");
-      }
+      setForm((prev) => ({
+        ...prev,
+        pdfUrl: result.url,
+        pdfFileKey: result.key,
+      }));
+      toast.success("PDF uploadé avec succès");
     } catch {
       toast.error(`Erreur lors de l'upload du ${type === "pdf" ? "PDF" : "fichier"}`);
     } finally {
@@ -447,7 +438,7 @@ export default function AdminMagazine() {
                     className="hidden"
                     onChange={(e) => {
                       const file = e.target.files?.[0];
-                      if (file) handleUploadFile(file, "pdf");
+                      if (file) handleUploadFile(file);
                     }}
                   />
                   <Button
@@ -472,53 +463,15 @@ export default function AdminMagazine() {
             </div>
 
             {/* Cover Upload */}
-            <div>
-              <label className="block text-sm font-sans font-medium text-foreground mb-1.5">
-                Image de couverture
-              </label>
-              {form.coverUrl ? (
-                <div className="flex items-center gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                  <img src={form.coverUrl} alt="Couverture" className="w-10 h-14 object-cover rounded shadow-sm" />
-                  <span className="text-sm font-sans text-blue-800 truncate flex-1">Couverture uploadée</span>
-                  <button
-                    onClick={() => setForm({ ...form, coverUrl: "", coverFileKey: "" })}
-                    className="p-1 rounded hover:bg-blue-100"
-                  >
-                    <X className="w-4 h-4 text-blue-600" />
-                  </button>
-                </div>
-              ) : (
-                <div className="flex gap-3">
-                  <input
-                    ref={coverInputRef}
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) handleUploadFile(file, "cover");
-                    }}
-                  />
-                  <Button
-                    variant="outline"
-                    onClick={() => coverInputRef.current?.click()}
-                    disabled={uploadingCover}
-                    className="font-sans"
-                  >
-                    <Upload className="w-4 h-4 mr-2" />
-                    {uploadingCover ? "Upload en cours..." : "Uploader la couverture"}
-                  </Button>
-                  <span className="text-xs text-muted-foreground self-center">ou</span>
-                  <input
-                    type="text"
-                    value={form.coverUrl}
-                    onChange={(e) => setForm({ ...form, coverUrl: e.target.value })}
-                    placeholder="URL de l'image"
-                    className="flex-1 px-3 py-2 border border-border rounded-lg text-sm font-sans bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
-                  />
-                </div>
-              )}
-            </div>
+            <ImagePickerWithAI
+              label="Image de couverture"
+              value={form.coverUrl}
+              onChange={(url) => setForm({ ...form, coverUrl: url, coverFileKey: "" })}
+              folder="magazine-covers"
+              uploadEndpoint="/api/upload/magazine"
+              aiPromptContext={`Professional magazine cover for issue titled: "${form.title || form.issueNumber}". ${form.description || ""}`}
+              previewHeight="h-40"
+            />
 
             {/* Options */}
             <div className="flex flex-wrap gap-6">

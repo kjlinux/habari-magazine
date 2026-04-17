@@ -33,6 +33,12 @@ export const users = mysqlTable("users", {
   country: varchar("country", { length: 255 }),
   sector: varchar("sector", { length: 255 }),
   profileCompleted: boolean("profileCompleted").default(false),
+  // Notification preferences
+  notifNewsletter: boolean("notifNewsletter").default(true).notNull(),
+  notifNewArticles: boolean("notifNewArticles").default(true).notNull(),
+  notifInvestments: boolean("notifInvestments").default(false).notNull(),
+  notifTenders: boolean("notifTenders").default(false).notNull(),
+  notifEvents: boolean("notifEvents").default(true).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
@@ -442,3 +448,18 @@ export const siteSettings = mysqlTable("siteSettings", {
 
 export type SiteSetting = typeof siteSettings.$inferSelect;
 export type InsertSiteSetting = typeof siteSettings.$inferInsert;
+
+/**
+ * Web Push subscriptions (browser push notifications)
+ */
+export const pushSubscriptions = mysqlTable("pushSubscriptions", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id),
+  endpoint: text("endpoint").notNull(),
+  p256dh: text("p256dh").notNull(),
+  auth: varchar("auth", { length: 255 }).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type PushSubscription = typeof pushSubscriptions.$inferSelect;
+export type InsertPushSubscription = typeof pushSubscriptions.$inferInsert;

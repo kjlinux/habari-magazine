@@ -6,6 +6,7 @@ import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerAuthRoutes } from "./oauth";
 import { registerStripeWebhook } from "../stripe/webhook";
 import { registerUploadRoutes } from "../uploadRoutes";
+import { startCronJobs } from "./cron";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
@@ -69,3 +70,4 @@ async function startServer() {
 }
 
 startServer().catch(console.error);
+startCronJobs();

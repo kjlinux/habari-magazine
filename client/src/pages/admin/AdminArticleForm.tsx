@@ -2,10 +2,11 @@ import AdminLayout from "@/components/AdminLayout";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { useLocation, useParams } from "wouter";
-import { ArrowLeft, Save, Eye, Loader2, Upload, X } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
+import { ArrowLeft, Save, Eye, Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import RichEditor from "@/components/RichEditor";
+import ImagePickerWithAI from "@/components/ImagePickerWithAI";
 
 function slugify(text: string): string {
   return text
@@ -31,8 +32,6 @@ export default function AdminArticleForm() {
   const [categoryId, setCategoryId] = useState<number | undefined>();
   const [countryId, setCountryId] = useState<number | undefined>();
   const [featuredImage, setFeaturedImage] = useState("");
-  const [imageUploading, setImageUploading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [status, setStatus] = useState<"draft" | "published" | "archived">("draft");
   const [accessLevel, setAccessLevel] = useState<"free" | "standard" | "premium" | "enterprise">("free");
 
@@ -89,26 +88,6 @@ export default function AdminArticleForm() {
   });
 
   const isSaving = createMutation.isPending || updateMutation.isPending;
-
-  const handleImageUpload = async (file: File) => {
-    setImageUploading(true);
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-      const res = await fetch("/api/upload/magazine", { method: "POST", body: formData, credentials: "include" });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err?.error || `Erreur ${res.status}`);
-      }
-      const { url } = await res.json();
-      setFeaturedImage(url);
-      toast.success("Image uploadée avec succès");
-    } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : "Erreur lors de l'upload");
-    } finally {
-      setImageUploading(false);
-    }
-  };
 
   const handleSave = (saveStatus?: "draft" | "published") => {
     const finalStatus = saveStatus || status;
@@ -304,52 +283,14 @@ export default function AdminArticleForm() {
               </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-sans font-medium text-foreground mb-1.5">Image à la une</label>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/jpeg,image/png,image/webp,image/gif"
-                className="hidden"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) handleImageUpload(file);
-                  e.target.value = "";
-                }}
-              />
-              {featuredImage ? (
-                <div className="relative rounded-lg overflow-hidden border border-border group">
-                  <img src={featuredImage} alt="Aperçu" className="w-full h-48 object-cover" onError={(e) => (e.currentTarget.style.display = "none")} />
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                    <Button type="button" size="sm" variant="secondary" onClick={() => fileInputRef.current?.click()} disabled={imageUploading} className="font-sans text-xs">
-                      {imageUploading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Upload className="w-3 h-3 mr-1" />}
-                      Remplacer
-                    </Button>
-                    <Button type="button" size="sm" variant="destructive" onClick={() => setFeaturedImage("")} className="font-sans text-xs">
-                      <X className="w-3 h-3 mr-1" /> Supprimer
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={imageUploading}
-                  title="Uploader une image à la une"
-                  className="w-full h-32 rounded-lg border-2 border-dashed border-border hover:border-primary/50 bg-muted/20 hover:bg-muted/40 transition-colors flex flex-col items-center justify-center gap-2 text-muted-foreground hover:text-foreground"
-                >
-                  {imageUploading ? (
-                    <Loader2 className="w-6 h-6 animate-spin" />
-                  ) : (
-                    <>
-                      <Upload className="w-6 h-6" />
-                      <span className="text-sm font-sans">Cliquer pour uploader une image</span>
-                      <span className="text-xs font-sans">JPG, PNG, WebP, GIF — max 50 Mo</span>
-                    </>
-                  )}
-                </button>
-              )}
-            </div>
+            <ImagePickerWithAI
+              label="Image à la une"
+              value={featuredImage}
+              onChange={setFeaturedImage}
+              folder="magazine-covers"
+              uploadEndpoint="/api/upload/magazine"
+              aiPromptContext={`Professional editorial magazine cover image for an article titled: "${title}". ${excerpt}`}
+            />
           </div>
         </div>
       </div>

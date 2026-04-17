@@ -35,7 +35,13 @@ import {
   KeyRound,
   Lock,
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import {
+  getPushPermissionState,
+  subscribeToPush,
+  unsubscribeFromPush,
+  getCurrentPushSubscription,
+} from "@/lib/pushNotifications";
 
 function ChangePasswordForm() {
   const [currentPw, setCurrentPw] = useState("");
@@ -126,6 +132,15 @@ export default function MyAccount() {
   const [country, setCountry] = useState("");
   const [sector, setSector] = useState("");
 
+  // Decode punycode email (e.g. xn--gmail-vqa.com → gmail.com)
+  const decodeEmail = (raw: string) => {
+    try {
+      return raw.replace(/xn--[a-z0-9-]+/gi, (part) => {
+        try { return new URL(`https://${part}`).hostname; } catch { return part; }
+      });
+    } catch { return raw; }
+  };
+
   // Populate form when profile loads
   useEffect(() => {
     if (profileQuery.data) {
@@ -138,6 +153,12 @@ export default function MyAccount() {
       setOrganization(p.organization || "");
       setCountry(p.country || "");
       setSector(p.sector || "");
+      // Load saved notification prefs
+      if (p.notifNewsletter !== undefined) setNotifNewsletter(p.notifNewsletter ?? true);
+      if (p.notifNewArticles !== undefined) setNotifNewArticles(p.notifNewArticles ?? true);
+      if (p.notifInvestments !== undefined) setNotifInvestments(p.notifInvestments ?? false);
+      if (p.notifTenders !== undefined) setNotifTenders(p.notifTenders ?? false);
+      if (p.notifEvents !== undefined) setNotifEvents(p.notifEvents ?? true);
     }
   }, [profileQuery.data]);
 
@@ -156,6 +177,70 @@ export default function MyAccount() {
   const subscriptionQuery = trpc.subscriptions.userPlan.useQuery(undefined, {
     enabled: isAuthenticated,
   });
+
+  // Notification preferences state (loaded from profile)
+  const [notifNewsletter, setNotifNewsletter] = useState(true);
+  const [notifNewArticles, setNotifNewArticles] = useState(true);
+  const [notifInvestments, setNotifInvestments] = useState(false);
+  const [notifTenders, setNotifTenders] = useState(false);
+  const [notifEvents, setNotifEvents] = useState(true);
+
+  const updateNotifMutation = trpc.profile.updateNotifications.useMutation({
+    onSuccess: () => toast.success("Préférences de notification enregistrées"),
+    onError: () => toast.error("Erreur lors de la sauvegarde des notifications"),
+  });
+
+  const saveNotif = (key: string, value: boolean) => {
+    const prefs = {
+      notifNewsletter,
+      notifNewArticles,
+      notifInvestments,
+      notifTenders,
+      notifEvents,
+      [key]: value,
+    };
+    updateNotifMutation.mutate(prefs);
+  };
+
+  // Push subscription state
+  const [pushState, setPushState] = useState<"granted" | "denied" | "default" | "unsupported">("default");
+  const [pushActive, setPushActive] = useState(false);
+  const pushChecked = useRef(false);
+
+  const vapidQuery = trpc.profile.getVapidKey.useQuery(undefined, { enabled: isAuthenticated });
+  const savePushSub = trpc.profile.savePushSubscription.useMutation();
+  const removePushSub = trpc.profile.removePushSubscription.useMutation();
+
+  useEffect(() => {
+    if (!isAuthenticated || pushChecked.current) return;
+    pushChecked.current = true;
+    getPushPermissionState().then(async (state) => {
+      if (!("serviceWorker" in navigator)) { setPushState("unsupported"); return; }
+      setPushState(state);
+      const sub = await getCurrentPushSubscription();
+      setPushActive(!!sub);
+      if (state === "default" && vapidQuery.data?.publicKey) {
+        subscribeToPush(vapidQuery.data.publicKey, async (s) => {
+          await savePushSub.mutateAsync(s);
+          setPushActive(true);
+          setPushState("granted");
+        });
+      }
+    });
+  }, [isAuthenticated, vapidQuery.data]);
+
+  const togglePush = async () => {
+    if (pushActive) {
+      await unsubscribeFromPush(async (endpoint) => { await removePushSub.mutateAsync({ endpoint }); });
+      setPushActive(false);
+    } else if (vapidQuery.data?.publicKey) {
+      const ok = await subscribeToPush(vapidQuery.data.publicKey, async (s) => {
+        await savePushSub.mutateAsync(s);
+      });
+      if (ok) { setPushActive(true); setPushState("granted"); }
+      else setPushState("denied");
+    }
+  };
 
   const cancelMutation = trpc.stripe.cancelSubscription.useMutation({
     onSuccess: () => {
@@ -272,7 +357,7 @@ export default function MyAccount() {
               <div>
                 <h1 className="font-serif text-3xl font-bold mb-1">{displayName}</h1>
                 <p className="text-white/70 font-sans text-sm flex items-center gap-2">
-                  <Mail className="w-4 h-4" /> {profile?.email || user?.email || "—"}
+                  <Mail className="w-4 h-4" /> {decodeEmail(profile?.email || user?.email || "—")}
                 </p>
                 {profile?.jobFunction && profile?.organization && (
                   <p className="text-white/50 font-sans text-sm flex items-center gap-2 mt-1">
@@ -490,7 +575,7 @@ export default function MyAccount() {
                     <ProfileField
                       icon={<Mail className="w-3.5 h-3.5" />}
                       label="Email"
-                      value={profile?.email || user?.email || "Non renseigné"}
+                      value={decodeEmail(profile?.email || user?.email || "Non renseigné")}
                     />
                     <ProfileField
                       icon={<Phone className="w-3.5 h-3.5" />}
@@ -592,7 +677,6 @@ export default function MyAccount() {
                   <KeyRound className="w-5 h-5" /> Changer le mot de passe
                 </h2>
                 <ChangePasswordForm />
-                </div>
               </div>
             </div>
 
@@ -715,14 +799,33 @@ export default function MyAccount() {
                   <Bell className="w-5 h-5" /> Préférences de notification
                 </h2>
                 <div className="space-y-4">
-                  <NotifToggle label="Newsletter hebdomadaire" desc="Résumé de l'actualité CEEAC chaque semaine" defaultOn />
-                  <NotifToggle label="Nouveaux articles" desc="Notification lors de la publication de nouveaux contenus" defaultOn />
-                  <NotifToggle label="Alertes investissements" desc="Nouvelles opportunités d'investissement" defaultOn={isPremium} />
-                  <NotifToggle label="Appels d'offres" desc="Nouveaux appels d'offres dans votre secteur" defaultOn={false} />
-                  <NotifToggle label="Événements" desc="Rappels pour les événements à venir" defaultOn />
+                  <NotifToggle label="Newsletter hebdomadaire" desc="Résumé de l'actualité CEEAC chaque semaine" value={notifNewsletter} onChange={(v) => { setNotifNewsletter(v); saveNotif("notifNewsletter", v); }} />
+                  <NotifToggle label="Nouveaux articles" desc="Notification lors de la publication de nouveaux contenus" value={notifNewArticles} onChange={(v) => { setNotifNewArticles(v); saveNotif("notifNewArticles", v); }} />
+                  <NotifToggle label="Alertes investissements" desc="Nouvelles opportunités d'investissement" value={notifInvestments} onChange={(v) => { setNotifInvestments(v); saveNotif("notifInvestments", v); }} />
+                  <NotifToggle label="Appels d'offres" desc="Nouveaux appels d'offres dans votre secteur" value={notifTenders} onChange={(v) => { setNotifTenders(v); saveNotif("notifTenders", v); }} />
+                  <NotifToggle label="Événements" desc="Rappels pour les événements à venir" value={notifEvents} onChange={(v) => { setNotifEvents(v); saveNotif("notifEvents", v); }} />
                 </div>
+                {/* Push browser indicator */}
+                {pushState !== "unsupported" && (
+                  <div className="mt-4 pt-4 border-t border-border flex items-center justify-between">
+                    <div>
+                      <p className="font-sans text-sm font-medium text-foreground">Notifications push (navigateur)</p>
+                      <p className="font-sans text-xs text-muted-foreground mt-0.5">
+                        {pushState === "denied" ? "Permission refusée par le navigateur" : pushActive ? "Activées sur cet appareil" : "Désactivées sur cet appareil"}
+                      </p>
+                    </div>
+                    {pushState !== "denied" && (
+                      <button
+                        onClick={togglePush}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${pushActive ? "bg-primary" : "bg-muted"}`}
+                      >
+                        <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${pushActive ? "translate-x-6" : "translate-x-1"}`} />
+                      </button>
+                    )}
+                  </div>
+                )}
                 <p className="text-xs text-muted-foreground font-sans mt-4">
-                  Les préférences de notification seront enregistrées dans votre profil.
+                  Vos préférences sont sauvegardées automatiquement.
                 </p>
               </div>
 
@@ -747,6 +850,7 @@ export default function MyAccount() {
             </div>
           </div>
         </div>
+      </div>
       <Footer />
     </>
   );
@@ -784,8 +888,7 @@ function FeatureItem({ included, label }: { included: boolean; label: string }) 
   );
 }
 
-function NotifToggle({ label, desc, defaultOn }: { label: string; desc: string; defaultOn: boolean }) {
-  const [on, setOn] = useState(defaultOn);
+function NotifToggle({ label, desc, value, onChange }: { label: string; desc: string; value: boolean; onChange: (v: boolean) => void }) {
   return (
     <div className="flex items-start justify-between gap-4 py-2">
       <div>
@@ -793,14 +896,14 @@ function NotifToggle({ label, desc, defaultOn }: { label: string; desc: string; 
         <p className="font-sans text-xs text-muted-foreground">{desc}</p>
       </div>
       <button
-        onClick={() => setOn(!on)}
+        onClick={() => onChange(!value)}
         className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${
-          on ? "bg-primary" : "bg-muted-foreground/20"
+          value ? "bg-primary" : "bg-muted-foreground/20"
         }`}
       >
         <span
           className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${
-            on ? "translate-x-5" : "translate-x-0"
+            value ? "translate-x-5" : "translate-x-0"
           }`}
         />
       </button>

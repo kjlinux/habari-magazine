@@ -2,8 +2,9 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { trpc } from "@/lib/trpc";
+import type { HeroSlide, GreenMetric, GreenCategory, EcosystemCard } from "@/lib/homepageTypes";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { toast } from "sonner";
 import {
   Loader2, ArrowRight, TrendingUp, BarChart3, Globe2, Briefcase,
@@ -26,8 +27,8 @@ const IMG = {
   culturePortrait: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663347570863/MsiRkJOHcDfupLNH.jpg",
 };
 
-/* Bande défilante — articles "chauds" et derniers dossiers */
-const heroSlides = [
+/* Fallback data — used when backend settings not yet configured */
+const FALLBACK_HERO_SLIDES: HeroSlide[] = [
   {
     rubrique: "Dossier Central",
     title: "Panne sèche à la CEMAC — Crise financière et ajustements budgétaires",
@@ -70,8 +71,7 @@ const heroSlides = [
   },
 ];
 
-/* Contenu vitrine — articles en accès libre */
-const freeContent = [
+const FALLBACK_FREE_CONTENT = [
   {
     rubrique: "Dossier Central",
     badge: "Accès libre",
@@ -136,8 +136,7 @@ const freeContent = [
   },
 ];
 
-/* Contenu premium — aperçu verrouillé */
-const premiumContent = [
+const FALLBACK_PREMIUM_CONTENT = [
   {
     rubrique: "Analyse Pays",
     title: "Tchad – Cameroun – Gabon : trajectoires comparées",
@@ -162,10 +161,67 @@ const premiumContent = [
   },
 ];
 
+const FALLBACK_GREEN_METRICS: GreenMetric[] = [
+  { label: "Prix crédit VCM", value: "$6,20", trend: "+12%" },
+  { label: "Projets REDD+", value: "47", trend: "+8" },
+  { label: "Finance verte/an", value: "$0,8 Md", trend: "+15%" },
+  { label: "Potentiel hydro", value: "107 GW", trend: "CEEAC" },
+];
+
+const FALLBACK_GREEN_CATEGORIES: GreenCategory[] = [
+  { label: "Marchés carbone", href: "/green/carbone", iconKey: "BarChart3" },
+  { label: "Forêts", href: "/green/forets", iconKey: "TreePine" },
+  { label: "Énergie", href: "/green/energie", iconKey: "Zap" },
+  { label: "Finance verte", href: "/green/finance", iconKey: "Landmark" },
+  { label: "Acteurs verts", href: "/green/acteurs", iconKey: "Users" },
+  { label: "Ressources", href: "/green/ressources", iconKey: "BookOpen" },
+];
+
+const FALLBACK_ECOSYSTEM_CARDS: EcosystemCard[] = [
+  { title: "Annuaire économique", desc: "Répertoire des acteurs clés de la zone CEEAC", href: "/annuaire", badge: "" },
+  { title: "Espace investisseurs", desc: "Opportunités d'investissement et baromètre CEEAC", href: "/investisseurs", badge: "Premium" },
+  { title: "Appels d'offres & AMI", desc: "Marchés publics, AMI et opportunités d'emploi", href: "/appels-offres", badge: "" },
+  { title: "Événements", desc: "Conférences, formations et networking", href: "/evenements", badge: "" },
+];
+
+const GREEN_CATEGORY_ICON_MAP: Record<string, React.ElementType> = {
+  BarChart3, TreePine, Zap, Landmark, Users, BookOpen,
+};
+
+const ECOSYSTEM_ICONS_ORDERED = [Globe2, Briefcase, Users, Calendar];
+
 export default function Home() {
   const { isAuthenticated } = useAuth();
   const { data: dbArticles, isLoading: articlesLoading } = trpc.articles.list.useQuery({ limit: 3, offset: 0 });
+  const { data: freeArticlesData } = trpc.articles.free.useQuery({ limit: 8, offset: 0 });
+  const { data: premiumArticlesData } = trpc.articles.premium.useQuery({ limit: 4, offset: 0 });
   const { data: events } = trpc.events.upcoming.useQuery({ limit: 3 });
+  const { data: hpSettings } = trpc.siteConfig.homepageSettings.useQuery({
+    keys: ["homepage_hero_slides", "homepage_green_metrics", "homepage_green_categories", "homepage_ecosystem_cards"],
+  });
+
+  const heroSlides = useMemo<HeroSlide[]>(() => {
+    try { if (hpSettings?.homepage_hero_slides) return JSON.parse(hpSettings.homepage_hero_slides); } catch {}
+    return FALLBACK_HERO_SLIDES;
+  }, [hpSettings]);
+
+  const greenMetrics = useMemo<GreenMetric[]>(() => {
+    try { if (hpSettings?.homepage_green_metrics) return JSON.parse(hpSettings.homepage_green_metrics); } catch {}
+    return FALLBACK_GREEN_METRICS;
+  }, [hpSettings]);
+
+  const greenCategories = useMemo<GreenCategory[]>(() => {
+    try { if (hpSettings?.homepage_green_categories) return JSON.parse(hpSettings.homepage_green_categories); } catch {}
+    return FALLBACK_GREEN_CATEGORIES;
+  }, [hpSettings]);
+
+  const ecosystemCards = useMemo<EcosystemCard[]>(() => {
+    try { if (hpSettings?.homepage_ecosystem_cards) return JSON.parse(hpSettings.homepage_ecosystem_cards); } catch {}
+    return FALLBACK_ECOSYSTEM_CARDS;
+  }, [hpSettings]);
+
+  const freeContent = (freeArticlesData && freeArticlesData.length > 0) ? freeArticlesData : FALLBACK_FREE_CONTENT;
+  const premiumContent = (premiumArticlesData && premiumArticlesData.length > 0) ? premiumArticlesData : FALLBACK_PREMIUM_CONTENT;
 
   const [nlEmail, setNlEmail] = useState("");
   const [nlLoading, setNlLoading] = useState(false);
@@ -177,12 +233,12 @@ export default function Home() {
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
   const nextSlide = useCallback(() => {
-    setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
-  }, []);
+    setCurrentSlide((prev) => (prev + 1) % (heroSlides.length || 1));
+  }, [heroSlides.length]);
 
   const prevSlide = useCallback(() => {
-    setCurrentSlide((prev) => (prev - 1 + heroSlides.length) % heroSlides.length);
-  }, []);
+    setCurrentSlide((prev) => (prev - 1 + (heroSlides.length || 1)) % (heroSlides.length || 1));
+  }, [heroSlides.length]);
 
   useEffect(() => {
     if (!isAutoPlaying) return;
@@ -205,7 +261,7 @@ export default function Home() {
     }
   };
 
-  const slide = heroSlides[currentSlide];
+  const slide = heroSlides[currentSlide] ?? heroSlides[0];
 
   return (
     <div className="min-h-screen bg-background">
@@ -325,12 +381,14 @@ export default function Home() {
                       <div className="flex items-center gap-2">
                         <button
                           onClick={(e) => { e.stopPropagation(); prevSlide(); }}
+                          aria-label="Slide précédent"
                           className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
                         >
                           <ChevronLeft className="w-4 h-4 text-white" />
                         </button>
                         <button
                           onClick={(e) => { e.stopPropagation(); nextSlide(); }}
+                          aria-label="Slide suivant"
                           className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
                         >
                           <ChevronRight className="w-4 h-4 text-white" />
@@ -345,6 +403,7 @@ export default function Home() {
                       <button
                         key={i}
                         onClick={() => setCurrentSlide(i)}
+                        aria-label={`Aller au slide ${i + 1}`}
                         className={`h-1.5 rounded-full transition-all duration-300 ${
                           i === currentSlide ? "w-6 bg-[oklch(0.72_0.15_75)]" : "w-1.5 bg-white/30 hover:bg-white/50"
                         }`}
@@ -477,12 +536,7 @@ export default function Home() {
 
           {/* Indicateurs express */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
-            {[
-              { label: "Prix crédit VCM", value: "$6,20", trend: "+12%" },
-              { label: "Projets REDD+", value: "47", trend: "+8" },
-              { label: "Finance verte/an", value: "$0,8 Md", trend: "+15%" },
-              { label: "Potentiel hydro", value: "107 GW", trend: "CEEAC" },
-            ].map((item) => (
+            {greenMetrics.map((item) => (
               <div key={item.label} className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-4">
                 <p className="text-[0.65rem] font-sans text-white/50 uppercase tracking-wider mb-0.5">{item.label}</p>
                 <div className="flex items-end gap-1.5">
@@ -495,21 +549,17 @@ export default function Home() {
 
           {/* Sous-rubriques */}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-            {[
-              { icon: BarChart3, label: "Marchés carbone", href: "/green/carbone" },
-              { icon: TreePine, label: "Forêts", href: "/green/forets" },
-              { icon: Zap, label: "Énergie", href: "/green/energie" },
-              { icon: Landmark, label: "Finance verte", href: "/green/finance" },
-              { icon: Users, label: "Acteurs verts", href: "/green/acteurs" },
-              { icon: BookOpen, label: "Ressources", href: "/green/ressources" },
-            ].map((sub) => (
-              <Link key={sub.href} href={sub.href}>
-                <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-4 text-center hover:bg-white/10 transition-colors cursor-pointer group">
-                  <sub.icon className="w-5 h-5 text-[oklch(0.75_0.18_145)] mx-auto mb-2 group-hover:scale-110 transition-transform" />
-                  <span className="text-xs font-sans text-white/70 group-hover:text-white transition-colors">{sub.label}</span>
-                </div>
-              </Link>
-            ))}
+            {greenCategories.map((sub, idx) => {
+              const Icon = GREEN_CATEGORY_ICON_MAP[sub.iconKey] ?? BarChart3;
+              return (
+                <Link key={sub.href || idx} href={sub.href}>
+                  <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-4 text-center hover:bg-white/10 transition-colors cursor-pointer group">
+                    <Icon className="w-5 h-5 text-[oklch(0.75_0.18_145)] mx-auto mb-2 group-hover:scale-110 transition-transform" />
+                    <span className="text-xs font-sans text-white/70 group-hover:text-white transition-colors">{sub.label}</span>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -725,27 +775,25 @@ export default function Home() {
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              { icon: Globe2, title: "Annuaire économique", desc: "Répertoire des acteurs clés de la zone CEEAC", href: "/annuaire", badge: null },
-              { icon: Briefcase, title: "Espace investisseurs", desc: "Opportunités d'investissement et baromètre CEEAC", href: "/investisseurs", badge: "Premium" },
-              { icon: Users, title: "Appels d'offres & AMI", desc: "Marchés publics, AMI et opportunités d'emploi", href: "/appels-offres", badge: null },
-              { icon: Calendar, title: "Événements", desc: "Conférences, formations et networking", href: "/evenements", badge: null },
-            ].map((svc) => (
-              <Link key={svc.title} href={svc.href}>
-                <div className="group bg-background border border-border rounded-xl p-6 hover:shadow-lg hover:border-primary/20 transition-all cursor-pointer h-full relative">
-                  {svc.badge && (
-                    <span className="absolute top-3 right-3 text-[0.55rem] font-sans bg-[oklch(0.72_0.15_75)]/15 text-[oklch(0.55_0.12_75)] px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider flex items-center gap-1">
-                      <Lock className="w-2.5 h-2.5" /> {svc.badge}
-                    </span>
-                  )}
-                  <div className="w-12 h-12 rounded-lg bg-primary/5 flex items-center justify-center mb-4 group-hover:bg-primary/10 transition-colors">
-                    <svc.icon className="w-6 h-6 text-primary" />
+            {ecosystemCards.map((svc, idx) => {
+              const Icon = ECOSYSTEM_ICONS_ORDERED[idx] ?? Globe2;
+              return (
+                <Link key={svc.href || idx} href={svc.href}>
+                  <div className="group bg-background border border-border rounded-xl p-6 hover:shadow-lg hover:border-primary/20 transition-all cursor-pointer h-full relative">
+                    {svc.badge && (
+                      <span className="absolute top-3 right-3 text-[0.55rem] font-sans bg-[oklch(0.72_0.15_75)]/15 text-[oklch(0.55_0.12_75)] px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider flex items-center gap-1">
+                        <Lock className="w-2.5 h-2.5" /> {svc.badge}
+                      </span>
+                    )}
+                    <div className="w-12 h-12 rounded-lg bg-primary/5 flex items-center justify-center mb-4 group-hover:bg-primary/10 transition-colors">
+                      <Icon className="w-6 h-6 text-primary" />
+                    </div>
+                    <h3 className="font-serif font-bold text-foreground mb-2">{svc.title}</h3>
+                    <p className="text-sm text-muted-foreground font-sans">{svc.desc}</p>
                   </div>
-                  <h3 className="font-serif font-bold text-foreground mb-2">{svc.title}</h3>
-                  <p className="text-sm text-muted-foreground font-sans">{svc.desc}</p>
-                </div>
-              </Link>
-            ))}
+                </Link>
+              );
+            })}
           </div>
         </div>
       </section>
