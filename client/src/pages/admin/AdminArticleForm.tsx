@@ -27,6 +27,7 @@ export default function AdminArticleForm() {
   const [slugManual, setSlugManual] = useState(false);
   const [excerpt, setExcerpt] = useState("");
   const [content, setContent] = useState("");
+  const [authorId, setAuthorId] = useState<number | undefined>();
   const [categoryId, setCategoryId] = useState<number | undefined>();
   const [countryId, setCountryId] = useState<number | undefined>();
   const [featuredImage, setFeaturedImage] = useState("");
@@ -42,6 +43,7 @@ export default function AdminArticleForm() {
 
   const { data: categories } = trpc.admin.categories.list.useQuery();
   const { data: countries } = trpc.admin.countries.list.useQuery();
+  const { data: authors } = trpc.admin.authors.list.useQuery();
 
   const utils = trpc.useUtils();
 
@@ -52,6 +54,7 @@ export default function AdminArticleForm() {
       setSlugManual(true);
       setExcerpt(article.excerpt || "");
       setContent(article.content);
+      setAuthorId(article.authorId ?? undefined);
       setCategoryId(article.categoryId ?? undefined);
       setCountryId(article.countryId ?? undefined);
       setFeaturedImage(article.featuredImage || "");
@@ -114,6 +117,7 @@ export default function AdminArticleForm() {
       slug,
       excerpt: excerpt || undefined,
       content,
+      authorId: authorId || undefined,
       categoryId: categoryId || undefined,
       countryId: countryId || undefined,
       featuredImage: featuredImage || undefined,
@@ -225,6 +229,21 @@ export default function AdminArticleForm() {
             <h2 className="text-lg font-serif font-bold text-foreground">Métadonnées</h2>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div>
+                <label className="block text-sm font-sans font-medium text-foreground mb-1.5">Auteur</label>
+                <select
+                  title="Auteur"
+                  value={authorId ?? ""}
+                  onChange={(e) => setAuthorId(e.target.value ? parseInt(e.target.value) : undefined)}
+                  className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-foreground font-sans text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors"
+                >
+                  <option value="">— Aucun auteur —</option>
+                  {authors?.map((a) => (
+                    <option key={a.id} value={a.id}>{a.name}</option>
+                  ))}
+                </select>
+              </div>
+
               <div>
                 <label className="block text-sm font-sans font-medium text-foreground mb-1.5">Rubrique</label>
                 <select

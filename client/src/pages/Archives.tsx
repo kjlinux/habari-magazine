@@ -165,7 +165,7 @@ export default function Archives() {
               Articles
               {articlesData && (
                 <span className="ml-2 text-xs bg-muted px-2 py-0.5 rounded-full">
-                  {articlesData.total}
+                  {articlesData.total ?? 0}
                 </span>
               )}
             </TabsTrigger>

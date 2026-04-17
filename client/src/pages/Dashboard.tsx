@@ -21,7 +21,7 @@ type TabId = (typeof tabs)[number]["id"];
 
 export default function Dashboard() {
   const { user, logout, isAuthenticated, loading } = useAuth();
-  const { data: userPlan, isLoading: planLoading } = trpc.subscriptions.userPlan.useQuery();
+  const { data: userPlan, isLoading: planLoading } = trpc.subscriptions.userPlan.useQuery(undefined, { enabled: isAuthenticated });
   const { data: purchases, isLoading: purchasesLoading } = trpc.magazine.myPurchases.useQuery(undefined, { enabled: isAuthenticated });
   const [activeTab, setActiveTab] = useState<TabId>("overview");
 

@@ -49,6 +49,7 @@ function ChangePasswordForm() {
     e.preventDefault();
     setError("");
     setSuccess(false);
+    if (!currentPw.trim()) { setError("Veuillez saisir votre mot de passe actuel."); return; }
     if (newPw.length < 8) { setError("Le nouveau mot de passe doit contenir au moins 8 caractères."); return; }
     if (newPw !== confirmPw) { setError("Les mots de passe ne correspondent pas."); return; }
     setLoading(true);
@@ -160,6 +161,7 @@ export default function MyAccount() {
     onSuccess: () => {
       toast.success("Votre abonnement a été annulé avec succès.");
       subscriptionQuery.refetch();
+      setCancelLoading(false);
     },
     onError: () => {
       toast.error("Erreur lors de l'annulation. Veuillez réessayer.");
@@ -791,10 +793,7 @@ function NotifToggle({ label, desc, defaultOn }: { label: string; desc: string; 
         <p className="font-sans text-xs text-muted-foreground">{desc}</p>
       </div>
       <button
-        onClick={() => {
-          setOn(!on);
-          toast.success(on ? `${label} désactivé` : `${label} activé`);
-        }}
+        onClick={() => setOn(!on)}
         className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${
           on ? "bg-primary" : "bg-muted-foreground/20"
         }`}

@@ -158,38 +158,53 @@ export const appRouter = router({
   articles: router({
     list: publicProcedure
       .input(z.object({ limit: z.number().default(10), offset: z.number().default(0) }))
-      .query(async ({ input }) => await getPublishedArticles(input.limit, input.offset)),
+      .query(async ({ input }) => {
+        try { return await getPublishedArticles(input.limit, input.offset); }
+        catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement des articles" }); }
+      }),
 
     free: publicProcedure
       .input(z.object({ limit: z.number().default(10), offset: z.number().default(0) }))
-      .query(async ({ input }) => await getFreeArticles(input.limit, input.offset)),
+      .query(async ({ input }) => {
+        try { return await getFreeArticles(input.limit, input.offset); }
+        catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement des articles" }); }
+      }),
 
     premium: publicProcedure
       .input(z.object({ limit: z.number().default(10), offset: z.number().default(0) }))
-      .query(async ({ input }) => await getPremiumArticles(input.limit, input.offset)),
+      .query(async ({ input }) => {
+        try { return await getPremiumArticles(input.limit, input.offset); }
+        catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement des articles" }); }
+      }),
 
     bySlug: publicProcedure
       .input(z.object({ slug: z.string() }))
       .query(async ({ ctx, input }) => {
-        const article = await getArticleBySlug(input.slug);
-        if (!article) {
-          return { article: null, access: null };
+        try {
+          const article = await getArticleBySlug(input.slug);
+          if (!article) return { article: null, access: null };
+          const activeSub = ctx.user ? await getUserSubscription(ctx.user.id) : null;
+          const access = canAccessArticle(ctx.user, article, activeSub ?? null);
+          const safeArticle = access.allowed ? article : stripPremiumContent(article);
+          return { article: safeArticle, access };
+        } catch (e) {
+          if (e instanceof TRPCError) throw e;
+          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement de l'article" });
         }
-        const activeSub = ctx.user ? await getUserSubscription(ctx.user.id) : null;
-        const access = canAccessArticle(ctx.user, article, activeSub ?? null);
-        const safeArticle = access.allowed ? article : stripPremiumContent(article);
-        return { article: safeArticle, access };
       }),
 
     checkAccess: publicProcedure
       .input(z.object({ slug: z.string() }))
       .query(async ({ ctx, input }) => {
-        const article = await getArticleBySlug(input.slug);
-        if (!article) {
-          return { allowed: false, reason: "free" as const, trialDaysRemaining: 0, isLaunchPeriod: false };
+        try {
+          const article = await getArticleBySlug(input.slug);
+          if (!article) return { allowed: false, reason: "free" as const, trialDaysRemaining: 0, isLaunchPeriod: false };
+          const activeSub = ctx.user ? await getUserSubscription(ctx.user.id) : null;
+          return canAccessArticle(ctx.user, article, activeSub ?? null);
+        } catch (e) {
+          if (e instanceof TRPCError) throw e;
+          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la vérification d'accès" });
         }
-        const activeSub = ctx.user ? await getUserSubscription(ctx.user.id) : null;
-        return canAccessArticle(ctx.user, article, activeSub ?? null);
       }),
 
     downloadUrl: protectedProcedure
@@ -209,51 +224,81 @@ export const appRouter = router({
 
     byCategory: publicProcedure
       .input(z.object({ categoryId: z.number(), limit: z.number().default(10) }))
-      .query(async ({ input }) => await getArticlesByCategory(input.categoryId, input.limit)),
+      .query(async ({ input }) => {
+        try { return await getArticlesByCategory(input.categoryId, input.limit); }
+        catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement des articles" }); }
+      }),
 
     byCountry: publicProcedure
       .input(z.object({ countryId: z.number(), limit: z.number().default(10) }))
-      .query(async ({ input }) => await getArticlesByCountry(input.countryId, input.limit)),
+      .query(async ({ input }) => {
+        try { return await getArticlesByCountry(input.countryId, input.limit); }
+        catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement des articles" }); }
+      }),
   }),
 
   directory: router({
     list: publicProcedure
       .input(z.object({ limit: z.number().default(20), offset: z.number().default(0) }))
-      .query(async ({ input }) => await getEconomicActors(input.limit, input.offset)),
+      .query(async ({ input }) => {
+        try { return await getEconomicActors(input.limit, input.offset); }
+        catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement de l'annuaire" }); }
+      }),
 
     bySlug: publicProcedure
       .input(z.object({ slug: z.string() }))
-      .query(async ({ input }) => await getEconomicActorBySlug(input.slug)),
+      .query(async ({ input }) => {
+        try { return await getEconomicActorBySlug(input.slug); }
+        catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement de l'acteur" }); }
+      }),
 
     byCountry: publicProcedure
       .input(z.object({ countryId: z.number(), limit: z.number().default(20) }))
-      .query(async ({ input }) => await getEconomicActorsByCountry(input.countryId, input.limit)),
+      .query(async ({ input }) => {
+        try { return await getEconomicActorsByCountry(input.countryId, input.limit); }
+        catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement de l'annuaire" }); }
+      }),
 
     bySector: publicProcedure
       .input(z.object({ sector: z.string(), limit: z.number().default(20) }))
-      .query(async ({ input }) => await getEconomicActorsBySector(input.sector, input.limit)),
+      .query(async ({ input }) => {
+        try { return await getEconomicActorsBySector(input.sector, input.limit); }
+        catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement de l'annuaire" }); }
+      }),
   }),
 
   investments: router({
     list: publicProcedure
       .input(z.object({ limit: z.number().default(10), offset: z.number().default(0) }))
-      .query(async ({ input }) => await getOpenInvestmentOpportunities(input.limit, input.offset)),
+      .query(async ({ input }) => {
+        try { return await getOpenInvestmentOpportunities(input.limit, input.offset); }
+        catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement des investissements" }); }
+      }),
 
     byCountry: publicProcedure
       .input(z.object({ countryId: z.number(), limit: z.number().default(10) }))
-      .query(async ({ input }) => await getInvestmentOpportunitiesByCountry(input.countryId, input.limit)),
+      .query(async ({ input }) => {
+        try { return await getInvestmentOpportunitiesByCountry(input.countryId, input.limit); }
+        catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement des investissements" }); }
+      }),
   }),
 
   events: router({
     upcoming: publicProcedure
       .input(z.object({ limit: z.number().default(10) }))
-      .query(async ({ input }) => await getUpcomingEvents(input.limit)),
+      .query(async ({ input }) => {
+        try { return await getUpcomingEvents(input.limit); }
+        catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement des événements" }); }
+      }),
   }),
 
   bids: router({
     list: publicProcedure
       .input(z.object({ limit: z.number().default(10), offset: z.number().default(0) }))
-      .query(async ({ input }) => await getOpenCallsForBids(input.limit, input.offset)),
+      .query(async ({ input }) => {
+        try { return await getOpenCallsForBids(input.limit, input.offset); }
+        catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement des appels d'offres" }); }
+      }),
   }),
 
   opportunities: router({
@@ -263,57 +308,89 @@ export const appRouter = router({
         limit: z.number().default(50),
         offset: z.number().default(0),
       }))
-      .query(async ({ input }) => await getActiveOpportunities(input.type, input.limit, input.offset)),
+      .query(async ({ input }) => {
+        try { return await getActiveOpportunities(input.type, input.limit, input.offset); }
+        catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement des opportunités" }); }
+      }),
 
     bySlug: publicProcedure
       .input(z.object({ slug: z.string() }))
-      .query(async ({ input }) => await getOpportunityBySlug(input.slug)),
+      .query(async ({ input }) => {
+        try { return await getOpportunityBySlug(input.slug); }
+        catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement de l'opportunité" }); }
+      }),
 
     counts: publicProcedure
-      .query(async () => await countActiveOpportunities()),
+      .query(async () => {
+        try { return await countActiveOpportunities(); }
+        catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du comptage des opportunités" }); }
+      }),
   }),
 
   countries: router({
-    list: publicProcedure.query(async () => await getAllCountries()),
+    list: publicProcedure.query(async () => {
+      try { return await getAllCountries(); }
+      catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement des pays" }); }
+    }),
     byCode: publicProcedure
       .input(z.object({ code: z.string() }))
-      .query(async ({ input }) => await getCountryByCode(input.code)),
+      .query(async ({ input }) => {
+        try { return await getCountryByCode(input.code); }
+        catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement du pays" }); }
+      }),
   }),
 
   subscriptions: router({
-    plans: publicProcedure.query(async () => await getSubscriptionPlans()),
-    userPlan: protectedProcedure.query(async ({ ctx }) => await getUserSubscription(ctx.user.id)),
+    plans: publicProcedure.query(async () => {
+      try { return await getSubscriptionPlans(); }
+      catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement des plans" }); }
+    }),
+    userPlan: protectedProcedure.query(async ({ ctx }) => {
+      try { return await getUserSubscription(ctx.user.id); }
+      catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement de l'abonnement" }); }
+    }),
   }),
 
   newsletter: router({
     subscribe: publicProcedure
       .input(z.object({ email: z.string().email(), name: z.string().optional(), tier: z.enum(["free", "premium"]).default("free") }))
       .mutation(async ({ ctx, input }) => {
-        if (input.tier === "premium") {
-          if (!ctx.user) {
-            throw new TRPCError({
-              code: "UNAUTHORIZED",
-              message: "Vous devez être connecté et abonné pour la newsletter premium",
-            });
+        try {
+          if (input.tier === "premium") {
+            if (!ctx.user) {
+              throw new TRPCError({
+                code: "UNAUTHORIZED",
+                message: "Vous devez être connecté et abonné pour la newsletter premium",
+              });
+            }
+            const activeSub = await getUserSubscription(ctx.user.id);
+            if (!hasActiveSubscription(ctx.user, activeSub ?? null)) {
+              throw new TRPCError({
+                code: "FORBIDDEN",
+                message: "La newsletter premium nécessite un abonnement actif (Newsletter Premium ou Habari Intégral)",
+              });
+            }
           }
-          const activeSub = await getUserSubscription(ctx.user.id);
-          if (!hasActiveSubscription(ctx.user, activeSub ?? null)) {
-            throw new TRPCError({
-              code: "FORBIDDEN",
-              message: "La newsletter premium nécessite un abonnement actif (Newsletter Premium ou Habari Intégral)",
-            });
-          }
+          return await subscribeToNewsletter({ email: input.email, name: input.name, tier: input.tier });
+        } catch (e) {
+          if (e instanceof TRPCError) throw e;
+          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de l'inscription à la newsletter" });
         }
-        return await subscribeToNewsletter({ email: input.email, name: input.name, tier: input.tier });
       }),
 
     status: publicProcedure
       .input(z.object({ email: z.string().email() }))
-      .query(async ({ input }) => await getNewsletterSubscription(input.email)),
+      .query(async ({ input }) => {
+        try { return await getNewsletterSubscription(input.email); }
+        catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la vérification" }); }
+      }),
 
     unsubscribe: publicProcedure
       .input(z.object({ email: z.string().email() }))
-      .mutation(async ({ input }) => await unsubscribeNewsletter(input.email)),
+      .mutation(async ({ input }) => {
+        try { return await unsubscribeNewsletter(input.email); }
+        catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la désinscription" }); }
+      }),
   }),
 
   // ═══════════════════════════════════════════════
@@ -323,7 +400,8 @@ export const appRouter = router({
   profile: router({
     /** Get current user profile */
     get: protectedProcedure.query(async ({ ctx }) => {
-      return await getUserProfile(ctx.user.id);
+      try { return await getUserProfile(ctx.user.id); }
+      catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement du profil" }); }
     }),
 
     /** Update user profile (registration form) */
@@ -339,13 +417,16 @@ export const appRouter = router({
         sector: z.string().optional(),
       }))
       .mutation(async ({ ctx, input }) => {
-        return await updateUserProfile(ctx.user.id, input);
+        try { return await updateUserProfile(ctx.user.id, input); }
+        catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la mise à jour du profil" }); }
       }),
 
     /** Check if profile is completed */
     isCompleted: protectedProcedure.query(async ({ ctx }) => {
-      const completed = await isProfileCompleted(ctx.user.id);
-      return { completed };
+      try {
+        const completed = await isProfileCompleted(ctx.user.id);
+        return { completed };
+      } catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la vérification du profil" }); }
     }),
   }),
 
@@ -355,7 +436,10 @@ export const appRouter = router({
 
   admin: router({
     /** Dashboard stats */
-    stats: adminProcedure.query(async () => await getAdminStats()),
+    stats: adminProcedure.query(async () => {
+      try { return await getAdminStats(); }
+      catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement des statistiques" }); }
+    }),
 
     /** Articles CRUD */
     articles: router({
@@ -365,11 +449,17 @@ export const appRouter = router({
           offset: z.number().default(0),
           status: z.string().optional(),
         }))
-        .query(async ({ input }) => await adminGetAllArticles(input.limit, input.offset, input.status)),
+        .query(async ({ input }) => {
+          try { return await adminGetAllArticles(input.limit, input.offset, input.status); }
+          catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement des articles" }); }
+        }),
 
       byId: adminProcedure
         .input(z.object({ id: z.number() }))
-        .query(async ({ input }) => await adminGetArticleById(input.id)),
+        .query(async ({ input }) => {
+          try { return await adminGetArticleById(input.id); }
+          catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement de l'article" }); }
+        }),
 
       create: adminProcedure
         .input(z.object({
@@ -384,7 +474,13 @@ export const appRouter = router({
           status: z.enum(["draft", "published", "archived"]).default("draft"),
           minSubscriptionTier: z.enum(["free", "standard", "premium", "enterprise"]).default("free"),
         }))
-        .mutation(async ({ input }) => await adminCreateArticle(input)),
+        .mutation(async ({ input }) => {
+          try { return await adminCreateArticle(input); }
+          catch (e) {
+            if (e instanceof TRPCError) throw e;
+            throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la création de l'article" });
+          }
+        }),
 
       update: adminProcedure
         .input(z.object({
@@ -401,13 +497,18 @@ export const appRouter = router({
           minSubscriptionTier: z.enum(["free", "standard", "premium", "enterprise"]).optional(),
         }))
         .mutation(async ({ input }) => {
-          const { id, ...data } = input;
-          return await adminUpdateArticle(id, data);
+          try {
+            const { id, ...data } = input;
+            return await adminUpdateArticle(id, data);
+          } catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la mise à jour de l'article" }); }
         }),
 
       delete: adminProcedure
         .input(z.object({ id: z.number() }))
-        .mutation(async ({ input }) => await adminDeleteArticle(input.id)),
+        .mutation(async ({ input }) => {
+          try { return await adminDeleteArticle(input.id); }
+          catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la suppression de l'article" }); }
+        }),
     }),
 
     /** Users management */
@@ -418,21 +519,30 @@ export const appRouter = router({
           offset: z.number().default(0),
           search: z.string().optional(),
         }))
-        .query(async ({ input }) => await adminGetAllUsers(input.limit, input.offset, input.search)),
+        .query(async ({ input }) => {
+          try { return await adminGetAllUsers(input.limit, input.offset, input.search); }
+          catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement des utilisateurs" }); }
+        }),
 
       updateRole: adminProcedure
         .input(z.object({
           userId: z.number(),
           role: z.enum(["user", "admin"]),
         }))
-        .mutation(async ({ input }) => await adminUpdateUserRole(input.userId, input.role)),
+        .mutation(async ({ input }) => {
+          try { return await adminUpdateUserRole(input.userId, input.role); }
+          catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la mise à jour du rôle" }); }
+        }),
 
       updateSubscription: adminProcedure
         .input(z.object({
           userId: z.number(),
           tier: z.enum(["free", "standard", "premium", "enterprise"]),
         }))
-        .mutation(async ({ input }) => await adminUpdateUserSubscription(input.userId, input.tier)),
+        .mutation(async ({ input }) => {
+          try { return await adminUpdateUserSubscription(input.userId, input.tier); }
+          catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la mise à jour de l'abonnement" }); }
+        }),
     }),
 
     /** Newsletter subscribers */
@@ -443,26 +553,41 @@ export const appRouter = router({
           offset: z.number().default(0),
           tier: z.string().optional(),
         }))
-        .query(async ({ input }) => await adminGetNewsletterSubscribers(input.limit, input.offset, input.tier)),
+        .query(async ({ input }) => {
+          try { return await adminGetNewsletterSubscribers(input.limit, input.offset, input.tier); }
+          catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement des abonnés" }); }
+        }),
     }),
 
     /** Categories */
     categories: router({
-      list: adminProcedure.query(async () => await adminGetCategories()),
+      list: adminProcedure.query(async () => {
+        try { return await adminGetCategories(); }
+        catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement des rubriques" }); }
+      }),
     }),
 
     /** Countries (for dropdowns) */
     countries: router({
-      list: adminProcedure.query(async () => await getAllCountries()),
+      list: adminProcedure.query(async () => {
+        try { return await getAllCountries(); }
+        catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement des pays" }); }
+      }),
     }),
 
     /** Magazine issues CRUD */
     magazineIssues: router({
-      list: adminProcedure.query(async () => await adminGetAllMagazineIssues()),
+      list: adminProcedure.query(async () => {
+        try { return await adminGetAllMagazineIssues(); }
+        catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement des numéros" }); }
+      }),
 
       byId: adminProcedure
         .input(z.object({ id: z.number() }))
-        .query(async ({ input }) => await adminGetMagazineIssueById(input.id)),
+        .query(async ({ input }) => {
+          try { return await adminGetMagazineIssueById(input.id); }
+          catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement du numéro" }); }
+        }),
 
       create: adminProcedure
         .input(z.object({
@@ -478,7 +603,13 @@ export const appRouter = router({
           isPublished: z.boolean().default(false),
           sommaire: z.string().optional(),
         }))
-        .mutation(async ({ input }) => await adminCreateMagazineIssue(input)),
+        .mutation(async ({ input }) => {
+          try { return await adminCreateMagazineIssue(input); }
+          catch (e) {
+            if (e instanceof TRPCError) throw e;
+            throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la création du numéro" });
+          }
+        }),
 
       update: adminProcedure
         .input(z.object({
@@ -496,19 +627,26 @@ export const appRouter = router({
           sommaire: z.string().nullable().optional(),
         }))
         .mutation(async ({ input }) => {
-          const { id, ...data } = input;
-          return await adminUpdateMagazineIssue(id, data);
+          try {
+            const { id, ...data } = input;
+            return await adminUpdateMagazineIssue(id, data);
+          } catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la mise à jour du numéro" }); }
         }),
 
       delete: adminProcedure
         .input(z.object({ id: z.number() }))
-        .mutation(async ({ input }) => await adminDeleteMagazineIssue(input.id)),
+        .mutation(async ({ input }) => {
+          try { return await adminDeleteMagazineIssue(input.id); }
+          catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la suppression du numéro" }); }
+        }),
     }),
 
     /** Registered users count */
     userCount: adminProcedure.query(async () => {
-      const total = await getTotalUserCount();
-      return { totalUsers: total };
+      try {
+        const total = await getTotalUserCount();
+        return { totalUsers: total };
+      } catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du comptage des utilisateurs" }); }
     }),
 
     /** Opportunities CRUD (Appels d'offres, AMI, Emplois) */
@@ -521,11 +659,17 @@ export const appRouter = router({
           limit: z.number().default(50),
           offset: z.number().default(0),
         }))
-        .query(async ({ input }) => await adminGetAllOpportunities(input)),
+        .query(async ({ input }) => {
+          try { return await adminGetAllOpportunities(input); }
+          catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement des opportunités" }); }
+        }),
 
       byId: adminProcedure
         .input(z.object({ id: z.number() }))
-        .query(async ({ input }) => await adminGetOpportunityById(input.id)),
+        .query(async ({ input }) => {
+          try { return await adminGetOpportunityById(input.id); }
+          catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement de l'opportunité" }); }
+        }),
 
       create: adminProcedure
         .input(z.object({
@@ -547,7 +691,13 @@ export const appRouter = router({
           featured: z.boolean().default(false),
           status: z.enum(['active', 'closed', 'draft']).default('active'),
         }))
-        .mutation(async ({ input }) => await adminCreateOpportunity(input)),
+        .mutation(async ({ input }) => {
+          try { return await adminCreateOpportunity(input); }
+          catch (e) {
+            if (e instanceof TRPCError) throw e;
+            throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la création de l'opportunité" });
+          }
+        }),
 
       update: adminProcedure
         .input(z.object({
@@ -571,20 +721,31 @@ export const appRouter = router({
           status: z.enum(['active', 'closed', 'draft']).optional(),
         }))
         .mutation(async ({ input }) => {
-          const { id, ...data } = input;
-          return await adminUpdateOpportunity(id, data);
+          try {
+            const { id, ...data } = input;
+            return await adminUpdateOpportunity(id, data);
+          } catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la mise à jour de l'opportunité" }); }
         }),
 
       delete: adminProcedure
         .input(z.object({ id: z.number() }))
-        .mutation(async ({ input }) => await adminDeleteOpportunity(input.id)),
+        .mutation(async ({ input }) => {
+          try { return await adminDeleteOpportunity(input.id); }
+          catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la suppression de l'opportunité" }); }
+        }),
 
       toggleFeatured: adminProcedure
         .input(z.object({ id: z.number() }))
-        .mutation(async ({ input }) => await adminToggleOpportunityFeatured(input.id)),
+        .mutation(async ({ input }) => {
+          try { return await adminToggleOpportunityFeatured(input.id); }
+          catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la mise en vedette" }); }
+        }),
 
       counts: adminProcedure
-        .query(async () => await adminCountOpportunities()),
+        .query(async () => {
+          try { return await adminCountOpportunities(); }
+          catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du comptage des opportunités" }); }
+        }),
     }),
 
     /** Contact messages */
@@ -595,34 +756,55 @@ export const appRouter = router({
           offset: z.number().default(0),
           status: z.string().optional(),
         }))
-        .query(async ({ input }) => await adminGetContactMessages(input.limit, input.offset, input.status)),
+        .query(async ({ input }) => {
+          try { return await adminGetContactMessages(input.limit, input.offset, input.status); }
+          catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement des messages" }); }
+        }),
 
       byId: adminProcedure
         .input(z.object({ id: z.number() }))
-        .query(async ({ input }) => await adminGetContactMessageById(input.id)),
+        .query(async ({ input }) => {
+          try { return await adminGetContactMessageById(input.id); }
+          catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement du message" }); }
+        }),
 
       updateStatus: adminProcedure
         .input(z.object({
           id: z.number(),
           status: z.enum(["new", "read", "replied", "archived"]),
         }))
-        .mutation(async ({ input }) => await adminUpdateContactMessageStatus(input.id, input.status)),
+        .mutation(async ({ input }) => {
+          try { return await adminUpdateContactMessageStatus(input.id, input.status); }
+          catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la mise à jour du statut" }); }
+        }),
 
       countNew: adminProcedure
-        .query(async () => await adminCountNewContactMessages()),
+        .query(async () => {
+          try { return await adminCountNewContactMessages(); }
+          catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du comptage des messages" }); }
+        }),
 
       delete: adminProcedure
         .input(z.object({ id: z.number() }))
-        .mutation(async ({ input }) => await adminDeleteContactMessage(input.id)),
+        .mutation(async ({ input }) => {
+          try { return await adminDeleteContactMessage(input.id); }
+          catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la suppression du message" }); }
+        }),
     }),
 
     /** Authors CRUD */
     authors: router({
-      list: adminProcedure.query(async () => await adminGetAllAuthors()),
+      list: adminProcedure.query(async () => {
+        try { return await adminGetAllAuthors(); }
+        catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement des auteurs" }); }
+      }),
 
       byId: adminProcedure
         .input(z.object({ id: z.number() }))
-        .query(async ({ input }) => await adminGetAuthorById(input.id)),
+        .query(async ({ input }) => {
+          try { return await adminGetAuthorById(input.id); }
+          catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement de l'auteur" }); }
+        }),
 
       create: adminProcedure
         .input(z.object({
@@ -633,7 +815,13 @@ export const appRouter = router({
           specialization: z.string().optional(),
           userId: z.number().optional(),
         }))
-        .mutation(async ({ input }) => await adminCreateAuthor(input)),
+        .mutation(async ({ input }) => {
+          try { return await adminCreateAuthor(input); }
+          catch (e) {
+            if (e instanceof TRPCError) throw e;
+            throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la création de l'auteur" });
+          }
+        }),
 
       update: adminProcedure
         .input(z.object({
@@ -645,22 +833,33 @@ export const appRouter = router({
           specialization: z.string().nullable().optional(),
         }))
         .mutation(async ({ input }) => {
-          const { id, ...data } = input;
-          return await adminUpdateAuthor(id, data);
+          try {
+            const { id, ...data } = input;
+            return await adminUpdateAuthor(id, data);
+          } catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la mise à jour de l'auteur" }); }
         }),
 
       delete: adminProcedure
         .input(z.object({ id: z.number() }))
-        .mutation(async ({ input }) => await adminDeleteAuthor(input.id)),
+        .mutation(async ({ input }) => {
+          try { return await adminDeleteAuthor(input.id); }
+          catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la suppression de l'auteur" }); }
+        }),
     }),
 
     /** Events CRUD */
     events: router({
-      list: adminProcedure.query(async () => await adminGetAllEvents()),
+      list: adminProcedure.query(async () => {
+        try { return await adminGetAllEvents(); }
+        catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement des événements" }); }
+      }),
 
       byId: adminProcedure
         .input(z.object({ id: z.number() }))
-        .query(async ({ input }) => await adminGetEventById(input.id)),
+        .query(async ({ input }) => {
+          try { return await adminGetEventById(input.id); }
+          catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement de l'événement" }); }
+        }),
 
       create: adminProcedure
         .input(z.object({
@@ -676,11 +875,18 @@ export const appRouter = router({
           capacity: z.number().optional(),
           status: z.enum(['upcoming', 'ongoing', 'completed', 'cancelled']).default('upcoming'),
         }))
-        .mutation(async ({ input }) => await adminCreateEvent({
-          ...input,
-          startDate: new Date(input.startDate),
-          endDate: input.endDate ? new Date(input.endDate) : undefined,
-        })),
+        .mutation(async ({ input }) => {
+          try {
+            return await adminCreateEvent({
+              ...input,
+              startDate: new Date(input.startDate),
+              endDate: input.endDate ? new Date(input.endDate) : undefined,
+            });
+          } catch (e) {
+            if (e instanceof TRPCError) throw e;
+            throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la création de l'événement" });
+          }
+        }),
 
       update: adminProcedure
         .input(z.object({
@@ -698,35 +904,47 @@ export const appRouter = router({
           status: z.enum(['upcoming', 'ongoing', 'completed', 'cancelled']).optional(),
         }))
         .mutation(async ({ input }) => {
-          const { id, startDate, endDate, ...rest } = input;
-          return await adminUpdateEvent(id, {
-            ...rest,
-            ...(startDate ? { startDate: new Date(startDate) } : {}),
-            ...(endDate !== undefined ? { endDate: endDate ? new Date(endDate) : null } : {}),
-          });
+          try {
+            const { id, startDate, endDate, ...rest } = input;
+            return await adminUpdateEvent(id, {
+              ...rest,
+              ...(startDate ? { startDate: new Date(startDate) } : {}),
+              ...(endDate !== undefined ? { endDate: endDate ? new Date(endDate) : null } : {}),
+            });
+          } catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la mise à jour de l'événement" }); }
         }),
 
       delete: adminProcedure
         .input(z.object({ id: z.number() }))
-        .mutation(async ({ input }) => await adminDeleteEvent(input.id)),
+        .mutation(async ({ input }) => {
+          try { return await adminDeleteEvent(input.id); }
+          catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la suppression de l'événement" }); }
+        }),
     }),
 
     /** Site settings (prix, config) */
     settings: router({
-      list: adminProcedure.query(async () => await getAllSettings()),
+      list: adminProcedure.query(async () => {
+        try { return await getAllSettings(); }
+        catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement des paramètres" }); }
+      }),
 
       get: adminProcedure
         .input(z.object({ key: z.string() }))
         .query(async ({ input }) => {
-          const value = await getSetting(input.key);
-          return { key: input.key, value };
+          try {
+            const value = await getSetting(input.key);
+            return { key: input.key, value };
+          } catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement du paramètre" }); }
         }),
 
       set: adminProcedure
         .input(z.object({ key: z.string(), value: z.string() }))
         .mutation(async ({ input }) => {
-          await setSetting(input.key, input.value);
-          return { success: true };
+          try {
+            await setSetting(input.key, input.value);
+            return { success: true };
+          } catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la sauvegarde du paramètre" }); }
         }),
     }),
 
@@ -872,19 +1090,27 @@ export const appRouter = router({
 
   magazineIssues: router({
     /** List published issues (public) */
-    list: publicProcedure.query(async () => await getPublishedMagazineIssues()),
+    list: publicProcedure.query(async () => {
+      try { return await getPublishedMagazineIssues(); }
+      catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement des numéros" }); }
+    }),
 
     /** Get issue by number (public) */
     byNumber: publicProcedure
       .input(z.object({ issueNumber: z.string() }))
-      .query(async ({ input }) => await getMagazineIssueByNumber(input.issueNumber)),
+      .query(async ({ input }) => {
+        try { return await getMagazineIssueByNumber(input.issueNumber); }
+        catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement du numéro" }); }
+      }),
 
     /** Track download */
     trackDownload: publicProcedure
       .input(z.object({ issueId: z.number() }))
       .mutation(async ({ input }) => {
-        await incrementMagazineDownloadCount(input.issueId);
-        return { success: true };
+        try {
+          await incrementMagazineDownloadCount(input.issueId);
+          return { success: true };
+        } catch { return { success: false }; }
       }),
   }),
 
@@ -892,7 +1118,7 @@ export const appRouter = router({
     /** Check if user has access to a specific magazine issue */
     checkAccess: publicProcedure
       .input(z.object({ issueId: z.string() }))
-      .query(async ({ ctx, input }) => {
+      .query(async ({ ctx, input }) => { try {
         // Launch period: free premium access for all registered users until June 1, 2026
         const LAUNCH_END_DATE = new Date("2026-06-01T00:00:00Z");
         const isLaunchPeriod = new Date() < LAUNCH_END_DATE;
@@ -949,7 +1175,10 @@ export const appRouter = router({
         }
 
         return { hasAccess: false, reason: "no_subscription" as const, isLaunchPeriod };
-      }),
+      } catch (e) {
+        if (e instanceof TRPCError) throw e;
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la vérification d'accès" });
+      } }),
 
     /** Get launch period status */
     launchStatus: publicProcedure.query(() => {
@@ -994,26 +1223,37 @@ export const appRouter = router({
     hasPurchased: protectedProcedure
       .input(z.object({ issueNumber: z.string() }))
       .query(async ({ ctx, input }) => {
-        const issue = await getMagazineIssueByNumber(input.issueNumber);
-        if (!issue) return { purchased: false };
-        const purchased = await hasUserPurchasedMagazine(ctx.user.id, issue.id);
-        return { purchased };
+        try {
+          const issue = await getMagazineIssueByNumber(input.issueNumber);
+          if (!issue) return { purchased: false };
+          const purchased = await hasUserPurchasedMagazine(ctx.user.id, issue.id);
+          return { purchased };
+        } catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la vérification d'achat" }); }
       }),
 
     /** List user's purchased magazine issues */
     myPurchases: protectedProcedure.query(async ({ ctx }) => {
-      return await listUserMagazinePurchases(ctx.user.id);
+      try { return await listUserMagazinePurchases(ctx.user.id); }
+      catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement des achats" }); }
     }),
 
     /** Get magazine PDF unit price (dynamic, admin-configurable) */
     pdfPrice: publicProcedure.query(async () => {
-      const raw = await getSetting("magazine_pdf_price");
-      const amount = raw ? parseInt(raw, 10) : MAGAZINE_PDF_PRICE.amount;
-      return {
-        amount,
-        currency: MAGAZINE_PDF_PRICE.currency,
-        formatted: `${(amount / 100).toFixed(2).replace(".", ",")} €`,
-      };
+      try {
+        const raw = await getSetting("magazine_pdf_price");
+        const amount = raw ? parseInt(raw, 10) : MAGAZINE_PDF_PRICE.amount;
+        return {
+          amount,
+          currency: MAGAZINE_PDF_PRICE.currency,
+          formatted: `${(amount / 100).toFixed(2).replace(".", ",")} €`,
+        };
+      } catch {
+        return {
+          amount: MAGAZINE_PDF_PRICE.amount,
+          currency: MAGAZINE_PDF_PRICE.currency,
+          formatted: `${(MAGAZINE_PDF_PRICE.amount / 100).toFixed(2).replace(".", ",")} €`,
+        };
+      }
     }),
   }),
 
@@ -1023,15 +1263,19 @@ export const appRouter = router({
 
   siteConfig: router({
     promo: publicProcedure.query(async () => {
-      const [code, message] = await Promise.all([
-        getSetting("promo_code_active"),
-        getSetting("promo_message"),
-      ]);
-      return {
-        code: code || null,
-        message: message || null,
-        active: !!(code && code.trim()),
-      };
+      try {
+        const [code, message] = await Promise.all([
+          getSetting("promo_code_active"),
+          getSetting("promo_message"),
+        ]);
+        return {
+          code: code || null,
+          message: message || null,
+          active: !!(code && code.trim()),
+        };
+      } catch {
+        return { code: null, message: null, active: false };
+      }
     }),
   }),
 
@@ -1049,13 +1293,22 @@ export const appRouter = router({
         limit: z.number().default(12),
         offset: z.number().default(0),
       }))
-      .query(async ({ input }) => await getArchivedArticles(input)),
+      .query(async ({ input }) => {
+        try { return await getArchivedArticles(input); }
+        catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement des archives" }); }
+      }),
 
     /** Get available years for filtering */
-    years: publicProcedure.query(async () => await getArticleYears()),
+    years: publicProcedure.query(async () => {
+      try { return await getArticleYears(); }
+      catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement des années" }); }
+    }),
 
     /** Get available categories for filtering */
-    categories: publicProcedure.query(async () => await adminGetCategories()),
+    categories: publicProcedure.query(async () => {
+      try { return await adminGetCategories(); }
+      catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement des rubriques" }); }
+    }),
 
     /** List archived magazine issues with filters */
     issues: publicProcedure
@@ -1063,7 +1316,10 @@ export const appRouter = router({
         year: z.number().optional(),
         search: z.string().optional(),
       }))
-      .query(async ({ input }) => await getArchivedMagazineIssues(input)),
+      .query(async ({ input }) => {
+        try { return await getArchivedMagazineIssues(input); }
+        catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement des archives magazine" }); }
+      }),
   }),
 
   // ═══════════════════════════════════════════════
@@ -1079,7 +1335,10 @@ export const appRouter = router({
         message: z.string().min(20, "Le message doit contenir au moins 20 caractères"),
         category: z.enum(["general", "editorial", "partnership", "advertising", "subscription", "other"]).default("general"),
       }))
-      .mutation(async ({ input }) => await submitContactMessage(input)),
+      .mutation(async ({ input }) => {
+        try { return await submitContactMessage(input); }
+        catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de l'envoi du message" }); }
+      }),
   }),
 });
 
