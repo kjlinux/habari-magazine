@@ -252,6 +252,100 @@
     margin: 1.5rem 0;
   }
 
+  /* Tables in articles */
+  .habari-prose table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+    font-size: 0.9375rem;
+  }
+  .habari-prose th {
+    background: var(--muted);
+    font-weight: 700;
+    text-align: left;
+    padding: 0.625rem 0.875rem;
+    border: 1px solid var(--border);
+    color: var(--primary);
+  }
+  .habari-prose td {
+    padding: 0.5rem 0.875rem;
+    border: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .habari-prose tr:nth-child(even) td {
+    background: var(--muted) / 30%;
+  }
+
+  /* Images in articles */
+  .habari-prose img {
+    max-width: 100%;
+    border-radius: 0.5rem;
+    margin: 1.5rem auto;
+    display: block;
+  }
+
+  /* YouTube / iframes */
+  .habari-prose iframe {
+    width: 100%;
+    aspect-ratio: 16/9;
+    border-radius: 0.5rem;
+    margin: 1.5rem 0;
+    border: none;
+  }
+
+  /* Subscript / Superscript */
+  .habari-prose sub { font-size: 0.75em; vertical-align: sub; }
+  .habari-prose sup { font-size: 0.75em; vertical-align: super; }
+
+  /* Highlight (surlignage) */
+  .habari-prose mark { border-radius: 2px; padding: 0 2px; }
+
+  /* RTL support */
+  .habari-prose [dir="rtl"] { direction: rtl; text-align: right; }
+  .habari-prose [dir="ltr"] { direction: ltr; text-align: left; }
+
+  /* TipTap editor table styles */
+  .ProseMirror table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+  }
+  .ProseMirror th, .ProseMirror td {
+    border: 1px solid var(--border);
+    padding: 0.5rem 0.75rem;
+    position: relative;
+    min-width: 60px;
+  }
+  .ProseMirror th {
+    background: var(--muted);
+    font-weight: 700;
+  }
+  .ProseMirror .selectedCell:after {
+    background: oklch(0.6 0.15 250 / 20%);
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .ProseMirror .column-resize-handle {
+    background-color: var(--primary);
+    bottom: -2px;
+    pointer-events: none;
+    position: absolute;
+    right: -2px;
+    top: 0;
+    width: 4px;
+  }
+  .ProseMirror img {
+    max-width: 100%;
+    border-radius: 0.5rem;
+    margin: 1rem 0;
+    cursor: pointer;
+  }
+  .ProseMirror img.ProseMirror-selectednode {
+    outline: 3px solid var(--primary);
+  }
+
   /* Chapô (article lead) */
   .habari-chapo {
     font-family: var(--font-sans);
