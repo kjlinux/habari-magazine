@@ -341,6 +341,7 @@ export default function MyAccount() {
   };
   const currentTier = (user as any)?.subscriptionTier || "free";
   const isPremium = currentTier === "premium" || currentTier === "enterprise";
+  const isPaid = currentTier !== "free";
   const displayName = profile?.firstName && profile?.lastName
     ? `${profile.firstName} ${profile.lastName}`
     : user?.name || "Membre Habari";
@@ -806,30 +807,71 @@ export default function MyAccount() {
                 <div className="space-y-4">
                   <NotifToggle label="Newsletter hebdomadaire" desc="Résumé de l'actualité CEEAC chaque semaine" value={notifNewsletter} onChange={(v) => { setNotifNewsletter(v); saveNotif("notifNewsletter", v); }} />
                   <NotifToggle label="Nouveaux articles" desc="Notification lors de la publication de nouveaux contenus" value={notifNewArticles} onChange={(v) => { setNotifNewArticles(v); saveNotif("notifNewArticles", v); }} />
-                  <NotifToggle label="Alertes investissements" desc="Nouvelles opportunités d'investissement" value={notifInvestments} onChange={(v) => { setNotifInvestments(v); saveNotif("notifInvestments", v); }} />
-                  <NotifToggle label="Appels d'offres" desc="Nouveaux appels d'offres dans votre secteur" value={notifTenders} onChange={(v) => { setNotifTenders(v); saveNotif("notifTenders", v); }} />
-                  <NotifToggle label="Événements" desc="Rappels pour les événements à venir" value={notifEvents} onChange={(v) => { setNotifEvents(v); saveNotif("notifEvents", v); }} />
+                  <NotifToggle
+                    label="Alertes investissements"
+                    desc={isPaid ? "Nouvelles opportunités d'investissement" : "Réservé aux abonnés — Passez à Standard ou Premium"}
+                    value={notifInvestments}
+                    onChange={(v) => { if (!isPaid) return; setNotifInvestments(v); saveNotif("notifInvestments", v); }}
+                    locked={!isPaid}
+                  />
+                  <NotifToggle
+                    label="Appels d'offres"
+                    desc={isPaid ? "Nouveaux appels d'offres dans votre secteur" : "Réservé aux abonnés — Passez à Standard ou Premium"}
+                    value={notifTenders}
+                    onChange={(v) => { if (!isPaid) return; setNotifTenders(v); saveNotif("notifTenders", v); }}
+                    locked={!isPaid}
+                  />
+                  <NotifToggle
+                    label="Événements"
+                    desc={isPaid ? "Rappels pour les événements à venir" : "Réservé aux abonnés — Passez à Standard ou Premium"}
+                    value={notifEvents}
+                    onChange={(v) => { if (!isPaid) return; setNotifEvents(v); saveNotif("notifEvents", v); }}
+                    locked={!isPaid}
+                  />
                 </div>
-                {/* Push browser indicator */}
-                {pushState !== "unsupported" && (
-                  <div className="mt-4 pt-4 border-t border-border flex items-center justify-between">
-                    <div>
-                      <p className="font-sans text-sm font-medium text-foreground">Notifications push (navigateur)</p>
-                      <p className="font-sans text-xs text-muted-foreground mt-0.5">
-                        {pushState === "denied" ? "Permission refusée par le navigateur" : pushActive ? "Activées sur cet appareil" : "Désactivées sur cet appareil"}
-                      </p>
+                {/* Push browser */}
+                <div className="mt-4 pt-4 border-t border-border">
+                  {!isPaid ? (
+                    <div className="flex items-center justify-between opacity-60">
+                      <div>
+                        <p className="font-sans text-sm font-medium text-foreground flex items-center gap-1.5">
+                          <Lock className="w-3.5 h-3.5" /> Notifications push (navigateur)
+                        </p>
+                        <p className="font-sans text-xs text-muted-foreground mt-0.5">Réservé aux abonnés — Passez à Standard ou Premium</p>
+                      </div>
+                      <div className="relative inline-flex h-6 w-11 items-center rounded-full bg-muted cursor-not-allowed">
+                        <span className="inline-block h-4 w-4 translate-x-1 transform rounded-full bg-white shadow" />
+                      </div>
                     </div>
-                    {pushState !== "denied" && (
-                      <button
-                        onClick={togglePush}
-                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${pushActive ? "bg-primary" : "bg-muted"}`}
-                      >
-                        <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${pushActive ? "translate-x-6" : "translate-x-1"}`} />
-                      </button>
-                    )}
+                  ) : pushState !== "unsupported" ? (
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-sans text-sm font-medium text-foreground">Notifications push (navigateur)</p>
+                        <p className="font-sans text-xs text-muted-foreground mt-0.5">
+                          {pushState === "denied" ? "Permission refusée par le navigateur" : pushActive ? "Activées sur cet appareil" : "Désactivées sur cet appareil"}
+                        </p>
+                      </div>
+                      {pushState !== "denied" && (
+                        <button
+                          onClick={togglePush}
+                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${pushActive ? "bg-primary" : "bg-muted"}`}
+                        >
+                          <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${pushActive ? "translate-x-6" : "translate-x-1"}`} />
+                        </button>
+                      )}
+                    </div>
+                  ) : null}
+                </div>
+                {!isPaid && (
+                  <div className="mt-3 p-3 rounded-lg bg-[oklch(0.72_0.15_75)]/10 border border-[oklch(0.72_0.15_75)]/20">
+                    <p className="text-xs font-sans text-[oklch(0.45_0.10_75)]">
+                      <Crown className="w-3 h-3 inline mr-1" />
+                      Abonnez-vous pour accéder aux alertes investissements, appels d'offres, événements et notifications push.{" "}
+                      <Link href="/abonnements" className="underline font-semibold">Voir les offres →</Link>
+                    </p>
                   </div>
                 )}
-                <p className="text-xs text-muted-foreground font-sans mt-4">
+                <p className="text-xs text-muted-foreground font-sans mt-3">
                   Vos préférences sont sauvegardées automatiquement.
                 </p>
               </div>
@@ -923,22 +965,26 @@ function FeatureItem({ included, label }: { included: boolean; label: string }) 
   );
 }
 
-function NotifToggle({ label, desc, value, onChange }: { label: string; desc: string; value: boolean; onChange: (v: boolean) => void }) {
+function NotifToggle({ label, desc, value, onChange, locked }: { label: string; desc: string; value: boolean; onChange: (v: boolean) => void; locked?: boolean }) {
   return (
-    <div className="flex items-start justify-between gap-4 py-2">
+    <div className={`flex items-start justify-between gap-4 py-2 ${locked ? "opacity-50" : ""}`}>
       <div>
-        <p className="font-sans text-sm font-medium">{label}</p>
+        <p className="font-sans text-sm font-medium flex items-center gap-1.5">
+          {locked && <Lock className="w-3 h-3 text-muted-foreground" />}
+          {label}
+        </p>
         <p className="font-sans text-xs text-muted-foreground">{desc}</p>
       </div>
       <button
-        onClick={() => onChange(!value)}
+        onClick={() => !locked && onChange(!value)}
+        disabled={locked}
         className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${
-          value ? "bg-primary" : "bg-muted-foreground/20"
+          locked ? "cursor-not-allowed bg-muted-foreground/10" : value ? "bg-primary" : "bg-muted-foreground/20"
         }`}
       >
         <span
           className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${
-            value ? "translate-x-5" : "translate-x-0"
+            value && !locked ? "translate-x-5" : "translate-x-0"
           }`}
         />
       </button>
