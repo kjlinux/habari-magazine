@@ -16,8 +16,8 @@ import { createCheckoutSession, getCheckoutSession, cancelSubscription, createMa
 import { notifyNewArticle, notifyNewOpportunity, notifyNewEvent, sendNewsletterBroadcast, countTargets, type NotifPreference } from "./_core/notificationService";
 import { getVapidPublicKey, sendBulkPush } from "./_core/webpush";
 import { getDb } from "./db";
-import { pushSubscriptions } from "../drizzle/schema";
-import { eq } from "drizzle-orm";
+import { pushSubscriptions, userFavorites, articles as articlesTable } from "../drizzle/schema";
+import { eq, and } from "drizzle-orm";
 import { HABARI_PRODUCTS, MAGAZINE_PDF_PRICE, type ProductKey, type PriceInterval } from "./stripe/products";
 import {
   getPublishedArticles,
@@ -484,6 +484,61 @@ export const appRouter = router({
           return { success: true };
         } catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la suppression de l'abonnement push" }); }
       }),
+
+    /** Save / unsave an article */
+    saveArticle: protectedProcedure
+      .input(z.object({ articleId: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        try {
+          const db = await getDb();
+          if (!db) throw new Error("DB unavailable");
+          const existing = await db.select().from(userFavorites)
+            .where(and(eq(userFavorites.userId, ctx.user.id), eq(userFavorites.articleId, input.articleId)))
+            .limit(1);
+          if (existing.length > 0) {
+            await db.delete(userFavorites).where(eq(userFavorites.id, existing[0].id));
+            return { saved: false };
+          }
+          await db.insert(userFavorites).values({ userId: ctx.user.id, articleId: input.articleId });
+          return { saved: true };
+        } catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la sauvegarde" }); }
+      }),
+
+    /** Check if article is saved */
+    isArticleSaved: protectedProcedure
+      .input(z.object({ articleId: z.number() }))
+      .query(async ({ ctx, input }) => {
+        try {
+          const db = await getDb();
+          if (!db) return { saved: false };
+          const existing = await db.select().from(userFavorites)
+            .where(and(eq(userFavorites.userId, ctx.user.id), eq(userFavorites.articleId, input.articleId)))
+            .limit(1);
+          return { saved: existing.length > 0 };
+        } catch { return { saved: false }; }
+      }),
+
+    /** Get all saved articles for current user */
+    savedArticles: protectedProcedure.query(async ({ ctx }) => {
+      try {
+        const db = await getDb();
+        if (!db) return [];
+        const rows = await db.select({
+          id: articlesTable.id,
+          title: articlesTable.title,
+          slug: articlesTable.slug,
+          excerpt: articlesTable.excerpt,
+          featuredImage: articlesTable.featuredImage,
+          publishedAt: articlesTable.publishedAt,
+          savedAt: userFavorites.createdAt,
+        })
+          .from(userFavorites)
+          .innerJoin(articlesTable, eq(userFavorites.articleId, articlesTable.id))
+          .where(eq(userFavorites.userId, ctx.user.id))
+          .orderBy(userFavorites.createdAt);
+        return rows;
+      } catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement des articles sauvegardés" }); }
+    }),
   }),
 
   // ═══════════════════════════════════════════════

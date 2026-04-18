@@ -1,6 +1,6 @@
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
-import { Loader2, ArrowLeft, Clock, User, Bookmark, Download } from "lucide-react";
+import { Loader2, ArrowLeft, Clock, User, Bookmark, BookmarkCheck, Download } from "lucide-react";
 import SocialShare from "@/components/SocialShare";
 import { Helmet } from "react-helmet-async";
 import { Link, useParams } from "wouter";
@@ -36,6 +36,25 @@ export default function ArticlePage() {
   const handleDownload = () => {
     if (!isAuthenticated) { toast.error("Connectez-vous pour télécharger l'article"); return; }
     if (slug) downloadMutation.mutate({ slug });
+  };
+
+  const { data: savedData, refetch: refetchSaved } = trpc.profile.isArticleSaved.useQuery(
+    { articleId: article?.id ?? 0 },
+    { enabled: isAuthenticated && !!article?.id }
+  );
+  const isSaved = savedData?.saved ?? false;
+
+  const saveMutation = trpc.profile.saveArticle.useMutation({
+    onSuccess: (res) => {
+      toast.success(res.saved ? "Article sauvegardé" : "Article retiré des sauvegardes");
+      refetchSaved();
+    },
+    onError: () => toast.error("Erreur lors de la sauvegarde"),
+  });
+
+  const handleSave = () => {
+    if (!isAuthenticated) { toast.error("Connectez-vous pour sauvegarder"); return; }
+    if (article?.id) saveMutation.mutate({ articleId: article.id });
   };
 
   const readTime = article?.content
@@ -147,8 +166,14 @@ export default function ArticlePage() {
 
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-10">
               <SocialShare title={article.title} excerpt={article.excerpt || ""} variant="bar" />
-              <Button variant="outline" size="sm" className="font-sans gap-2 text-muted-foreground">
-                <Bookmark className="w-4 h-4" /> Sauvegarder
+              <Button
+                variant="outline" size="sm"
+                onClick={handleSave}
+                disabled={saveMutation.isPending}
+                className={`font-sans gap-2 ${isSaved ? "text-primary border-primary" : "text-muted-foreground"}`}
+              >
+                {isSaved ? <BookmarkCheck className="w-4 h-4" /> : <Bookmark className="w-4 h-4" />}
+                {isSaved ? "Sauvegardé" : "Sauvegarder"}
               </Button>
             </div>
 

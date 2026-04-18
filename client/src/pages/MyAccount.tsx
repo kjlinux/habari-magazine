@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import {
   User,
   Mail,
+  Bookmark,
   CreditCard,
   Crown,
   Calendar,
@@ -241,6 +242,10 @@ export default function MyAccount() {
       else setPushState("denied");
     }
   };
+
+  const { data: savedArticles } = trpc.profile.savedArticles.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
 
   const cancelMutation = trpc.stripe.cancelSubscription.useMutation({
     onSuccess: () => {
@@ -827,6 +832,36 @@ export default function MyAccount() {
                 <p className="text-xs text-muted-foreground font-sans mt-4">
                   Vos préférences sont sauvegardées automatiquement.
                 </p>
+              </div>
+
+              {/* Saved articles */}
+              <div className="bg-background rounded-xl border border-border p-6 shadow-sm">
+                <h2 className="font-serif text-lg font-bold text-primary mb-4 flex items-center gap-2">
+                  <Bookmark className="w-5 h-5" /> Articles sauvegardés
+                </h2>
+                {!savedArticles || savedArticles.length === 0 ? (
+                  <p className="text-sm text-muted-foreground font-sans">Aucun article sauvegardé pour l'instant.</p>
+                ) : (
+                  <div className="space-y-3">
+                    {savedArticles.map((a) => (
+                      <Link key={a.id} href={`/article/${a.slug}`}>
+                        <div className="flex gap-3 p-3 rounded-lg border border-border hover:border-primary/40 hover:bg-muted/30 transition-colors cursor-pointer group">
+                          {a.featuredImage && (
+                            <img src={a.featuredImage} alt="" className="w-14 h-14 rounded-md object-cover shrink-0" />
+                          )}
+                          <div className="min-w-0">
+                            <p className="font-serif text-sm font-bold text-foreground group-hover:text-primary transition-colors line-clamp-2">{a.title}</p>
+                            {a.publishedAt && (
+                              <p className="font-sans text-xs text-muted-foreground mt-0.5">
+                                {new Date(a.publishedAt).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Activity */}

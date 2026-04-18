@@ -221,9 +221,47 @@
     color: var(--foreground);
   }
 
+  /* Inline text formatting */
+  .habari-prose strong, .habari-prose b { font-weight: 700; }
+  .habari-prose em, .habari-prose i { font-style: italic; }
+  .habari-prose u { text-decoration: underline; }
+  .habari-prose s { text-decoration: line-through; }
+  .habari-prose sub { font-size: 0.75em; vertical-align: sub; }
+  .habari-prose sup { font-size: 0.75em; vertical-align: super; }
+
+  /* Colors — TipTap outputs inline style="color:..." */
+  .habari-prose span[style*="color"] { /* inherited via inline style */ }
+  /* Highlight — TipTap outputs <mark style="background-color:..."> */
+  .habari-prose mark { border-radius: 2px; padding: 0 2px; }
+  /* Font size / family — TipTap outputs inline style on span */
+  .habari-prose span[style*="font-size"] { }
+  .habari-prose span[style*="font-family"] { }
+
+  /* Alignment */
+  .habari-prose [style*="text-align: left"], .habari-prose .text-left { text-align: left !important; }
+  .habari-prose [style*="text-align: center"], .habari-prose .text-center { text-align: center !important; }
+  .habari-prose [style*="text-align: right"], .habari-prose .text-right { text-align: right !important; }
+  .habari-prose [style*="text-align: justify"] { text-align: justify !important; }
+
+  /* RTL */
+  .habari-prose [dir="rtl"] { direction: rtl; text-align: right; }
+  .habari-prose [dir="ltr"] { direction: ltr; text-align: left; }
+
+  /* Links */
+  .habari-prose a { color: var(--primary); text-decoration: underline; }
+  .habari-prose a:hover { opacity: 0.8; }
+
   .habari-prose p {
     margin-bottom: 1.25rem;
-    text-align: justify;
+  }
+
+  .habari-prose h1 {
+    font-family: var(--font-serif);
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-top: 2.5rem;
+    margin-bottom: 1rem;
   }
 
   .habari-prose h2 {
@@ -242,6 +280,31 @@
     color: var(--primary);
     margin-top: 1.5rem;
     margin-bottom: 0.75rem;
+  }
+
+  /* Lists */
+  .habari-prose ul {
+    list-style-type: disc !important;
+    padding-left: 1.5rem !important;
+    margin-bottom: 1.25rem;
+  }
+  .habari-prose ol {
+    list-style-type: decimal !important;
+    padding-left: 1.5rem !important;
+    margin-bottom: 1.25rem;
+  }
+  .habari-prose li {
+    display: list-item !important;
+    margin-bottom: 0.375rem;
+  }
+  .habari-prose ul ul { list-style-type: circle !important; }
+  .habari-prose ul ul ul { list-style-type: square !important; }
+
+  /* Horizontal rule */
+  .habari-prose hr {
+    border: none;
+    border-top: 2px solid var(--border);
+    margin: 2rem 0;
   }
 
   .habari-prose blockquote {
