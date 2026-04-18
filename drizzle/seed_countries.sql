@@ -1,0 +1,17 @@
+INSERT IGNORE INTO `countries` (`code`, `name`, `flag`) VALUES
+('AO', 'Angola', '🇦🇴'),
+('BI', 'Burundi', '🇧🇮'),
+('CM', 'Cameroun', '🇨🇲'),
+('CG', 'Congo (Brazzaville)', '🇨🇬'),
+('GA', 'Gabon', '🇬🇦'),
+('GQ', 'Guinée Équatoriale', '🇬🇶'),
+('CF', 'RCA (Centrafrique)', '🇨🇫'),
+('CD', 'RDC (Congo-Kinshasa)', '🇨🇩'),
+('RW', 'Rwanda', '🇷🇼'),
+('ST', 'São Tomé-et-Príncipe', '🇸🇹'),
+('TD', 'Tchad', '🇹🇩'),
+('AF', 'Autre pays africain', '🌍'),
+('EU', 'Europe', '🌍'),
+('AM', 'Amérique', '🌎'),
+('AS', 'Asie', '🌏'),
+('OT', 'Autre', '🌐');
