@@ -5,12 +5,16 @@ import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import {
+  canAccess,
   canAccessArticle,
   getTrialDaysRemaining,
   hasActiveSubscription,
+  hasIntegral,
+  hasNewsletterPremium,
   isLaunchPeriod,
   stripPremiumContent,
   TRIAL_DURATION_DAYS,
+  type SubscriptionTier,
 } from "./_core/access";
 import { createCheckoutSession, getCheckoutSession, cancelSubscription, createMagazinePdfCheckoutSession, getStripe } from "./stripe/stripe";
 import { notifyNewArticle, notifyNewOpportunity, notifyNewEvent, sendNewsletterBroadcast, countTargets, type NotifPreference } from "./_core/notificationService";
@@ -112,6 +116,30 @@ import {
   adminCreateEvent,
   adminUpdateEvent,
   adminDeleteEvent,
+  // Directory admin helpers
+  adminGetAllActors,
+  adminGetActorById,
+  adminCreateActor,
+  adminUpdateActor,
+  adminDeleteActor,
+  adminToggleActorVerified,
+  adminCountActors,
+  // Investments admin helpers
+  adminGetAllInvestments,
+  adminGetInvestmentById,
+  adminCreateInvestment,
+  adminUpdateInvestment,
+  adminDeleteInvestment,
+  adminCountInvestments,
+  // Partners
+  getPublishedPartners,
+  getPartnerBySlug,
+  adminGetAllPartners,
+  adminGetPartnerById,
+  adminCreatePartner,
+  adminUpdatePartner,
+  adminDeletePartner,
+  adminTogglePartnerFeatured,
 } from "./db";
 
 // Admin-only procedure middleware
@@ -277,15 +305,37 @@ export const appRouter = router({
   investments: router({
     list: publicProcedure
       .input(z.object({ limit: z.number().default(10), offset: z.number().default(0) }))
-      .query(async ({ input }) => {
-        try { return await getOpenInvestmentOpportunities(input.limit, input.offset); }
+      .query(async ({ ctx, input }) => {
+        try {
+          const opportunities = await getOpenInvestmentOpportunities(input.limit, input.offset);
+          const activeSub = ctx.user ? await getUserSubscription(ctx.user.id) : null;
+          const items = opportunities.map((opp: any) => {
+            const minTier: SubscriptionTier = (opp.minSubscriptionTier as SubscriptionTier) ?? "premium";
+            const access = canAccess(ctx.user, minTier, activeSub ?? null);
+            if (access.allowed) return { ...opp, access };
+            const { description, targetAmount, minInvestment, expectedReturn, timeline, ...teaser } = opp;
+            return { ...teaser, description: null, targetAmount: null, minInvestment: null, expectedReturn: null, timeline: null, access };
+          });
+          return items;
+        }
         catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement des investissements" }); }
       }),
 
     byCountry: publicProcedure
       .input(z.object({ countryId: z.number(), limit: z.number().default(10) }))
-      .query(async ({ input }) => {
-        try { return await getInvestmentOpportunitiesByCountry(input.countryId, input.limit); }
+      .query(async ({ ctx, input }) => {
+        try {
+          const opportunities = await getInvestmentOpportunitiesByCountry(input.countryId, input.limit);
+          const activeSub = ctx.user ? await getUserSubscription(ctx.user.id) : null;
+          const items = opportunities.map((opp: any) => {
+            const minTier: SubscriptionTier = (opp.minSubscriptionTier as SubscriptionTier) ?? "premium";
+            const access = canAccess(ctx.user, minTier, activeSub ?? null);
+            if (access.allowed) return { ...opp, access };
+            const { description, targetAmount, minInvestment, expectedReturn, timeline, ...teaser } = opp;
+            return { ...teaser, description: null, targetAmount: null, minInvestment: null, expectedReturn: null, timeline: null, access };
+          });
+          return items;
+        }
         catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement des investissements" }); }
       }),
   }),
@@ -293,9 +343,32 @@ export const appRouter = router({
   events: router({
     upcoming: publicProcedure
       .input(z.object({ limit: z.number().default(10) }))
-      .query(async ({ input }) => {
-        try { return await getUpcomingEvents(input.limit); }
+      .query(async ({ ctx, input }) => {
+        try {
+          const includeExclusive = hasIntegral(ctx.user ?? null);
+          return await getUpcomingEvents(input.limit, includeExclusive);
+        }
         catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement des événements" }); }
+      }),
+  }),
+
+  partners: router({
+    list: publicProcedure
+      .input(z.object({
+        category: z.enum(['communique', 'sponsored', 'report']).optional(),
+        limit: z.number().default(30),
+        offset: z.number().default(0),
+      }))
+      .query(async ({ input }) => {
+        try { return await getPublishedPartners(input); }
+        catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement des partenaires" }); }
+      }),
+
+    bySlug: publicProcedure
+      .input(z.object({ slug: z.string() }))
+      .query(async ({ input }) => {
+        try { return await getPartnerBySlug(input.slug); }
+        catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement du partenaire" }); }
       }),
   }),
 
@@ -370,8 +443,7 @@ export const appRouter = router({
                 message: "Vous devez être connecté et abonné pour la newsletter premium",
               });
             }
-            const activeSub = await getUserSubscription(ctx.user.id);
-            if (!hasActiveSubscription(ctx.user, activeSub ?? null)) {
+            if (!hasNewsletterPremium(ctx.user)) {
               throw new TRPCError({
                 code: "FORBIDDEN",
                 message: "La newsletter premium nécessite un abonnement actif (Newsletter Premium ou Habari Intégral)",
@@ -583,7 +655,7 @@ export const appRouter = router({
           countryId: z.number().optional(),
           featuredImage: z.string().optional(),
           status: z.enum(["draft", "published", "archived"]).default("draft"),
-          minSubscriptionTier: z.enum(["free", "standard", "premium", "enterprise"]).default("free"),
+          minSubscriptionTier: z.enum(["free", "premium", "integral"]).default("free"),
         }))
         .mutation(async ({ input }) => {
           try {
@@ -610,7 +682,7 @@ export const appRouter = router({
           countryId: z.number().nullable().optional(),
           featuredImage: z.string().nullable().optional(),
           status: z.enum(["draft", "published", "archived"]).optional(),
-          minSubscriptionTier: z.enum(["free", "standard", "premium", "enterprise"]).optional(),
+          minSubscriptionTier: z.enum(["free", "premium", "integral"]).optional(),
         }))
         .mutation(async ({ input }) => {
           try {
@@ -658,7 +730,7 @@ export const appRouter = router({
       updateSubscription: adminProcedure
         .input(z.object({
           userId: z.number(),
-          tier: z.enum(["free", "standard", "premium", "enterprise"]),
+          tier: z.enum(["free", "premium", "integral"]),
         }))
         .mutation(async ({ input }) => {
           try { return await adminUpdateUserSubscription(input.userId, input.tier); }
@@ -875,6 +947,255 @@ export const appRouter = router({
         }),
     }),
 
+    /** Directory CRUD (economicActors) */
+    directory: router({
+      list: adminProcedure
+        .input(z.object({
+          sector: z.string().optional(),
+          countryId: z.number().optional(),
+          verified: z.boolean().optional(),
+          search: z.string().optional(),
+          limit: z.number().default(50),
+          offset: z.number().default(0),
+        }))
+        .query(async ({ input }) => {
+          try { return await adminGetAllActors(input); }
+          catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement de l'annuaire" }); }
+        }),
+
+      byId: adminProcedure
+        .input(z.object({ id: z.number() }))
+        .query(async ({ input }) => {
+          try { return await adminGetActorById(input.id); }
+          catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement de l'acteur" }); }
+        }),
+
+      create: adminProcedure
+        .input(z.object({
+          name: z.string().min(1),
+          description: z.string().optional(),
+          sector: z.string().optional(),
+          subsector: z.string().optional(),
+          countryId: z.number().optional(),
+          website: z.string().optional(),
+          email: z.string().optional(),
+          phone: z.string().optional(),
+          logo: z.string().optional(),
+          foundedYear: z.number().optional(),
+          employees: z.string().optional(),
+          verified: z.boolean().default(false),
+        }))
+        .mutation(async ({ input }) => {
+          try { return await adminCreateActor(input); }
+          catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la création de l'acteur" }); }
+        }),
+
+      update: adminProcedure
+        .input(z.object({
+          id: z.number(),
+          name: z.string().optional(),
+          description: z.string().nullable().optional(),
+          sector: z.string().nullable().optional(),
+          subsector: z.string().nullable().optional(),
+          countryId: z.number().nullable().optional(),
+          website: z.string().nullable().optional(),
+          email: z.string().nullable().optional(),
+          phone: z.string().nullable().optional(),
+          logo: z.string().nullable().optional(),
+          foundedYear: z.number().nullable().optional(),
+          employees: z.string().nullable().optional(),
+          verified: z.boolean().optional(),
+        }))
+        .mutation(async ({ input }) => {
+          try {
+            const { id, ...data } = input;
+            return await adminUpdateActor(id, data);
+          } catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la mise à jour de l'acteur" }); }
+        }),
+
+      delete: adminProcedure
+        .input(z.object({ id: z.number() }))
+        .mutation(async ({ input }) => {
+          try { return await adminDeleteActor(input.id); }
+          catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la suppression de l'acteur" }); }
+        }),
+
+      toggleVerified: adminProcedure
+        .input(z.object({ id: z.number() }))
+        .mutation(async ({ input }) => {
+          try { return await adminToggleActorVerified(input.id); }
+          catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la vérification" }); }
+        }),
+
+      counts: adminProcedure
+        .query(async () => {
+          try { return await adminCountActors(); }
+          catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du comptage" }); }
+        }),
+    }),
+
+    /** Investments CRUD (investmentOpportunities) */
+    investments: router({
+      list: adminProcedure
+        .input(z.object({
+          investmentType: z.enum(['equity', 'debt', 'grant', 'partnership']).optional(),
+          status: z.enum(['open', 'closed', 'funded']).optional(),
+          countryId: z.number().optional(),
+          search: z.string().optional(),
+          limit: z.number().default(50),
+          offset: z.number().default(0),
+        }))
+        .query(async ({ input }) => {
+          try { return await adminGetAllInvestments(input); }
+          catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement des investissements" }); }
+        }),
+
+      byId: adminProcedure
+        .input(z.object({ id: z.number() }))
+        .query(async ({ input }) => {
+          try { return await adminGetInvestmentById(input.id); }
+          catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement de l'investissement" }); }
+        }),
+
+      create: adminProcedure
+        .input(z.object({
+          title: z.string().min(1),
+          description: z.string().min(1),
+          actorId: z.number().optional(),
+          countryId: z.number().optional(),
+          sector: z.string().optional(),
+          investmentType: z.enum(['equity', 'debt', 'grant', 'partnership']),
+          targetAmount: z.string().optional(),
+          currency: z.string().optional(),
+          minInvestment: z.string().optional(),
+          expectedReturn: z.string().optional(),
+          timeline: z.string().optional(),
+          status: z.enum(['open', 'closed', 'funded']).default('open'),
+          image: z.string().optional(),
+          minSubscriptionTier: z.enum(['free', 'premium', 'integral']).default('premium'),
+        }))
+        .mutation(async ({ input }) => {
+          try { return await adminCreateInvestment(input); }
+          catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la création" }); }
+        }),
+
+      update: adminProcedure
+        .input(z.object({
+          id: z.number(),
+          title: z.string().optional(),
+          description: z.string().optional(),
+          actorId: z.number().nullable().optional(),
+          countryId: z.number().nullable().optional(),
+          sector: z.string().nullable().optional(),
+          investmentType: z.enum(['equity', 'debt', 'grant', 'partnership']).optional(),
+          targetAmount: z.string().nullable().optional(),
+          currency: z.string().nullable().optional(),
+          minInvestment: z.string().nullable().optional(),
+          expectedReturn: z.string().nullable().optional(),
+          timeline: z.string().nullable().optional(),
+          status: z.enum(['open', 'closed', 'funded']).optional(),
+          image: z.string().nullable().optional(),
+          minSubscriptionTier: z.enum(['free', 'premium', 'integral']).optional(),
+        }))
+        .mutation(async ({ input }) => {
+          try {
+            const { id, ...data } = input;
+            return await adminUpdateInvestment(id, data);
+          } catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la mise à jour" }); }
+        }),
+
+      delete: adminProcedure
+        .input(z.object({ id: z.number() }))
+        .mutation(async ({ input }) => {
+          try { return await adminDeleteInvestment(input.id); }
+          catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la suppression" }); }
+        }),
+
+      counts: adminProcedure
+        .query(async () => {
+          try { return await adminCountInvestments(); }
+          catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du comptage" }); }
+        }),
+    }),
+
+    /** Partners CRUD */
+    partners: router({
+      list: adminProcedure
+        .input(z.object({
+          category: z.enum(['communique', 'sponsored', 'report']).optional(),
+          published: z.boolean().optional(),
+          search: z.string().optional(),
+          limit: z.number().default(50),
+          offset: z.number().default(0),
+        }))
+        .query(async ({ input }) => {
+          try { return await adminGetAllPartners(input); }
+          catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement des partenaires" }); }
+        }),
+
+      byId: adminProcedure
+        .input(z.object({ id: z.number() }))
+        .query(async ({ input }) => {
+          try { return await adminGetPartnerById(input.id); }
+          catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement du partenaire" }); }
+        }),
+
+      create: adminProcedure
+        .input(z.object({
+          title: z.string().min(1),
+          category: z.enum(['communique', 'sponsored', 'report']),
+          source: z.string().optional(),
+          excerpt: z.string().optional(),
+          content: z.string().optional(),
+          tag: z.string().optional(),
+          image: z.string().optional(),
+          externalLink: z.string().optional(),
+          featured: z.boolean().default(false),
+          published: z.boolean().default(true),
+          publishedAt: z.coerce.date().optional(),
+        }))
+        .mutation(async ({ input }) => {
+          try { return await adminCreatePartner(input); }
+          catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la création" }); }
+        }),
+
+      update: adminProcedure
+        .input(z.object({
+          id: z.number(),
+          title: z.string().optional(),
+          category: z.enum(['communique', 'sponsored', 'report']).optional(),
+          source: z.string().nullable().optional(),
+          excerpt: z.string().nullable().optional(),
+          content: z.string().nullable().optional(),
+          tag: z.string().nullable().optional(),
+          image: z.string().nullable().optional(),
+          externalLink: z.string().nullable().optional(),
+          featured: z.boolean().optional(),
+          published: z.boolean().optional(),
+          publishedAt: z.coerce.date().nullable().optional(),
+        }))
+        .mutation(async ({ input }) => {
+          try {
+            const { id, ...data } = input;
+            return await adminUpdatePartner(id, data);
+          } catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la mise à jour" }); }
+        }),
+
+      delete: adminProcedure
+        .input(z.object({ id: z.number() }))
+        .mutation(async ({ input }) => {
+          try { return await adminDeletePartner(input.id); }
+          catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la suppression" }); }
+        }),
+
+      toggleFeatured: adminProcedure
+        .input(z.object({ id: z.number() }))
+        .mutation(async ({ input }) => {
+          try { return await adminTogglePartnerFeatured(input.id); }
+          catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la mise en vedette" }); }
+        }),
+    }),
+
     /** Contact messages */
     contact: router({
       list: adminProcedure
@@ -1001,6 +1322,7 @@ export const appRouter = router({
           image: z.string().optional(),
           capacity: z.number().optional(),
           status: z.enum(['upcoming', 'ongoing', 'completed', 'cancelled']).default('upcoming'),
+          isExclusive: z.boolean().default(false),
         }))
         .mutation(async ({ input }) => {
           try {
@@ -1034,6 +1356,7 @@ export const appRouter = router({
           image: z.string().nullable().optional(),
           capacity: z.number().nullable().optional(),
           status: z.enum(['upcoming', 'ongoing', 'completed', 'cancelled']).optional(),
+          isExclusive: z.boolean().optional(),
         }))
         .mutation(async ({ input }) => {
           try {
@@ -1319,15 +1642,17 @@ export const appRouter = router({
           return { hasAccess: true, reason: "launch_promo" as const, isLaunchPeriod };
         }
 
-        // After launch period: check user subscription tier
         const tier = ctx.user.subscriptionTier;
-        if (tier === "premium" || tier === "enterprise") {
+        if (tier === "premium" || tier === "integral") {
           return { hasAccess: true, reason: "subscription" as const, isLaunchPeriod };
         }
 
-        // Also check active subscription in userSubscriptions table
         const activeSub = await getUserSubscription(ctx.user.id);
-        if (activeSub && (activeSub.tier === "premium" || activeSub.tier === "enterprise") && activeSub.status === "active") {
+        if (
+          activeSub &&
+          activeSub.status === "active" &&
+          (activeSub.tier === "premium" || activeSub.tier === "integral")
+        ) {
           return { hasAccess: true, reason: "subscription" as const, isLaunchPeriod };
         }
 
@@ -1514,8 +1839,11 @@ export const appRouter = router({
         message: z.string().min(20, "Le message doit contenir au moins 20 caractères"),
         category: z.enum(["general", "editorial", "partnership", "advertising", "subscription", "other"]).default("general"),
       }))
-      .mutation(async ({ input }) => {
-        try { return await submitContactMessage(input); }
+      .mutation(async ({ ctx, input }) => {
+        try {
+          const priority = ctx.user?.subscriptionTier === "integral" ? "priority" : "normal";
+          return await submitContactMessage({ ...input, priority });
+        }
         catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de l'envoi du message" }); }
       }),
   }),

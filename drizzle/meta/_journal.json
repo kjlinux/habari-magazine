@@ -71,6 +71,13 @@
       "when": 1776453017839,
       "tag": "0009_real_puck",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "5",
+      "when": 1776565170423,
+      "tag": "0010_black_brother_voodoo",
+      "breakpoints": true
     }
   ]
 }

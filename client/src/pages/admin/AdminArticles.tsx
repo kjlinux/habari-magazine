@@ -30,16 +30,14 @@ const statusColors: Record<string, string> = {
 
 const tierLabels: Record<string, string> = {
   free: "Libre",
-  standard: "Standard",
   premium: "Premium",
-  enterprise: "Entreprise",
+  integral: "Intégral",
 };
 
 const tierColors: Record<string, string> = {
   free: "bg-blue-100 text-blue-800",
-  standard: "bg-purple-100 text-purple-800",
   premium: "bg-[oklch(0.75_0.15_85)]/20 text-[oklch(0.45_0.15_85)]",
-  enterprise: "bg-red-100 text-red-800",
+  integral: "bg-primary/10 text-primary",
 };
 
 export default function AdminArticles() {

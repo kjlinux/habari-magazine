@@ -29,6 +29,12 @@ import AdminContact from "./pages/admin/AdminContact";
 import AdminMagazine from "./pages/admin/AdminMagazine";
 import AdminOpportunities from "./pages/admin/AdminOpportunities";
 import AdminOpportunityForm from "./pages/admin/AdminOpportunityForm";
+import AdminDirectory from "./pages/admin/AdminDirectory";
+import AdminDirectoryForm from "./pages/admin/AdminDirectoryForm";
+import AdminInvestments from "./pages/admin/AdminInvestments";
+import AdminInvestmentForm from "./pages/admin/AdminInvestmentForm";
+import AdminPartners from "./pages/admin/AdminPartners";
+import AdminPartnerForm from "./pages/admin/AdminPartnerForm";
 import AdminSettings from "./pages/admin/AdminSettings";
 import AdminAuthors from "./pages/admin/AdminAuthors";
 import AdminEvents from "./pages/admin/AdminEvents";
@@ -96,6 +102,15 @@ function Router() {
       <Route path={"/admin/opportunites"} component={AdminOpportunities} />
       <Route path={"/admin/opportunites/nouveau"} component={AdminOpportunityForm} />
       <Route path={"/admin/opportunites/:id"} component={AdminOpportunityForm} />
+      <Route path={"/admin/annuaire"} component={AdminDirectory} />
+      <Route path={"/admin/annuaire/nouveau"} component={AdminDirectoryForm} />
+      <Route path={"/admin/annuaire/:id"} component={AdminDirectoryForm} />
+      <Route path={"/admin/investisseurs"} component={AdminInvestments} />
+      <Route path={"/admin/investisseurs/nouveau"} component={AdminInvestmentForm} />
+      <Route path={"/admin/investisseurs/:id"} component={AdminInvestmentForm} />
+      <Route path={"/admin/partenaires"} component={AdminPartners} />
+      <Route path={"/admin/partenaires/nouveau"} component={AdminPartnerForm} />
+      <Route path={"/admin/partenaires/:id"} component={AdminPartnerForm} />
       <Route path={"/admin/parametres"} component={AdminSettings} />
       <Route path={"/admin/auteurs"} component={AdminAuthors} />
       <Route path={"/admin/evenements"} component={AdminEvents} />

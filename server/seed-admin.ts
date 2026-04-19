@@ -45,7 +45,8 @@ async function main() {
       passwordHash,
       loginMethod: "email",
       role: "admin",
-      subscriptionTier: "enterprise",
+      subscriptionTier: "integral",
+      hasNewsletterPremium: true,
       lastSignedIn: new Date(),
     });
     console.log(`✅ Created admin account: ${ADMIN_EMAIL}`);

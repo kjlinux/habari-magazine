@@ -4,22 +4,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { trpc } from "@/lib/trpc";
 import { Loader2, Search, TrendingUp, DollarSign, MapPin, ArrowRight, BarChart3, ArrowUpRight, ArrowDownRight, Minus, Globe2 } from "lucide-react";
 import { Link } from "wouter";
+import { Lock } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-
-const sampleInvestments = [
-  { id: 1, title: "Agro-industrie — Transformation cacao", sector: "Agriculture", country: "Cameroun", amount: "5M USD", type: "equity", status: "open", desc: "Unité de transformation de fèves de cacao en beurre et poudre de cacao pour l'export." },
-  { id: 2, title: "Mini-grid solaire — Zone rurale", sector: "Énergie", country: "Cameroun", amount: "2M USD", type: "debt", status: "open", desc: "Déploiement de mini-réseaux solaires dans 15 villages non connectés au réseau national." },
-  { id: 3, title: "Plateforme fintech — Mobile money B2B", sector: "Services financiers", country: "Gabon", amount: "1.5M USD", type: "equity", status: "open", desc: "Solution de paiement B2B pour les PME de la zone CEEAC." },
-  { id: 4, title: "Complexe hôtelier éco-responsable", sector: "Tourisme", country: "Gabon", amount: "8M USD", type: "equity", status: "open", desc: "Écolodge de 40 chambres dans le parc national de la Lopé." },
-  { id: 5, title: "Cimenterie — Extension capacité", sector: "Construction", country: "Congo", amount: "15M USD", type: "debt", status: "open", desc: "Extension de la capacité de production de 500 000 à 1 million de tonnes/an." },
-  { id: 6, title: "Aquaculture intensive — Tilapia", sector: "Agriculture", country: "Cameroun", amount: "3M USD", type: "equity", status: "open", desc: "Ferme aquacole moderne de 200 hectares avec unité de transformation." },
-  { id: 7, title: "Exploration pétrolière offshore — Bloc 15", sector: "Énergie", country: "Angola", amount: "50M USD", type: "equity", status: "open", desc: "Participation dans un consortium d'exploration pétrolière offshore au large de Luanda." },
-  { id: 8, title: "Mine de cobalt — Katanga", sector: "Industries extractives", country: "RDC", amount: "25M USD", type: "equity", status: "open", desc: "Développement d'une mine de cobalt dans la province du Haut-Katanga pour l'électromobilité." },
-  { id: 9, title: "Kigali Innovation City — Tech Hub", sector: "Technologie", country: "Rwanda", amount: "10M USD", type: "equity", status: "open", desc: "Espace de co-working et incubateur technologique au cœur de Kigali Innovation City." },
-  { id: 10, title: "Caféiculture durable — Ngozi", sector: "Agriculture", country: "Burundi", amount: "2M USD", type: "debt", status: "open", desc: "Modernisation de coopératives caféières et certification commerce équitable." },
-  { id: 11, title: "Cacao bio premium — Export", sector: "Agriculture", country: "São Tomé-et-Príncipe", amount: "1M USD", type: "equity", status: "open", desc: "Chaîne de valeur cacao biologique premium pour les marchés européens." },
-];
+import { paywallCta, paywallMessage, type SubscriptionTier } from "@/lib/access";
 
 const sectors = ["Tous", "Agriculture", "Énergie", "Services financiers", "Tourisme", "Construction"];
 
@@ -44,19 +32,19 @@ export default function Investments() {
   const [activeSector, setActiveSector] = useState("Tous");
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>("deals");
-  const { data: dbInvestments, isLoading } = trpc.investments.list.useQuery({ limit: 20, offset: 0 });
+  const { data: dbInvestments, isLoading } = trpc.investments.list.useQuery({ limit: 40, offset: 0 });
 
-  const investments = dbInvestments && dbInvestments.length > 0 ? dbInvestments : null;
-
-  const filteredSamples = useMemo(() => {
-    let filtered = sampleInvestments;
-    if (activeSector !== "Tous") filtered = filtered.filter((i) => i.sector === activeSector);
+  const investments = useMemo(() => {
+    let list = dbInvestments ?? [];
+    if (activeSector !== "Tous") list = list.filter((i: any) => i.sector === activeSector);
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
-      filtered = filtered.filter((i) => i.title.toLowerCase().includes(q) || i.desc.toLowerCase().includes(q));
+      list = list.filter((i: any) =>
+        i.title?.toLowerCase().includes(q) || i.description?.toLowerCase().includes(q)
+      );
     }
-    return filtered;
-  }, [activeSector, searchQuery]);
+    return list;
+  }, [dbInvestments, activeSector, searchQuery]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -233,64 +221,56 @@ export default function Investments() {
           <div className="container">
             {isLoading ? (
               <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
-            ) : investments ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {investments.map((inv) => (
-                  <Card key={inv.id} className="border shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden">
-                    <CardContent className="p-6">
-                      <div className="flex items-center gap-2 mb-3">
-                        <span className="habari-rubrique text-xs">{inv.sector}</span>
-                        <span className="text-xs font-sans px-2 py-0.5 bg-green-50 text-green-700 rounded capitalize">{inv.status}</span>
-                      </div>
-                      <h3 className="font-serif font-bold text-lg text-foreground mb-2">{inv.title}</h3>
-                      {inv.description && <p className="text-sm text-muted-foreground font-sans line-clamp-2 mb-4">{inv.description}</p>}
-                      <div className="flex items-center justify-between pt-3 border-t border-border">
-                        <div className="flex items-center gap-1 text-[oklch(0.72_0.15_75)]">
-                          <DollarSign className="w-4 h-4" />
-                          <span className="font-bold font-sans">{inv.targetAmount} {inv.currency}</span>
-                        </div>
-                        <span className="text-xs font-sans px-2 py-1 bg-primary/10 text-primary rounded capitalize">{inv.investmentType}</span>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+            ) : investments.length === 0 ? (
+              <div className="text-center py-20">
+                <TrendingUp className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
+                <p className="text-muted-foreground font-sans">
+                  {(dbInvestments?.length ?? 0) === 0
+                    ? "Les opportunités d'investissement seront bientôt disponibles."
+                    : "Aucune opportunité ne correspond à votre recherche."}
+                </p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {filteredSamples.map((inv) => (
-                  <Card key={inv.id} className="border shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden">
-                    <CardContent className="p-6">
-                      <div className="flex items-center gap-2 mb-3">
-                        <span className="habari-rubrique text-xs">{inv.sector}</span>
-                        <span className="text-xs font-sans px-2 py-0.5 bg-green-50 text-green-700 rounded capitalize">{inv.status}</span>
-                      </div>
-                      <h3 className="font-serif font-bold text-lg text-foreground mb-2">{inv.title}</h3>
-                      <p className="text-sm text-muted-foreground font-sans line-clamp-2 mb-4">{inv.desc}</p>
-                      <div className="flex items-center justify-between pt-3 border-t border-border">
-                        <div className="flex items-center gap-2">
-                          <MapPin className="w-3 h-3 text-muted-foreground" />
-                          <span className="text-sm text-muted-foreground font-sans">{inv.country}</span>
+                {investments.map((inv: any) => {
+                  const access = inv.access;
+                  const locked = access && !access.allowed;
+                  const cta = locked ? paywallCta(access.reason, access.requiredTier as SubscriptionTier | undefined) : null;
+                  const msg = locked ? paywallMessage(access.reason, access.trialDaysRemaining ?? 0, access.requiredTier as SubscriptionTier | undefined) : "";
+                  return (
+                    <Card key={inv.id} className={`border shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden ${locked ? "relative" : ""}`}>
+                      <CardContent className="p-6">
+                        <div className="flex items-center gap-2 mb-3">
+                          <span className="habari-rubrique text-xs">{inv.sector}</span>
+                          <span className="text-xs font-sans px-2 py-0.5 bg-green-50 text-green-700 rounded capitalize">{inv.status}</span>
+                          {locked && (
+                            <span className="text-xs font-sans font-semibold px-2 py-0.5 bg-primary/10 text-primary rounded inline-flex items-center gap-1">
+                              <Lock className="w-3 h-3" /> Premium
+                            </span>
+                          )}
                         </div>
-                        <div className="flex items-center gap-1 text-[oklch(0.72_0.15_75)]">
-                          <DollarSign className="w-4 h-4" />
-                          <span className="font-bold font-sans">{inv.amount}</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between mt-3">
-                        <span className="text-xs font-sans px-2 py-1 bg-primary/10 text-primary rounded capitalize">{inv.type}</span>
-                        <Button variant="ghost" size="sm" className="font-sans text-primary gap-1 p-0 h-auto">
-                          En savoir plus <ArrowRight className="w-3 h-3" />
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-                {filteredSamples.length === 0 && (
-                  <div className="col-span-full text-center py-20">
-                    <TrendingUp className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-                    <p className="text-muted-foreground font-sans">Aucune opportunité ne correspond à votre recherche.</p>
-                  </div>
-                )}
+                        <h3 className="font-serif font-bold text-lg text-foreground mb-2">{inv.title}</h3>
+                        {inv.description && <p className="text-sm text-muted-foreground font-sans line-clamp-2 mb-4">{inv.description}</p>}
+                        {locked ? (
+                          <div className="pt-3 border-t border-border space-y-3">
+                            <p className="text-xs text-muted-foreground font-sans">{msg}</p>
+                            <Link href={cta!.href}>
+                              <Button size="sm" className="font-sans w-full">{cta!.label}</Button>
+                            </Link>
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-between pt-3 border-t border-border">
+                            <div className="flex items-center gap-1 text-[oklch(0.72_0.15_75)]">
+                              <DollarSign className="w-4 h-4" />
+                              <span className="font-bold font-sans">{inv.targetAmount} {inv.currency}</span>
+                            </div>
+                            <span className="text-xs font-sans px-2 py-1 bg-primary/10 text-primary rounded capitalize">{inv.investmentType}</span>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  );
+                })}
               </div>
             )}
           </div>

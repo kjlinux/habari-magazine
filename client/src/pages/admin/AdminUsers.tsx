@@ -7,12 +7,11 @@ import { toast } from "sonner";
 const roleLabels: Record<string, string> = { user: "Utilisateur", admin: "Administrateur" };
 const roleColors: Record<string, string> = { user: "bg-blue-100 text-blue-800", admin: "bg-red-100 text-red-800" };
 
-const tierLabels: Record<string, string> = { free: "Gratuit", standard: "Standard", premium: "Premium", enterprise: "Entreprise" };
+const tierLabels: Record<string, string> = { free: "Gratuit", premium: "Premium", integral: "Habari Intégral" };
 const tierColors: Record<string, string> = {
   free: "bg-gray-100 text-gray-600",
-  standard: "bg-purple-100 text-purple-800",
   premium: "bg-[oklch(0.75_0.15_85)]/20 text-[oklch(0.45_0.15_85)]",
-  enterprise: "bg-primary/10 text-primary",
+  integral: "bg-primary/10 text-primary",
 };
 
 export default function AdminUsers() {
@@ -141,9 +140,8 @@ export default function AdminUsers() {
                           className={`px-2 py-1 rounded-lg text-xs font-sans font-medium border-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/30 ${tierColors[u.subscriptionTier]}`}
                         >
                           <option value="free">Gratuit</option>
-                          <option value="standard">Standard</option>
                           <option value="premium">Premium</option>
-                          <option value="enterprise">Entreprise</option>
+                          <option value="integral">Habari Intégral</option>
                         </select>
                       </td>
                       <td className="px-4 py-3 hidden lg:table-cell">

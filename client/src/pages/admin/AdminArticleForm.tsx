@@ -33,7 +33,7 @@ export default function AdminArticleForm() {
   const [countryId, setCountryId] = useState<number | undefined>();
   const [featuredImage, setFeaturedImage] = useState("");
   const [status, setStatus] = useState<"draft" | "published" | "archived">("draft");
-  const [accessLevel, setAccessLevel] = useState<"free" | "standard" | "premium" | "enterprise">("free");
+  const [accessLevel, setAccessLevel] = useState<"free" | "premium" | "integral">("free");
 
   const { data: article, isLoading: loadingArticle } = trpc.admin.articles.byId.useQuery(
     { id: articleId! },
@@ -262,9 +262,8 @@ export default function AdminArticleForm() {
                   className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-foreground font-sans text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors"
                 >
                   <option value="free">Accès libre</option>
-                  <option value="standard">Standard</option>
-                  <option value="premium">Premium</option>
-                  <option value="enterprise">Entreprise</option>
+                  <option value="premium">Accès Premium</option>
+                  <option value="integral">Habari Intégral</option>
                 </select>
               </div>
 

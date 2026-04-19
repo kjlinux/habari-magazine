@@ -25,9 +25,8 @@ const STATUS_LABELS: Record<string, { label: string; className: string }> = {
 
 const TIER_LABELS: Record<string, { label: string; className: string }> = {
   free: { label: "Libre", className: "bg-blue-100 text-blue-600" },
-  standard: { label: "Standard", className: "bg-purple-100 text-purple-600" },
   premium: { label: "Premium", className: "bg-amber-100 text-amber-700" },
-  enterprise: { label: "Enterprise", className: "bg-red-100 text-red-700" },
+  integral: { label: "Intégral", className: "bg-primary/10 text-primary" },
 };
 
 export default function AdminDashboard() {

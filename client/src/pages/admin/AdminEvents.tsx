@@ -18,11 +18,12 @@ type EventForm = {
   image: string;
   capacity: string;
   status: 'upcoming' | 'ongoing' | 'completed' | 'cancelled';
+  isExclusive: boolean;
 };
 
 const empty: EventForm = {
   title: "", slug: "", description: "", type: "conference",
-  startDate: "", endDate: "", location: "", image: "", capacity: "", status: "upcoming",
+  startDate: "", endDate: "", location: "", image: "", capacity: "", status: "upcoming", isExclusive: false,
 };
 
 const EVENT_TYPES = [
@@ -64,10 +65,10 @@ export default function AdminEvents() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editForm, setEditForm] = useState<EventForm>(empty);
 
-  const setF = (k: keyof EventForm, v: string) => setForm(p => ({
+  const setF = (k: keyof EventForm, v: string | boolean) => setForm(p => ({
     ...p,
     [k]: v,
-    ...(k === "title" ? { slug: slugify(v) } : {}),
+    ...(k === "title" && typeof v === "string" ? { slug: slugify(v) } : {}),
   }));
 
   const handleCreate = () => {
@@ -83,6 +84,7 @@ export default function AdminEvents() {
       image: form.image || undefined,
       capacity: form.capacity ? parseInt(form.capacity) : undefined,
       status: form.status,
+      isExclusive: form.isExclusive,
     });
   };
 
@@ -93,6 +95,7 @@ export default function AdminEvents() {
       type: e.type, startDate: e.startDate?.slice(0, 10) || "",
       endDate: e.endDate?.slice(0, 10) || "", location: e.location || "",
       image: e.image || "", capacity: e.capacity?.toString() || "", status: e.status,
+      isExclusive: !!e.isExclusive,
     });
   };
 
@@ -109,6 +112,7 @@ export default function AdminEvents() {
       image: editForm.image || null,
       capacity: editForm.capacity ? parseInt(editForm.capacity) : null,
       status: editForm.status,
+      isExclusive: editForm.isExclusive,
     });
   };
 
@@ -184,6 +188,19 @@ export default function AdminEvents() {
               <div className="sm:col-span-2 space-y-1">
                 <Label className="font-sans text-xs">Description</Label>
                 <textarea placeholder="Description de l'événement..." value={form.description} onChange={e => setF("description", e.target.value)} rows={3} className="w-full border border-input rounded-md px-3 py-2 text-sm font-sans bg-background resize-none" />
+              </div>
+              <div className="sm:col-span-2 flex items-center gap-2 pt-2">
+                <input
+                  id="isExclusive"
+                  type="checkbox"
+                  title="Événement exclusif Intégral"
+                  checked={form.isExclusive}
+                  onChange={e => setF("isExclusive", e.target.checked)}
+                  className="w-4 h-4 rounded border-input accent-primary"
+                />
+                <Label htmlFor="isExclusive" className="font-sans text-sm cursor-pointer">
+                  Événement exclusif (réservé aux abonnés Habari Intégral)
+                </Label>
               </div>
             </div>
             <div className="flex gap-2 mt-4">

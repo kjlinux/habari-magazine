@@ -84,20 +84,21 @@ export function registerStripeWebhook(app: Express) {
                 .where(eq(users.id, userId));
             }
 
-            // Determine the subscription tier based on product key
-            let tier: "standard" | "premium" | "enterprise" = "premium";
+            let siteTier: "free" | "premium" | "integral" = "premium";
+            let grantNewsletter = false;
+
             if (productKey === "newsletterPremium") {
-              // Newsletter premium only - upgrade newsletter subscriber
-              const userResult = await db.select().from(users).where(eq(users.id, userId)).limit(1);
-              if (userResult.length > 0 && userResult[0].email) {
-                await db.update(newsletterSubscribers)
-                  .set({ tier: "premium" })
-                  .where(eq(newsletterSubscribers.email, userResult[0].email));
-              }
-              tier = "standard";
+              siteTier = "free";
+              grantNewsletter = true;
+            } else if (productKey === "premiumAccess") {
+              siteTier = "premium";
+              grantNewsletter = false;
             } else if (productKey === "bundle") {
-              tier = "premium";
-              // Also upgrade newsletter
+              siteTier = "integral";
+              grantNewsletter = true;
+            }
+
+            if (grantNewsletter) {
               const userResult = await db.select().from(users).where(eq(users.id, userId)).limit(1);
               if (userResult.length > 0 && userResult[0].email) {
                 await db.update(newsletterSubscribers)
@@ -106,22 +107,22 @@ export function registerStripeWebhook(app: Express) {
               }
             }
 
-            // Update user subscription tier
             await db.update(users)
-              .set({ subscriptionTier: tier })
+              .set({ subscriptionTier: siteTier, hasNewsletterPremium: grantNewsletter })
               .where(eq(users.id, userId));
 
-            // Create subscription record
-            await db.insert(userSubscriptions).values({
-              userId,
-              tier,
-              status: "active",
-              stripeSubscriptionId: stripeSubscriptionId as string,
-              stripeProductKey: productKey,
-              startDate: new Date(),
-            });
+            if (siteTier !== "free") {
+              await db.insert(userSubscriptions).values({
+                userId,
+                tier: siteTier,
+                status: "active",
+                stripeSubscriptionId: stripeSubscriptionId as string,
+                stripeProductKey: productKey,
+                startDate: new Date(),
+              });
+            }
 
-            console.log(`[Webhook] User ${userId} subscribed to ${productKey} (tier: ${tier})`);
+            console.log(`[Webhook] User ${userId} subscribed to ${productKey} (siteTier: ${siteTier}, newsletter: ${grantNewsletter})`);
             break;
           }
 
@@ -144,10 +145,33 @@ export function registerStripeWebhook(app: Express) {
               .where(eq(userSubscriptions.stripeSubscriptionId, subscriptionId));
 
             if (subResult.length > 0) {
-              await db.update(users)
-                .set({ subscriptionTier: "free" })
-                .where(eq(users.id, subResult[0].userId));
-              console.log(`[Webhook] User ${subResult[0].userId} subscription cancelled`);
+              const cancelledProduct = subResult[0].stripeProductKey;
+              const userId = subResult[0].userId;
+
+              const updates: { subscriptionTier?: "free"; hasNewsletterPremium?: boolean } = {};
+              if (cancelledProduct === "premiumAccess") {
+                updates.subscriptionTier = "free";
+              } else if (cancelledProduct === "bundle") {
+                updates.subscriptionTier = "free";
+                updates.hasNewsletterPremium = false;
+              } else if (cancelledProduct === "newsletterPremium") {
+                updates.hasNewsletterPremium = false;
+              } else {
+                updates.subscriptionTier = "free";
+                updates.hasNewsletterPremium = false;
+              }
+              await db.update(users).set(updates).where(eq(users.id, userId));
+
+              if (cancelledProduct === "bundle" || cancelledProduct === "newsletterPremium") {
+                const userRow = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+                if (userRow.length > 0 && userRow[0].email) {
+                  await db.update(newsletterSubscribers)
+                    .set({ tier: "free" })
+                    .where(eq(newsletterSubscribers.email, userRow[0].email));
+                }
+              }
+
+              console.log(`[Webhook] User ${userId} subscription cancelled (product: ${cancelledProduct})`);
             }
             break;
           }

@@ -889,12 +889,12 @@ function SubscriptionPriceSettings() {
   };
 
   const priceKeys = [
-    { key: "price_standard_monthly", label: "Standard mensuel (€)" },
-    { key: "price_standard_annual", label: "Standard annuel (€)" },
     { key: "price_premium_monthly", label: "Premium mensuel (€)" },
     { key: "price_premium_annual", label: "Premium annuel (€)" },
-    { key: "price_enterprise_monthly", label: "Entreprise mensuel (€)" },
-    { key: "price_enterprise_annual", label: "Entreprise annuel (€)" },
+    { key: "price_integral_monthly", label: "Habari Intégral mensuel (€)" },
+    { key: "price_integral_annual", label: "Habari Intégral annuel (€)" },
+    { key: "price_newsletter_premium_monthly", label: "Newsletter Premium mensuelle (€)" },
+    { key: "price_magazine_pdf_unit", label: "Magazine PDF à l'unité (€)" },
   ];
 
   return (

@@ -22,7 +22,8 @@ export const users = mysqlTable("users", {
   loginMethod: varchar("loginMethod", { length: 64 }),
   passwordHash: varchar("passwordHash", { length: 255 }),
   role: mysqlEnum("role", ["user", "admin"]).default("user").notNull(),
-  subscriptionTier: mysqlEnum("subscriptionTier", ["free", "standard", "premium", "enterprise"]).default("free").notNull(),
+  subscriptionTier: mysqlEnum("subscriptionTier", ["free", "premium", "integral"]).default("free").notNull(),
+  hasNewsletterPremium: boolean("hasNewsletterPremium").default(false).notNull(),
   stripeCustomerId: varchar("stripeCustomerId", { length: 255 }),
   // Profile fields
   firstName: varchar("firstName", { length: 255 }),
@@ -107,7 +108,7 @@ export const articles = mysqlTable("articles", {
   countryId: int("countryId").references(() => countries.id),
   featuredImage: varchar("featuredImage", { length: 512 }),
   status: mysqlEnum("status", ["draft", "published", "archived"]).default("draft").notNull(),
-  minSubscriptionTier: mysqlEnum("minSubscriptionTier", ["free", "standard", "premium", "enterprise"]).default("free").notNull(),
+  minSubscriptionTier: mysqlEnum("minSubscriptionTier", ["free", "premium", "integral"]).default("free").notNull(),
   viewCount: int("viewCount").default(0),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   publishedAt: timestamp("publishedAt"),
@@ -161,6 +162,7 @@ export const investmentOpportunities = mysqlTable("investmentOpportunities", {
   timeline: varchar("timeline", { length: 255 }),
   status: mysqlEnum("status", ["open", "closed", "funded"]).default("open").notNull(),
   image: varchar("image", { length: 512 }),
+  minSubscriptionTier: mysqlEnum("minSubscriptionTier", ["free", "premium", "integral"]).default("premium").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
@@ -243,6 +245,7 @@ export const events = mysqlTable("events", {
   capacity: int("capacity"),
   registeredCount: int("registeredCount").default(0),
   status: mysqlEnum("status", ["upcoming", "ongoing", "completed", "cancelled"]).default("upcoming").notNull(),
+  isExclusive: boolean("isExclusive").default(false).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
@@ -255,7 +258,7 @@ export type InsertEvent = typeof events.$inferInsert;
  */
 export const subscriptionPlans = mysqlTable("subscriptionPlans", {
   id: int("id").autoincrement().primaryKey(),
-  tier: mysqlEnum("tier", ["standard", "premium", "enterprise"]).notNull().unique(),
+  tier: mysqlEnum("tier", ["premium", "integral"]).notNull().unique(),
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
   monthlyPrice: decimal("monthlyPrice", { precision: 10, scale: 2 }).notNull(),
@@ -275,7 +278,7 @@ export const userSubscriptions = mysqlTable("userSubscriptions", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").references(() => users.id).notNull(),
   planId: int("planId").references(() => subscriptionPlans.id),
-  tier: mysqlEnum("tier", ["standard", "premium", "enterprise"]).notNull(),
+  tier: mysqlEnum("tier", ["premium", "integral"]).notNull(),
   status: mysqlEnum("status", ["active", "cancelled", "expired"]).default("active").notNull(),
   stripeSubscriptionId: varchar("stripeSubscriptionId", { length: 255 }),
   stripeProductKey: varchar("stripeProductKey", { length: 100 }),
@@ -382,6 +385,7 @@ export const contactMessages = mysqlTable("contactMessages", {
   message: longtext("message").notNull(),
   category: mysqlEnum("category", ["general", "editorial", "partnership", "advertising", "subscription", "other"]).default("general").notNull(),
   status: mysqlEnum("status", ["new", "read", "replied", "archived"]).default("new").notNull(),
+  priority: mysqlEnum("priority", ["normal", "priority"]).default("normal").notNull(),
   repliedAt: timestamp("repliedAt"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
@@ -448,6 +452,30 @@ export const siteSettings = mysqlTable("siteSettings", {
 
 export type SiteSetting = typeof siteSettings.$inferSelect;
 export type InsertSiteSetting = typeof siteSettings.$inferInsert;
+
+/**
+ * Partners content (press releases, sponsored articles, reports)
+ */
+export const partners = mysqlTable("partners", {
+  id: int("id").autoincrement().primaryKey(),
+  title: varchar("title", { length: 512 }).notNull(),
+  slug: varchar("slug", { length: 512 }).notNull().unique(),
+  category: mysqlEnum("category", ["communique", "sponsored", "report"]).notNull(),
+  source: varchar("source", { length: 255 }),
+  excerpt: text("excerpt"),
+  content: longtext("content"),
+  tag: varchar("tag", { length: 100 }),
+  image: varchar("image", { length: 512 }),
+  externalLink: varchar("externalLink", { length: 1024 }),
+  featured: boolean("featured").default(false),
+  published: boolean("published").default(true),
+  publishedAt: timestamp("publishedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Partner = typeof partners.$inferSelect;
+export type InsertPartner = typeof partners.$inferInsert;
 
 /**
  * Web Push subscriptions (browser push notifications)

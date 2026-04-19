@@ -335,12 +335,11 @@ export default function MyAccount() {
   const subscription = subscriptionQuery.data;
   const tierLabels: Record<string, string> = {
     free: "Accès libre",
-    standard: "Standard",
     premium: "Premium",
-    enterprise: "Intégral",
+    integral: "Habari Intégral",
   };
   const currentTier = (user as any)?.subscriptionTier || "free";
-  const isPremium = currentTier === "premium" || currentTier === "enterprise";
+  const isPremium = currentTier === "premium" || currentTier === "integral";
   const isPaid = currentTier !== "free";
   const displayName = profile?.firstName && profile?.lastName
     ? `${profile.firstName} ${profile.lastName}`

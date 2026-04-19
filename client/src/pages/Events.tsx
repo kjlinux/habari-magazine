@@ -96,7 +96,12 @@ export default function Events() {
                         <div className="text-xs text-muted-foreground font-sans uppercase">{ev.startDate && new Date(ev.startDate).toLocaleDateString('fr-FR', { month: 'short' })}</div>
                       </div>
                       <div className="flex-1">
-                        <span className="inline-block mb-2 text-xs font-sans px-2 py-0.5 bg-[oklch(0.72_0.15_75)]/10 text-[oklch(0.55_0.12_75)] rounded capitalize">{ev.type}</span>
+                        <div className="flex items-center gap-2 mb-2 flex-wrap">
+                          <span className="inline-block text-xs font-sans px-2 py-0.5 bg-[oklch(0.72_0.15_75)]/10 text-[oklch(0.55_0.12_75)] rounded capitalize">{ev.type}</span>
+                          {(ev as any).isExclusive && (
+                            <span className="inline-block text-xs font-sans font-semibold px-2 py-0.5 bg-primary/10 text-primary rounded">Intégral</span>
+                          )}
+                        </div>
                         <h3 className="font-serif font-bold text-foreground leading-snug">{ev.title}</h3>
                       </div>
                     </div>

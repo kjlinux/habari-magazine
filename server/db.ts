@@ -25,6 +25,8 @@ import {
   siteSettings,
   authors,
   InsertAuthor,
+  partners,
+  InsertPartner,
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -271,17 +273,22 @@ export async function getInvestmentOpportunitiesByCountry(countryId: number, lim
 /**
  * Events queries
  */
-export async function getUpcomingEvents(limit: number = 10) {
+export async function getUpcomingEvents(limit: number = 10, includeExclusive: boolean = false) {
   const db = await getDb();
   if (!db) return [];
-  
+
+  const statusCondition = or(eq(events.status, 'upcoming'), eq(events.status, 'ongoing'));
+  const whereCondition = includeExclusive
+    ? statusCondition
+    : and(statusCondition, eq(events.isExclusive, false));
+
   const result = await db
     .select()
     .from(events)
-    .where(or(eq(events.status, 'upcoming'), eq(events.status, 'ongoing')))
+    .where(whereCondition)
     .orderBy((t) => t.startDate)
     .limit(limit);
-  
+
   return result;
 }
 
@@ -426,9 +433,8 @@ export async function getPremiumArticles(limit: number = 10, offset: number = 0)
     .where(and(
       eq(articles.status, 'published'),
       or(
-        eq(articles.minSubscriptionTier, 'standard'),
         eq(articles.minSubscriptionTier, 'premium'),
-        eq(articles.minSubscriptionTier, 'enterprise')
+        eq(articles.minSubscriptionTier, 'integral')
       )
     ))
     .orderBy(desc(articles.publishedAt))
@@ -535,7 +541,7 @@ export async function adminCreateArticle(data: {
   countryId?: number;
   featuredImage?: string;
   status?: 'draft' | 'published' | 'archived';
-  minSubscriptionTier?: 'free' | 'standard' | 'premium' | 'enterprise';
+  minSubscriptionTier?: 'free' | 'premium' | 'integral';
 }) {
   const db = await getDb();
   if (!db) return undefined;
@@ -572,7 +578,7 @@ export async function adminUpdateArticle(id: number, data: {
   countryId?: number | null;
   featuredImage?: string | null;
   status?: 'draft' | 'published' | 'archived';
-  minSubscriptionTier?: 'free' | 'standard' | 'premium' | 'enterprise';
+  minSubscriptionTier?: 'free' | 'premium' | 'integral';
 }) {
   const db = await getDb();
   if (!db) return undefined;
@@ -637,7 +643,7 @@ export async function adminUpdateUserRole(userId: number, role: 'user' | 'admin'
 /**
  * Admin: Update user subscription tier
  */
-export async function adminUpdateUserSubscription(userId: number, tier: 'free' | 'standard' | 'premium' | 'enterprise') {
+export async function adminUpdateUserSubscription(userId: number, tier: 'free' | 'premium' | 'integral') {
   const db = await getDb();
   if (!db) return undefined;
 
@@ -690,6 +696,7 @@ export async function submitContactMessage(data: {
   subject: string;
   message: string;
   category?: 'general' | 'editorial' | 'partnership' | 'advertising' | 'subscription' | 'other';
+  priority?: 'normal' | 'priority';
 }) {
   const db = await getDb();
   if (!db) return undefined;
@@ -700,6 +707,7 @@ export async function submitContactMessage(data: {
     subject: data.subject,
     message: data.message,
     category: data.category ?? 'general',
+    priority: data.priority ?? 'normal',
   });
 
   return { success: true };
@@ -720,7 +728,7 @@ export async function adminGetContactMessages(limit: number = 50, offset: number
     .select()
     .from(contactMessages)
     .where(conditions)
-    .orderBy(desc(contactMessages.createdAt))
+    .orderBy(desc(contactMessages.priority), desc(contactMessages.createdAt))
     .limit(limit)
     .offset(offset);
 }
@@ -1649,4 +1657,379 @@ export async function adminDeleteEvent(id: number) {
   if (!db) return undefined;
   await db.delete(events).where(eq(events.id, id));
   return { success: true };
+}
+
+// ---------- Helpers slug ----------
+function buildSlug(title: string): string {
+  return title
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
+    .substring(0, 200) + "-" + Date.now().toString(36);
+}
+
+// ---------- Admin: Directory (economicActors) ----------
+export async function adminGetAllActors(filters?: {
+  sector?: string;
+  countryId?: number;
+  search?: string;
+  verified?: boolean;
+  limit?: number;
+  offset?: number;
+}) {
+  const db = await getDb();
+  if (!db) return { items: [], total: 0 };
+
+  const conditions: any[] = [];
+  if (filters?.sector) conditions.push(eq(economicActors.sector, filters.sector));
+  if (filters?.countryId) conditions.push(eq(economicActors.countryId, filters.countryId));
+  if (typeof filters?.verified === "boolean") conditions.push(eq(economicActors.verified, filters.verified));
+  if (filters?.search) conditions.push(like(economicActors.name, `%${filters.search}%`));
+
+  const whereClause = conditions.length ? and(...conditions) : undefined;
+  const limit = filters?.limit ?? 50;
+  const offset = filters?.offset ?? 0;
+
+  const [totalResult, items] = await Promise.all([
+    db.select({ c: count() }).from(economicActors).where(whereClause),
+    db.select().from(economicActors).where(whereClause).orderBy(desc(economicActors.createdAt)).limit(limit).offset(offset),
+  ]);
+  return { items, total: totalResult[0]?.c ?? 0 };
+}
+
+export async function adminGetActorById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const r = await db.select().from(economicActors).where(eq(economicActors.id, id)).limit(1);
+  return r[0];
+}
+
+export async function adminCreateActor(data: {
+  name: string;
+  description?: string | null;
+  sector?: string | null;
+  subsector?: string | null;
+  countryId?: number | null;
+  website?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  logo?: string | null;
+  foundedYear?: number | null;
+  employees?: string | null;
+  verified?: boolean;
+}) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const slug = buildSlug(data.name);
+  const result = await db.insert(economicActors).values({
+    name: data.name,
+    slug,
+    description: data.description ?? null,
+    sector: data.sector ?? null,
+    subsector: data.subsector ?? null,
+    countryId: data.countryId ?? null,
+    website: data.website ?? null,
+    email: data.email ?? null,
+    phone: data.phone ?? null,
+    logo: data.logo ?? null,
+    foundedYear: data.foundedYear ?? null,
+    employees: data.employees ?? null,
+    verified: data.verified ?? false,
+  });
+  return { success: true, insertId: result[0].insertId };
+}
+
+export async function adminUpdateActor(id: number, data: {
+  name?: string;
+  description?: string | null;
+  sector?: string | null;
+  subsector?: string | null;
+  countryId?: number | null;
+  website?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  logo?: string | null;
+  foundedYear?: number | null;
+  employees?: string | null;
+  verified?: boolean;
+}) {
+  const db = await getDb();
+  if (!db) return undefined;
+  await db.update(economicActors).set(data).where(eq(economicActors.id, id));
+  return { success: true };
+}
+
+export async function adminDeleteActor(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  await db.delete(economicActors).where(eq(economicActors.id, id));
+  return { success: true };
+}
+
+export async function adminToggleActorVerified(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const existing = await adminGetActorById(id);
+  if (!existing) return undefined;
+  const newValue = !existing.verified;
+  await db.update(economicActors).set({ verified: newValue }).where(eq(economicActors.id, id));
+  return { success: true, verified: newValue };
+}
+
+export async function adminCountActors() {
+  const db = await getDb();
+  if (!db) return { total: 0, verified: 0 };
+  const [total] = await db.select({ c: count() }).from(economicActors);
+  const [verified] = await db.select({ c: count() }).from(economicActors).where(eq(economicActors.verified, true));
+  return { total: total?.c ?? 0, verified: verified?.c ?? 0 };
+}
+
+// ---------- Admin: Investments (investmentOpportunities) ----------
+export async function adminGetAllInvestments(filters?: {
+  investmentType?: 'equity' | 'debt' | 'grant' | 'partnership';
+  status?: 'open' | 'closed' | 'funded';
+  countryId?: number;
+  search?: string;
+  limit?: number;
+  offset?: number;
+}) {
+  const db = await getDb();
+  if (!db) return { items: [], total: 0 };
+
+  const conditions: any[] = [];
+  if (filters?.investmentType) conditions.push(eq(investmentOpportunities.investmentType, filters.investmentType));
+  if (filters?.status) conditions.push(eq(investmentOpportunities.status, filters.status));
+  if (filters?.countryId) conditions.push(eq(investmentOpportunities.countryId, filters.countryId));
+  if (filters?.search) conditions.push(like(investmentOpportunities.title, `%${filters.search}%`));
+
+  const whereClause = conditions.length ? and(...conditions) : undefined;
+  const limit = filters?.limit ?? 50;
+  const offset = filters?.offset ?? 0;
+
+  const [totalResult, items] = await Promise.all([
+    db.select({ c: count() }).from(investmentOpportunities).where(whereClause),
+    db.select().from(investmentOpportunities).where(whereClause).orderBy(desc(investmentOpportunities.createdAt)).limit(limit).offset(offset),
+  ]);
+  return { items, total: totalResult[0]?.c ?? 0 };
+}
+
+export async function adminGetInvestmentById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const r = await db.select().from(investmentOpportunities).where(eq(investmentOpportunities.id, id)).limit(1);
+  return r[0];
+}
+
+export async function adminCreateInvestment(data: {
+  title: string;
+  description: string;
+  actorId?: number | null;
+  countryId?: number | null;
+  sector?: string | null;
+  investmentType: 'equity' | 'debt' | 'grant' | 'partnership';
+  targetAmount?: string | null;
+  currency?: string | null;
+  minInvestment?: string | null;
+  expectedReturn?: string | null;
+  timeline?: string | null;
+  status?: 'open' | 'closed' | 'funded';
+  image?: string | null;
+  minSubscriptionTier?: 'free' | 'premium' | 'integral';
+}) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const slug = buildSlug(data.title);
+  const result = await db.insert(investmentOpportunities).values({
+    title: data.title,
+    slug,
+    description: data.description,
+    actorId: data.actorId ?? null,
+    countryId: data.countryId ?? null,
+    sector: data.sector ?? null,
+    investmentType: data.investmentType,
+    targetAmount: data.targetAmount ?? null,
+    currency: data.currency ?? "USD",
+    minInvestment: data.minInvestment ?? null,
+    expectedReturn: data.expectedReturn ?? null,
+    timeline: data.timeline ?? null,
+    status: data.status ?? 'open',
+    image: data.image ?? null,
+    minSubscriptionTier: data.minSubscriptionTier ?? 'premium',
+  });
+  return { success: true, insertId: result[0].insertId };
+}
+
+export async function adminUpdateInvestment(id: number, data: {
+  title?: string;
+  description?: string;
+  actorId?: number | null;
+  countryId?: number | null;
+  sector?: string | null;
+  investmentType?: 'equity' | 'debt' | 'grant' | 'partnership';
+  targetAmount?: string | null;
+  currency?: string | null;
+  minInvestment?: string | null;
+  expectedReturn?: string | null;
+  timeline?: string | null;
+  status?: 'open' | 'closed' | 'funded';
+  image?: string | null;
+  minSubscriptionTier?: 'free' | 'premium' | 'integral';
+}) {
+  const db = await getDb();
+  if (!db) return undefined;
+  await db.update(investmentOpportunities).set(data).where(eq(investmentOpportunities.id, id));
+  return { success: true };
+}
+
+export async function adminDeleteInvestment(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  await db.delete(investmentOpportunities).where(eq(investmentOpportunities.id, id));
+  return { success: true };
+}
+
+export async function adminCountInvestments() {
+  const db = await getDb();
+  if (!db) return { total: 0, open: 0, closed: 0, funded: 0 };
+  const [total] = await db.select({ c: count() }).from(investmentOpportunities);
+  const [open] = await db.select({ c: count() }).from(investmentOpportunities).where(eq(investmentOpportunities.status, 'open'));
+  const [closed] = await db.select({ c: count() }).from(investmentOpportunities).where(eq(investmentOpportunities.status, 'closed'));
+  const [funded] = await db.select({ c: count() }).from(investmentOpportunities).where(eq(investmentOpportunities.status, 'funded'));
+  return {
+    total: total?.c ?? 0,
+    open: open?.c ?? 0,
+    closed: closed?.c ?? 0,
+    funded: funded?.c ?? 0,
+  };
+}
+
+// ---------- Public: Partners ----------
+export async function getPublishedPartners(filters?: {
+  category?: 'communique' | 'sponsored' | 'report';
+  limit?: number;
+  offset?: number;
+}) {
+  const db = await getDb();
+  if (!db) return [];
+  const conditions: any[] = [eq(partners.published, true)];
+  if (filters?.category) conditions.push(eq(partners.category, filters.category));
+  return db
+    .select()
+    .from(partners)
+    .where(and(...conditions))
+    .orderBy(desc(partners.featured), desc(partners.publishedAt), desc(partners.createdAt))
+    .limit(filters?.limit ?? 30)
+    .offset(filters?.offset ?? 0);
+}
+
+export async function getPartnerBySlug(slug: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const r = await db.select().from(partners).where(eq(partners.slug, slug)).limit(1);
+  return r[0];
+}
+
+// ---------- Admin: Partners ----------
+export async function adminGetAllPartners(filters?: {
+  category?: 'communique' | 'sponsored' | 'report';
+  published?: boolean;
+  search?: string;
+  limit?: number;
+  offset?: number;
+}) {
+  const db = await getDb();
+  if (!db) return { items: [], total: 0 };
+
+  const conditions: any[] = [];
+  if (filters?.category) conditions.push(eq(partners.category, filters.category));
+  if (typeof filters?.published === "boolean") conditions.push(eq(partners.published, filters.published));
+  if (filters?.search) conditions.push(like(partners.title, `%${filters.search}%`));
+
+  const whereClause = conditions.length ? and(...conditions) : undefined;
+  const limit = filters?.limit ?? 50;
+  const offset = filters?.offset ?? 0;
+
+  const [totalResult, items] = await Promise.all([
+    db.select({ c: count() }).from(partners).where(whereClause),
+    db.select().from(partners).where(whereClause).orderBy(desc(partners.featured), desc(partners.createdAt)).limit(limit).offset(offset),
+  ]);
+  return { items, total: totalResult[0]?.c ?? 0 };
+}
+
+export async function adminGetPartnerById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const r = await db.select().from(partners).where(eq(partners.id, id)).limit(1);
+  return r[0];
+}
+
+export async function adminCreatePartner(data: {
+  title: string;
+  category: 'communique' | 'sponsored' | 'report';
+  source?: string | null;
+  excerpt?: string | null;
+  content?: string | null;
+  tag?: string | null;
+  image?: string | null;
+  externalLink?: string | null;
+  featured?: boolean;
+  published?: boolean;
+  publishedAt?: Date | null;
+}) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const slug = buildSlug(data.title);
+  const result = await db.insert(partners).values({
+    title: data.title,
+    slug,
+    category: data.category,
+    source: data.source ?? null,
+    excerpt: data.excerpt ?? null,
+    content: data.content ?? null,
+    tag: data.tag ?? null,
+    image: data.image ?? null,
+    externalLink: data.externalLink ?? null,
+    featured: data.featured ?? false,
+    published: data.published ?? true,
+    publishedAt: data.publishedAt ?? new Date(),
+  });
+  return { success: true, insertId: result[0].insertId };
+}
+
+export async function adminUpdatePartner(id: number, data: {
+  title?: string;
+  category?: 'communique' | 'sponsored' | 'report';
+  source?: string | null;
+  excerpt?: string | null;
+  content?: string | null;
+  tag?: string | null;
+  image?: string | null;
+  externalLink?: string | null;
+  featured?: boolean;
+  published?: boolean;
+  publishedAt?: Date | null;
+}) {
+  const db = await getDb();
+  if (!db) return undefined;
+  await db.update(partners).set(data).where(eq(partners.id, id));
+  return { success: true };
+}
+
+export async function adminDeletePartner(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  await db.delete(partners).where(eq(partners.id, id));
+  return { success: true };
+}
+
+export async function adminTogglePartnerFeatured(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const existing = await adminGetPartnerById(id);
+  if (!existing) return undefined;
+  const newValue = !existing.featured;
+  await db.update(partners).set({ featured: newValue }).where(eq(partners.id, id));
+  return { success: true, featured: newValue };
 }

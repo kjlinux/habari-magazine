@@ -523,7 +523,7 @@ describe("Admin - Contact Messages", () => {
 // ═══════════════════════════════════════════════
 
 function createMockContextWithTier(
-  tier: "free" | "standard" | "premium" | "enterprise",
+  tier: "free" | "premium" | "integral",
   role: "user" | "admin" = "user"
 ): TrpcContext {
   return {
@@ -603,16 +603,6 @@ describe("Magazine PDF Access Control", () => {
     expect(result.isLaunchPeriod).toBe(true);
   });
 
-  it("should grant access to N001 for standard-tier users during launch period", async () => {
-    const ctx = createMockContextWithTier("standard");
-    const caller = appRouter.createCaller(ctx);
-
-    const result = await caller.magazine.checkAccess({ issueId: "N001" });
-    expect(result.hasAccess).toBe(true);
-    expect(result.reason).toBe("launch_promo");
-    expect(result.isLaunchPeriod).toBe(true);
-  });
-
   it("should grant access to N001 for premium-tier users", async () => {
     const ctx = createMockContextWithTier("premium");
     const caller = appRouter.createCaller(ctx);
@@ -623,8 +613,8 @@ describe("Magazine PDF Access Control", () => {
     expect(["launch_promo", "subscription"]).toContain(result.reason);
   });
 
-  it("should grant access to N001 for enterprise-tier users", async () => {
-    const ctx = createMockContextWithTier("enterprise");
+  it("should grant access to N001 for integral-tier users", async () => {
+    const ctx = createMockContextWithTier("integral");
     const caller = appRouter.createCaller(ctx);
 
     const result = await caller.magazine.checkAccess({ issueId: "N001" });

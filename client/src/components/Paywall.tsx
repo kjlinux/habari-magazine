@@ -2,17 +2,18 @@ import { Link } from "wouter";
 import { Lock, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { paywallCta, paywallMessage, type AccessReason } from "@/lib/access";
+import { paywallCta, paywallMessage, type AccessReason, type SubscriptionTier } from "@/lib/access";
 
 type PaywallProps = {
   reason: AccessReason;
   trialDaysRemaining?: number;
   excerpt?: string | null;
+  requiredTier?: SubscriptionTier;
 };
 
-export default function Paywall({ reason, trialDaysRemaining = 0, excerpt }: PaywallProps) {
-  const cta = paywallCta(reason);
-  const message = paywallMessage(reason, trialDaysRemaining);
+export default function Paywall({ reason, trialDaysRemaining = 0, excerpt, requiredTier }: PaywallProps) {
+  const cta = paywallCta(reason, requiredTier);
+  const message = paywallMessage(reason, trialDaysRemaining, requiredTier);
 
   return (
     <div className="relative my-8">

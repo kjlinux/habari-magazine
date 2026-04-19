@@ -11,7 +11,7 @@ import { Link, useLocation } from "wouter";
 import {
   LayoutDashboard, FileText, Users, Mail, ChevronLeft,
   LogOut, Menu, X, Shield, MessageSquare, BookOpen, Megaphone, Settings,
-  CalendarDays, UserCheck, Bell
+  CalendarDays, UserCheck, Bell, BookUser, TrendingUp, Handshake
 } from "lucide-react";
 import { useState, useEffect } from "react";
 
@@ -24,6 +24,9 @@ const adminMenuItems = [
   { icon: Users, label: "Utilisateurs", path: "/admin/utilisateurs" },
   { icon: Mail, label: "Newsletter", path: "/admin/newsletter" },
   { icon: Megaphone, label: "Opportunités", path: "/admin/opportunites" },
+  { icon: BookUser, label: "Annuaire", path: "/admin/annuaire" },
+  { icon: TrendingUp, label: "Investisseurs", path: "/admin/investisseurs" },
+  { icon: Handshake, label: "Partenaires", path: "/admin/partenaires" },
   { icon: MessageSquare, label: "Messages", path: "/admin/messages" },
   { icon: Bell, label: "Notifications", path: "/admin/notifications" },
   { icon: Settings, label: "Paramètres", path: "/admin/parametres" },
