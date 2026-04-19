@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "wouter";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { trpc } from "@/lib/trpc";
 import {
   Leaf, TreePine, Zap, Landmark, Users, FileText,
   ArrowRight, TrendingUp, Globe2, BarChart3, Shield,
@@ -101,6 +102,8 @@ const greenIndicators = [
 ];
 
 export default function Green() {
+  const { data: greenEvents } = trpc.events.upcoming.useQuery({ limit: 6 });
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -377,29 +380,30 @@ export default function Green() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              { day: "26-29", month: "Mars", title: "OMC MC14 — 14ᵉ Conférence ministérielle", location: "Yaoundé, Cameroun", type: "Sommet mondial", desc: "Événement historique pour la CEEAC. Renforce le commerce régional avec le tarif externe commun CEEAC appliqué dès janvier 2026." },
-              { day: "Mars", month: "2026", title: "Trade and Sustainability Hub", location: "Yaoundé, Cameroun", type: "En marge OMC MC14", desc: "Pour la première fois en Afrique Centrale, les ministres discuteront des échanges de biens et services environnementaux." },
-              { day: "11-12", month: "Mai", title: "Sommet Afrique-France \"Africa Forward\"", location: "Nairobi, Kenya", type: "Sommet international", desc: "Premier sommet du genre en pays anglophone. Innovation et climat au cœur des discussions." },
-              { day: "—", month: "2026", title: "HABARI GREEN SUMMIT", location: "Douala, Cameroun", type: "Conférence annuelle", desc: "Le rendez-vous annuel des acteurs de la transition verte en Afrique Centrale." },
-              { day: "Nov.", month: "2026", title: "COP31 — Belem", location: "Belem, Brésil", type: "Agenda partenaire", desc: "Suivi de la participation des pays CEEAC à la COP31 sur le climat." },
-              { day: "—", month: "Mensuel", title: "Petit-déjeuner climat", location: "Libreville / Douala / Kinshasa", type: "Networking", desc: "Rencontres mensuelles entre décideurs et acteurs de l'économie verte." },
-            ].map((ev, i) => (
-              <div key={i} className="bg-background border border-border rounded-xl p-6 hover:shadow-md transition-shadow">
+            {greenEvents && greenEvents.length > 0 ? greenEvents.map((ev) => (
+              <div key={ev.id} className="bg-background border border-border rounded-xl p-6 hover:shadow-md transition-shadow">
                 <div className="flex items-start gap-4">
                   <div className="text-center bg-[oklch(0.45_0.15_145)]/5 rounded-lg p-3 min-w-[60px]">
-                    <div className="text-xl font-serif font-bold text-[oklch(0.35_0.12_145)]">{ev.day}</div>
-                    <div className="text-xs text-muted-foreground font-sans uppercase">{ev.month}</div>
+                    <div className="text-xl font-serif font-bold text-[oklch(0.35_0.12_145)]">
+                      {new Date(ev.startDate).getDate()}
+                    </div>
+                    <div className="text-xs text-muted-foreground font-sans uppercase">
+                      {new Date(ev.startDate).toLocaleDateString('fr-FR', { month: 'short' })}
+                    </div>
                   </div>
                   <div className="flex-1">
                     <h3 className="font-serif font-bold text-foreground mb-1">{ev.title}</h3>
                     <p className="text-sm text-muted-foreground font-sans mb-1">{ev.location}</p>
-                    <p className="text-xs text-muted-foreground font-sans mb-2">{ev.desc}</p>
-                    <span className="inline-block text-xs font-sans px-2 py-1 bg-[oklch(0.45_0.15_145)]/10 text-[oklch(0.35_0.12_145)] rounded">{ev.type}</span>
+                    {ev.description && <p className="text-xs text-muted-foreground font-sans mb-2 line-clamp-2">{ev.description}</p>}
+                    <span className="inline-block text-xs font-sans px-2 py-1 bg-[oklch(0.45_0.15_145)]/10 text-[oklch(0.35_0.12_145)] rounded capitalize">{ev.type}</span>
                   </div>
                 </div>
               </div>
-            ))}
+            )) : (
+              <div className="col-span-3 text-center py-10 text-muted-foreground font-sans text-sm">
+                Aucun événement à venir pour le moment.
+              </div>
+            )}
           </div>
         </div>
       </section>

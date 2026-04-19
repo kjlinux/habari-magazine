@@ -737,19 +737,15 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {(events && events.length > 0 ? events : [
-              { day: "26", month: "févr.", title: "Cultur'Com — Ouagadougou 2026", location: "Ouagadougou, Burkina Faso", type: "conference" },
-              { day: "15", month: "nov.", title: "PME-Bright Forum — N'Djamena 2026", location: "N'Djamena, Tchad", type: "conference" },
-              { day: "—", month: "2026", title: "Petit-déjeuner décideurs CEEAC — Kinshasa", location: "Kinshasa, RDC", type: "networking" },
-            ]).map((ev: any, i: number) => (
+            {events && events.length > 0 ? events.map((ev: any, i: number) => (
               <div key={i} className="bg-background border border-border rounded-xl p-6 hover:shadow-md transition-shadow">
                 <div className="flex items-start gap-4">
                   <div className="text-center bg-primary/5 rounded-lg p-3 min-w-[60px]">
                     <div className="text-2xl font-serif font-bold text-primary">
-                      {ev.startDate ? new Date(ev.startDate).getDate() : ev.day}
+                      {new Date(ev.startDate).getDate()}
                     </div>
                     <div className="text-xs text-muted-foreground font-sans uppercase">
-                      {ev.startDate ? new Date(ev.startDate).toLocaleDateString('fr-FR', { month: 'short' }) : ev.month}
+                      {new Date(ev.startDate).toLocaleDateString('fr-FR', { month: 'short' })}
                     </div>
                   </div>
                   <div className="flex-1">
@@ -759,7 +755,11 @@ export default function Home() {
                   </div>
                 </div>
               </div>
-            ))}
+            )) : (
+              <div className="col-span-3 text-center py-10 text-muted-foreground font-sans text-sm">
+                Aucun événement à venir pour le moment.
+              </div>
+            )}
           </div>
         </div>
       </section>
