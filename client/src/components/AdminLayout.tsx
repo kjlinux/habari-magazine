@@ -106,7 +106,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <div className="min-h-screen bg-[oklch(0.97_0.005_250)]">
       {/* Mobile header */}
-      <div className="lg:hidden sticky top-0 z-50 bg-background border-b border-border h-14 flex items-center px-4 justify-between">
+      <div className="lg:hidden sticky top-0 z-50 bg-background border-b border-border min-h-14 flex items-center px-4 justify-between safe-area-top">
         <div className="flex items-center gap-3">
           <button onClick={() => setMobileOpen(!mobileOpen)} className="p-2 rounded-md hover:bg-muted">
             {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -122,7 +122,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       <div className="flex">
         {/* Sidebar - Desktop */}
-        <aside className={`hidden lg:flex flex-col sticky top-0 h-screen border-r border-border bg-background transition-all duration-300 ${sidebarOpen ? "w-64" : "w-16"}`}>
+        <aside className={`hidden lg:flex flex-col sticky top-0 h-screen border-r border-border bg-background transition-all duration-300 overflow-hidden ${sidebarOpen ? "w-64" : "w-16"}`}>
           {/* Logo */}
           <div className="h-16 flex items-center px-4 border-b border-border justify-between">
             {sidebarOpen ? (
@@ -146,7 +146,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
 
           {/* Nav items */}
-          <nav className="flex-1 py-4 px-2 space-y-1">
+          <nav className="flex-1 py-4 px-2 space-y-1 overflow-y-auto">
             {adminMenuItems.map((item) => {
               const isActive = location === item.path || (item.path !== "/admin" && location.startsWith(item.path));
               return (

@@ -361,8 +361,7 @@ export default function Subscriptions() {
           {/* Payment info */}
           <div className="text-center mt-8">
             <p className="text-xs text-muted-foreground font-sans">
-              <Lock className="w-3 h-3 inline mr-1" />
-              Paiement sécurisé par Stripe. Annulation possible à tout moment. Carte de test : 4242 4242 4242 4242
+
             </p>
           </div>
         </div>

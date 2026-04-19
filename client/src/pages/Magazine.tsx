@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { trpc } from "@/lib/trpc";
-import { Loader2, BookOpen, Search, Lock } from "lucide-react";
+import { Loader2, BookOpen, Search } from "lucide-react";
 import SocialShare from "@/components/SocialShare";
 import { Link } from "wouter";
 import { useState, useMemo } from "react";
@@ -107,7 +107,6 @@ export default function Magazine() {
                       : "bg-muted/50 text-muted-foreground hover:bg-muted"
                   }`}
                 >
-                  {f.id === "premium" && <Lock className="w-3 h-3 inline mr-1" />}
                   {f.label}
                 </button>
               ))}
@@ -144,7 +143,7 @@ export default function Magazine() {
                           ? "bg-green-100 text-green-700"
                           : "bg-[oklch(0.72_0.15_75)]/15 text-[oklch(0.55_0.12_75)]"
                       }`}>
-                        {article.minSubscriptionTier === "free" ? "Accès libre" : "🔒 Premium"}
+                        {article.minSubscriptionTier === "free" ? "Accès libre" : "Premium"}
                       </span>
                     </div>
                     <CardContent className="p-5">

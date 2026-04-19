@@ -360,8 +360,8 @@ export default function SearchPage() {
                             {article.rubrique}
                           </span>
                           {article.access === "premium" && (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-sans font-medium bg-[oklch(0.72_0.15_75)]/10 text-[oklch(0.55_0.15_75)] rounded-full">
-                              <Lock className="w-3 h-3" /> Premium
+                            <span className="inline-flex items-center px-2 py-0.5 text-xs font-sans font-medium bg-[oklch(0.72_0.15_75)]/10 text-[oklch(0.55_0.15_75)] rounded-full">
+                              Premium
                             </span>
                           )}
                           {article.access === "free" && (
