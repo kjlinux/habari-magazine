@@ -430,7 +430,7 @@ export default function Home() {
                 {[...freeContent, ...freeContent].map((item, i) => (
                   <Link key={i} href={item.slug ? `/article/${item.slug}` : "/magazine"}>
                     <span className="inline-flex items-center gap-2 text-sm font-sans text-foreground/80 hover:text-primary transition-colors cursor-pointer">
-                      <span className="text-[oklch(0.72_0.15_75)] font-semibold text-xs">{item.rubrique}</span>
+                      <span className="text-[oklch(0.72_0.15_75)] font-semibold text-xs">{(item as any).rubrique}</span>
                       <span className="text-muted-foreground/40">—</span>
                       <span className="font-medium">{item.title}</span>
                     </span>
@@ -590,8 +590,8 @@ export default function Home() {
               <div key={i} className="relative group">
                 <Card className="border-0 shadow-sm overflow-hidden h-full opacity-90">
                   <div className="w-full h-52 bg-gradient-to-br from-[oklch(0.72_0.15_75)]/15 to-primary/10 relative overflow-hidden">
-                    {item.image ? (
-                      <img src={item.image} alt={item.title} className="w-full h-full object-cover object-top opacity-70" />
+                    {((item as any).image || (item as any).featuredImage) ? (
+                      <img src={(item as any).image ?? (item as any).featuredImage} alt={item.title} className="w-full h-full object-cover object-top opacity-70" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
                         <Lock className="w-10 h-10 text-[oklch(0.72_0.15_75)]/40" />
@@ -602,7 +602,7 @@ export default function Home() {
                     </span>
                   </div>
                   <CardContent className="p-5">
-                    <div className="habari-rubrique text-xs mb-2">{item.rubrique}</div>
+                    <div className="habari-rubrique text-xs mb-2">{(item as any).rubrique}</div>
                     <h3 className="font-serif font-bold text-lg text-foreground leading-snug mb-2 line-clamp-2">
                       {item.title}
                     </h3>

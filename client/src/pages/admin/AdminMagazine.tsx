@@ -438,7 +438,7 @@ export default function AdminMagazine() {
                     className="hidden"
                     onChange={(e) => {
                       const file = e.target.files?.[0];
-                      if (file) handleUploadFile(file);
+                      if (file) handleUploadFile(file, "pdf");
                     }}
                   />
                   <Button
