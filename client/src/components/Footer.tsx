@@ -1,6 +1,12 @@
 import { Link } from "wouter";
+import { trpc } from "@/lib/trpc";
 
 export default function Footer() {
+  const { data: settings } = trpc.siteConfig.homepageSettings.useQuery({
+    keys: ["site_logo_url", "site_name", "contact_email", "social_twitter", "social_linkedin", "social_facebook", "social_instagram", "social_youtube"],
+  });
+  const get = (key: string, fallback = "") => settings?.[key] ?? fallback;
+
   return (
     <footer className="bg-[oklch(0.20_0.02_250)] text-white/80">
       {/* Main footer */}
@@ -10,8 +16,8 @@ export default function Footer() {
           <div className="lg:col-span-1">
             <div className="mb-4">
               <img
-                src="/logo-habari.png"
-                alt="Habari Mag"
+                src={get("site_logo_url", "/logo-habari.png")}
+                alt={get("site_name", "Habari Mag")}
                 className="h-12 w-auto brightness-[1.8] contrast-[0.9]"
               />
             </div>
@@ -57,7 +63,9 @@ export default function Footer() {
           <div>
             <h4 className="font-serif font-bold text-white text-sm mb-5 uppercase tracking-wider">Contact</h4>
             <ul className="space-y-3 text-sm text-white/60">
-              <li><a href="mailto:redaction@habari.info" className="hover:text-habari-gold transition-colors">redaction@habari.info</a></li>
+              {get("contact_email", "redaction@habari.info") && (
+                <li><a href={`mailto:${get("contact_email", "redaction@habari.info")}`} className="hover:text-habari-gold transition-colors">{get("contact_email", "redaction@habari.info")}</a></li>
+              )}
               <li><a href="mailto:publicite@habari.info" className="hover:text-habari-gold transition-colors">publicite@habari.info</a></li>
               <li className="pt-2">
                 <span className="text-white/40 text-xs">Éditeur</span><br />
@@ -75,8 +83,25 @@ export default function Footer() {
       <div className="border-t border-white/10">
         <div className="container py-5 flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-xs text-white/40">
-            © {new Date().getFullYear()} Habari Magazine — Tous droits réservés
+            © {new Date().getFullYear()} {get("site_name", "Habari Magazine")} — Tous droits réservés
           </p>
+          <div className="flex items-center gap-3">
+            {get("social_twitter") && (
+              <a href={get("social_twitter")} target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-habari-gold transition-colors text-xs">Twitter</a>
+            )}
+            {get("social_facebook") && (
+              <a href={get("social_facebook")} target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-habari-gold transition-colors text-xs">Facebook</a>
+            )}
+            {get("social_linkedin") && (
+              <a href={get("social_linkedin")} target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-habari-gold transition-colors text-xs">LinkedIn</a>
+            )}
+            {get("social_instagram") && (
+              <a href={get("social_instagram")} target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-habari-gold transition-colors text-xs">Instagram</a>
+            )}
+            {get("social_youtube") && (
+              <a href={get("social_youtube")} target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-habari-gold transition-colors text-xs">YouTube</a>
+            )}
+          </div>
         </div>
       </div>
     </footer>

@@ -7,13 +7,15 @@ import { ENV } from "./env";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-async function getUsersWithPref(pref: keyof typeof users.$inferSelect) {
+async function getUsersWithPref(pref: keyof typeof users.$inferSelect, tier?: "premium" | "integral") {
   const db = await getDb();
   if (!db) return [];
+  const conditions: any[] = [eq(users[pref] as any, true), isNotNull(users.email)];
+  if (tier) conditions.push(eq(users.subscriptionTier as any, tier));
   return db
     .select({ id: users.id, email: users.email, name: users.name })
     .from(users)
-    .where(and(eq(users[pref] as any, true), isNotNull(users.email)));
+    .where(and(...conditions));
 }
 
 async function getPushSubs(userIds: number[]) {
@@ -191,9 +193,10 @@ export type NotifPreference = "notifNewsletter" | "notifNewArticles" | "notifInv
 export async function sendNewsletterBroadcast(
   subject: string,
   html: string,
-  targetPref: NotifPreference
+  targetPref: NotifPreference,
+  tier?: "premium" | "integral"
 ) {
-  const targets = await getUsersWithPref(targetPref);
+  const targets = await getUsersWithPref(targetPref, tier);
   const emails = targets.map((u) => u.email!).filter(Boolean);
   await sendBulkEmails(emails, subject, html);
 
@@ -204,7 +207,7 @@ export async function sendNewsletterBroadcast(
   return { sent: emails.length };
 }
 
-export async function countTargets(pref: NotifPreference): Promise<number> {
-  const targets = await getUsersWithPref(pref);
+export async function countTargets(pref: NotifPreference, tier?: "premium" | "integral"): Promise<number> {
+  const targets = await getUsersWithPref(pref, tier);
   return targets.length;
 }

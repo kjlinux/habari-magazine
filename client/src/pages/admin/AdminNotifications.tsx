@@ -24,11 +24,12 @@ export default function AdminNotifications() {
   const [subject, setSubject] = useState("");
   const [html, setHtml] = useState("");
   const [pref, setPref] = useState<Pref>("notifNewsletter");
+  const [tier, setTier] = useState<"all" | "premium" | "integral">("all");
   const [testEmail, setTestEmail] = useState(user?.email || "");
   const [confirmed, setConfirmed] = useState(false);
 
   const { data: countData, isLoading: countLoading } = trpc.admin.notifications.countTargets.useQuery(
-    { pref },
+    { pref, tier },
     { refetchOnWindowFocus: false }
   );
 
@@ -77,6 +78,20 @@ export default function AdminNotifications() {
                 <p className="font-sans text-xs text-muted-foreground mt-0.5">{opt.desc}</p>
               </button>
             ))}
+          </div>
+          <div className="space-y-1">
+            <label className="text-sm font-sans font-medium">Filtrer par abonnement</label>
+            <select
+              value={tier}
+              onChange={e => setTier(e.target.value as "all" | "premium" | "integral")}
+              title="Filtrer par abonnement"
+              aria-label="Filtrer par abonnement"
+              className="w-full border border-input rounded-md px-3 py-2 text-sm font-sans bg-background"
+            >
+              <option value="all">Tous les abonnés</option>
+              <option value="premium">Premium uniquement</option>
+              <option value="integral">Intégral uniquement</option>
+            </select>
           </div>
           <div className="flex items-center gap-2 pt-2 text-sm font-sans">
             <Users className="w-4 h-4 text-primary" />

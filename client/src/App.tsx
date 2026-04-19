@@ -3,6 +3,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
 import { Route, Switch, useLocation } from "wouter";
 import { useEffect } from "react";
+import { trpc } from "@/lib/trpc";
 import ErrorBoundary from "./components/ErrorBoundary";
 
 function ScrollToTop() {
@@ -124,6 +125,25 @@ function Router() {
   );
 }
 
+function SeoManager() {
+  const { data: seoSettings } = trpc.siteConfig.homepageSettings.useQuery({
+    keys: ["site_name", "seo_meta_description", "seo_og_image", "seo_keywords", "site_favicon_url"],
+  });
+
+  useEffect(() => {
+    if (!seoSettings) return;
+    if (seoSettings.site_name) document.title = seoSettings.site_name;
+    const desc = document.querySelector('meta[name="description"]');
+    if (desc && seoSettings.seo_meta_description) desc.setAttribute("content", seoSettings.seo_meta_description);
+    const ogImg = document.querySelector('meta[property="og:image"]');
+    if (ogImg && seoSettings.seo_og_image) ogImg.setAttribute("content", seoSettings.seo_og_image);
+    const favicon = document.querySelector('link[rel="icon"]');
+    if (favicon && seoSettings.site_favicon_url) favicon.setAttribute("href", seoSettings.site_favicon_url);
+  }, [seoSettings]);
+
+  return null;
+}
+
 function App() {
   return (
     <ErrorBoundary>
@@ -131,6 +151,7 @@ function App() {
         <TooltipProvider>
           <Toaster />
           <ScrollToTop />
+          <SeoManager />
           <Router />
         </TooltipProvider>
       </ThemeProvider>

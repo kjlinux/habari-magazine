@@ -12,6 +12,7 @@ import {
   hasIntegral,
   hasNewsletterPremium,
   isLaunchPeriod,
+  getLaunchEndDate,
   stripPremiumContent,
   TRIAL_DURATION_DAYS,
   type SubscriptionTier,
@@ -1472,9 +1473,13 @@ export const appRouter = router({
     notifications: router({
       /** Count recipients for a given preference */
       countTargets: adminProcedure
-        .input(z.object({ pref: z.enum(["notifNewsletter", "notifNewArticles", "notifInvestments", "notifTenders", "notifEvents"]) }))
+        .input(z.object({
+          pref: z.enum(["notifNewsletter", "notifNewArticles", "notifInvestments", "notifTenders", "notifEvents"]),
+          tier: z.enum(["all", "premium", "integral"]).optional(),
+        }))
         .query(async ({ input }) => {
-          try { return { count: await countTargets(input.pref as NotifPreference) }; }
+          const tier = input.tier && input.tier !== "all" ? input.tier : undefined;
+          try { return { count: await countTargets(input.pref as NotifPreference, tier) }; }
           catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du comptage" }); }
         }),
 
@@ -1484,9 +1489,11 @@ export const appRouter = router({
           subject: z.string().min(1),
           html: z.string().min(1),
           pref: z.enum(["notifNewsletter", "notifNewArticles", "notifInvestments", "notifTenders", "notifEvents"]),
+          tier: z.enum(["all", "premium", "integral"]).optional(),
         }))
         .mutation(async ({ input }) => {
-          try { return await sendNewsletterBroadcast(input.subject, input.html, input.pref as NotifPreference); }
+          const tier = input.tier && input.tier !== "all" ? input.tier : undefined;
+          try { return await sendNewsletterBroadcast(input.subject, input.html, input.pref as NotifPreference, tier); }
           catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de l'envoi de la notification" }); }
         }),
 
@@ -1673,8 +1680,8 @@ export const appRouter = router({
     checkAccess: publicProcedure
       .input(z.object({ issueId: z.string() }))
       .query(async ({ ctx, input }) => { try {
-        // Launch period: free premium access for all registered users until June 1, 2026
-        const LAUNCH_END_DATE = new Date("2026-06-01T00:00:00Z");
+        // Launch period: free premium access for all registered users until configured date
+        const LAUNCH_END_DATE = await getLaunchEndDate();
         const isLaunchPeriod = new Date() < LAUNCH_END_DATE;
 
         // Define which issues require premium
@@ -1737,8 +1744,8 @@ export const appRouter = router({
       } }),
 
     /** Get launch period status */
-    launchStatus: publicProcedure.query(() => {
-      const LAUNCH_END_DATE = new Date("2026-06-01T00:00:00Z");
+    launchStatus: publicProcedure.query(async () => {
+      const LAUNCH_END_DATE = await getLaunchEndDate();
       const now = new Date();
       const isLaunchPeriod = now < LAUNCH_END_DATE;
       const daysRemaining = isLaunchPeriod ? Math.ceil((LAUNCH_END_DATE.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)) : 0;

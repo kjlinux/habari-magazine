@@ -450,14 +450,6 @@ export default function AdminMagazine() {
                     <Upload className="w-4 h-4 mr-2" />
                     {uploadingPdf ? "Upload en cours..." : "Uploader le PDF"}
                   </Button>
-                  <span className="text-xs text-muted-foreground self-center">ou</span>
-                  <input
-                    type="text"
-                    value={form.pdfUrl}
-                    onChange={(e) => setForm({ ...form, pdfUrl: e.target.value })}
-                    placeholder="URL du PDF"
-                    className="flex-1 px-3 py-2 border border-border rounded-lg text-sm font-sans bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
-                  />
                 </div>
               )}
             </div>

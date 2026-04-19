@@ -20,6 +20,7 @@ import {
   Upload,
 } from "lucide-react";
 import { useRef } from "react";
+import ImagePickerWithAI from "@/components/ImagePickerWithAI";
 
 // ─── Prix PDF ───────────────────────────────────────────────────────────────
 
@@ -528,22 +529,28 @@ function SiteInfoSettings() {
             </div>
           </div>
         ))}
-        <ImageUploadField
-          label="Logo du site"
-          settingKey="site_logo_url"
-          value={field("site_logo_url")}
-          onChange={v => set("site_logo_url", v)}
-          onSave={() => save("site_logo_url")}
-          saving={setMutation.isPending}
-        />
-        <ImageUploadField
-          label="Favicon"
-          settingKey="site_favicon_url"
-          value={field("site_favicon_url")}
-          onChange={v => set("site_favicon_url", v)}
-          onSave={() => save("site_favicon_url")}
-          saving={setMutation.isPending}
-        />
+        <div className="space-y-1">
+          <ImagePickerWithAI
+            label="Logo du site"
+            value={field("site_logo_url")}
+            onChange={v => { set("site_logo_url", v); setMutation.mutate({ key: "site_logo_url", value: v }); }}
+            folder="logos"
+            uploadEndpoint="/api/upload/image"
+            aiPromptContext="Professional magazine logo for Habari Magazine"
+            previewHeight="h-20"
+          />
+        </div>
+        <div className="space-y-1">
+          <ImagePickerWithAI
+            label="Favicon"
+            value={field("site_favicon_url")}
+            onChange={v => { set("site_favicon_url", v); setMutation.mutate({ key: "site_favicon_url", value: v }); }}
+            folder="favicons"
+            uploadEndpoint="/api/upload/image"
+            aiPromptContext="Small favicon icon for Habari Magazine website"
+            previewHeight="h-16"
+          />
+        </div>
       </div>
     </div>
   );
@@ -685,25 +692,15 @@ function SeoSettings() {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1">
-            <Label className="font-sans text-xs">
-              Image Open Graph par défaut (URL)
-            </Label>
-            <div className="flex gap-2">
-              <Input
-                placeholder="https://..."
-                value={field("seo_og_image")}
-                onChange={e => set("seo_og_image", e.target.value)}
-                className="font-sans text-sm"
-              />
-              <Button
-                size="sm"
-                onClick={() => save("seo_og_image")}
-                disabled={setMutation.isPending}
-                className="font-sans shrink-0"
-              >
-                OK
-              </Button>
-            </div>
+            <ImagePickerWithAI
+              label="Image Open Graph par défaut (URL)"
+              value={field("seo_og_image")}
+              onChange={v => { set("seo_og_image", v); setMutation.mutate({ key: "seo_og_image", value: v }); }}
+              folder="seo"
+              uploadEndpoint="/api/upload/image"
+              aiPromptContext="Open Graph social sharing image for Habari Magazine"
+              previewHeight="h-20"
+            />
           </div>
           <div className="space-y-1">
             <Label className="font-sans text-xs">Mots-clés par défaut</Label>

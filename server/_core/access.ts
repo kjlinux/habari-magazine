@@ -1,7 +1,14 @@
 import type { User, Article, UserSubscription } from "../../drizzle/schema";
+import { getSetting } from "../db";
 
 export const TRIAL_DURATION_DAYS = 90;
-export const LAUNCH_END_DATE = new Date("2026-06-01T00:00:00Z");
+const DEFAULT_LAUNCH_END = "2026-06-01T00:00:00Z";
+export const LAUNCH_END_DATE = new Date(DEFAULT_LAUNCH_END);
+
+export async function getLaunchEndDate(): Promise<Date> {
+  const stored = await getSetting("launch_end_date");
+  return new Date(stored ?? DEFAULT_LAUNCH_END);
+}
 const MS_PER_DAY = 1000 * 60 * 60 * 24;
 
 export type SubscriptionTier = "free" | "premium" | "integral";

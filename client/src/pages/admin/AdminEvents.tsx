@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useState } from "react";
 import { Plus, Trash2, Pencil, Loader2, CalendarDays, X } from "lucide-react";
+import ImagePickerWithAI from "@/components/ImagePickerWithAI";
 
 type EventForm = {
   title: string;
@@ -175,9 +176,16 @@ export default function AdminEvents() {
                 <Label className="font-sans text-xs">Capacité</Label>
                 <Input type="number" placeholder="200" value={form.capacity} onChange={e => setF("capacity", e.target.value)} className="font-sans text-sm" />
               </div>
-              <div className="space-y-1">
-                <Label className="font-sans text-xs">Image (URL)</Label>
-                <Input placeholder="https://..." value={form.image} onChange={e => setF("image", e.target.value)} className="font-sans text-sm" />
+              <div className="space-y-1 sm:col-span-2">
+                <ImagePickerWithAI
+                  label="Image"
+                  value={form.image}
+                  onChange={(url) => setF("image", url)}
+                  folder="events"
+                  uploadEndpoint="/api/upload/image"
+                  aiPromptContext={`Event image for: "${form.title || ""}"`}
+                  previewHeight="h-40"
+                />
               </div>
               <div className="space-y-1">
                 <Label className="font-sans text-xs">Statut</Label>

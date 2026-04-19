@@ -6,6 +6,7 @@ import { Loader2, ChevronLeft, Save } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRoute, useLocation } from "wouter";
 import { toast } from "sonner";
+import ImagePickerWithAI from "@/components/ImagePickerWithAI";
 
 type PartnerCategory = "communique" | "sponsored" | "report";
 
@@ -192,11 +193,14 @@ export default function AdminPartnerForm() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-sans font-medium mb-1">Image (URL)</label>
-                  <input
-                    type="url" value={form.image}
-                    onChange={(e) => setForm({ ...form, image: e.target.value })}
-                    className="w-full px-3 py-2 text-sm font-sans border border-border rounded-md bg-background"
+                  <ImagePickerWithAI
+                    label="Image"
+                    value={form.image}
+                    onChange={(url) => setForm({ ...form, image: url })}
+                    folder="partners"
+                    uploadEndpoint="/api/upload/image"
+                    aiPromptContext={`Partner image for: "${form.name || ""}"`}
+                    previewHeight="h-40"
                   />
                 </div>
               </div>

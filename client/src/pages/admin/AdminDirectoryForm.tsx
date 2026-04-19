@@ -6,6 +6,7 @@ import { Loader2, ChevronLeft, Save } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRoute, useLocation } from "wouter";
 import { toast } from "sonner";
+import ImagePickerWithAI from "@/components/ImagePickerWithAI";
 
 const sectorOptions = [
   "Agriculture", "Énergie", "Finance", "Santé", "Technologie", "Transport",
@@ -198,11 +199,14 @@ export default function AdminDirectoryForm() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-sans font-medium mb-1">Logo (URL)</label>
-                  <input
-                    type="url" value={form.logo}
-                    onChange={(e) => setForm({ ...form, logo: e.target.value })}
-                    className="w-full px-3 py-2 text-sm font-sans border border-border rounded-md bg-background"
+                  <ImagePickerWithAI
+                    label="Logo"
+                    value={form.logo}
+                    onChange={(url) => setForm({ ...form, logo: url })}
+                    folder="directory-logos"
+                    uploadEndpoint="/api/upload/image"
+                    aiPromptContext={`Company logo for: "${form.name || ""}"`}
+                    previewHeight="h-32"
                   />
                 </div>
               </div>

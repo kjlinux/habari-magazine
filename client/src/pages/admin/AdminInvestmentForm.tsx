@@ -1,3 +1,4 @@
+import ImagePickerWithAI from "@/components/ImagePickerWithAI";
 import AdminLayout from "@/components/AdminLayout";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
@@ -279,11 +280,14 @@ export default function AdminInvestmentForm() {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-sans font-medium mb-1">Image (URL)</label>
-                <input
-                  type="url" value={form.image}
-                  onChange={(e) => setForm({ ...form, image: e.target.value })}
-                  className="w-full px-3 py-2 text-sm font-sans border border-border rounded-md bg-background"
+                <ImagePickerWithAI
+                  label="Image"
+                  value={form.image}
+                  onChange={(url) => setForm({ ...form, image: url })}
+                  folder="investments"
+                  uploadEndpoint="/api/upload/image"
+                  aiPromptContext={`Investment opportunity image for: "${form.title || ""}"`}
+                  previewHeight="h-40"
                 />
               </div>
             </CardContent>
