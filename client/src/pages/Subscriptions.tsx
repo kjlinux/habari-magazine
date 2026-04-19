@@ -26,6 +26,16 @@ export default function Subscriptions() {
   const subscribeMutation = trpc.newsletter.subscribe.useMutation();
   const checkoutMutation = trpc.stripe.createCheckout.useMutation();
   const { data: promo } = trpc.siteConfig.promo.useQuery(undefined, { staleTime: 1000 * 60 * 10 });
+  const { data: plans } = trpc.subscriptions.plans.useQuery();
+  const { data: pdfPriceData } = trpc.magazine.pdfPrice.useQuery();
+
+  const premiumPlan = plans?.find(p => p.tier === "premium");
+  const integralPlan = plans?.find(p => p.tier === "integral");
+
+  const fmt = (val: string | null | undefined) =>
+    val ? parseFloat(val).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €" : "—";
+
+  const pdfPriceFmt = pdfPriceData?.formatted ?? "4,99 €";
 
   const searchString = useSearch();
   const params = new URLSearchParams(searchString);
@@ -218,13 +228,15 @@ export default function Subscriptions() {
                 </div>
                 <div className="mb-5">
                   <span className="text-3xl font-serif font-bold text-foreground">
-                    {interval === "monthly" ? "4,50 €" : "45 €"}
+                    {interval === "monthly" ? fmt(premiumPlan?.monthlyPrice) : fmt(premiumPlan?.annualPrice)}
                   </span>
                   <span className="text-sm text-muted-foreground font-sans">
                     /{interval === "monthly" ? "mois" : "an"}
                   </span>
-                  {interval === "annual" && (
-                    <span className="block text-xs text-green-700 font-sans mt-1">soit 3,75 €/mois</span>
+                  {interval === "annual" && premiumPlan?.annualPrice && (
+                    <span className="block text-xs text-green-700 font-sans mt-1">
+                      soit {(parseFloat(premiumPlan.annualPrice) / 12).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €/mois
+                    </span>
                   )}
                 </div>
                 <ul className="space-y-2.5 text-sm font-sans text-muted-foreground mb-6">
@@ -284,14 +296,12 @@ export default function Subscriptions() {
                 </div>
                 <div className="mb-5">
                   <span className="text-3xl font-serif font-bold text-foreground">
-                    {interval === "monthly" ? "9 €" : "90 €"}
+                    {interval === "monthly" ? fmt(integralPlan?.monthlyPrice) : fmt(integralPlan?.annualPrice)}
                   </span>
                   <span className="text-sm text-muted-foreground font-sans">
                     /{interval === "monthly" ? "mois" : "an"}
                   </span>
-                  <span className="block text-xs text-green-700 font-sans mt-1">
-                    {interval === "monthly" ? "au lieu de 9,50 €" : "au lieu de 114 €"}
-                  </span>
+                  {null}
                 </div>
                 <ul className="space-y-2.5 text-sm font-sans text-muted-foreground mb-6">
                   <li className="flex items-start gap-2">
@@ -345,8 +355,7 @@ export default function Subscriptions() {
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="text-right">
-                    <span className="text-2xl font-serif font-bold text-foreground">4,99 €</span>
-                    <span className="text-xs text-muted-foreground font-sans block"><s>9,99 €</s> — Offre lancement</span>
+                    <span className="text-2xl font-serif font-bold text-foreground">{pdfPriceFmt}</span>
                   </div>
                   <Link href="/archives">
                     <Button variant="outline" className="font-sans border-[oklch(0.72_0.15_75)] text-[oklch(0.55_0.12_75)] hover:bg-[oklch(0.72_0.15_75)]/10">

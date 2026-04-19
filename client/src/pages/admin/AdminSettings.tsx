@@ -12,9 +12,7 @@ import {
   Plus,
   Loader2,
   CheckCircle2,
-  Globe,
   Share2,
-  Search,
   Calendar,
   CreditCard,
   Upload,
@@ -470,92 +468,6 @@ function ImageUploadField({ label, settingKey, value, onChange, onSave, saving }
   );
 }
 
-function SiteInfoSettings() {
-  const { data: settings, refetch } = trpc.admin.settings.list.useQuery();
-  const setMutation = trpc.admin.settings.set.useMutation({
-    onSuccess: () => {
-      toast.success("Paramètre enregistré");
-      refetch();
-    },
-    onError: e => toast.error(e.message),
-  });
-
-  const getVal = (key: string, fallback = "") =>
-    settings?.find(s => s.key === key)?.value ?? fallback;
-
-  const [form, setForm] = useState<Record<string, string>>({});
-  const field = (key: string) => (key in form ? form[key] : getVal(key));
-  const set = (key: string, val: string) =>
-    setForm(f => ({ ...f, [key]: val }));
-
-  const save = (key: string) => {
-    setMutation.mutate({ key, value: field(key) });
-  };
-
-  const textFields: { key: string; label: string; placeholder: string }[] = [
-    { key: "site_name", label: "Nom du site", placeholder: "Habari Magazine" },
-    { key: "site_tagline", label: "Slogan", placeholder: "L'actualité économique de l'Afrique centrale" },
-    { key: "contact_email", label: "Email de contact", placeholder: "contact@habari-magazine.com" },
-  ];
-
-  return (
-    <div className="bg-background border border-border rounded-xl p-6 shadow-sm">
-      <h2 className="font-serif text-lg font-bold text-primary mb-1 flex items-center gap-2">
-        <Globe className="w-5 h-5" /> Informations du site
-      </h2>
-      <p className="text-sm text-muted-foreground font-sans mb-4">
-        Paramètres généraux affichés sur le site.
-      </p>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {textFields.map(f => (
-          <div key={f.key} className="space-y-1">
-            <Label className="font-sans text-xs">{f.label}</Label>
-            <div className="flex gap-2">
-              <Input
-                type="text"
-                placeholder={f.placeholder}
-                value={field(f.key)}
-                onChange={e => set(f.key, e.target.value)}
-                className="font-sans text-sm"
-              />
-              <Button
-                size="sm"
-                onClick={() => save(f.key)}
-                disabled={setMutation.isPending}
-                className="font-sans shrink-0"
-              >
-                {setMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : "OK"}
-              </Button>
-            </div>
-          </div>
-        ))}
-        <div className="space-y-1">
-          <ImagePickerWithAI
-            label="Logo du site"
-            value={field("site_logo_url")}
-            onChange={v => { set("site_logo_url", v); setMutation.mutate({ key: "site_logo_url", value: v }); }}
-            folder="logos"
-            uploadEndpoint="/api/upload/image"
-            aiPromptContext="Professional magazine logo for Habari Magazine"
-            previewHeight="h-20"
-          />
-        </div>
-        <div className="space-y-1">
-          <ImagePickerWithAI
-            label="Favicon"
-            value={field("site_favicon_url")}
-            onChange={v => { set("site_favicon_url", v); setMutation.mutate({ key: "site_favicon_url", value: v }); }}
-            folder="favicons"
-            uploadEndpoint="/api/upload/image"
-            aiPromptContext="Small favicon icon for Habari Magazine website"
-            previewHeight="h-16"
-          />
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // ─── Réseaux sociaux ──────────────────────────────────────────────────────────
 
 function SocialSettings() {
@@ -634,94 +546,6 @@ function SocialSettings() {
             </div>
           </div>
         ))}
-      </div>
-    </div>
-  );
-}
-
-// ─── SEO ──────────────────────────────────────────────────────────────────────
-
-function SeoSettings() {
-  const { data: settings, refetch } = trpc.admin.settings.list.useQuery();
-  const setMutation = trpc.admin.settings.set.useMutation({
-    onSuccess: () => {
-      toast.success("Enregistré");
-      refetch();
-    },
-    onError: e => toast.error(e.message),
-  });
-
-  const getVal = (key: string) =>
-    settings?.find(s => s.key === key)?.value ?? "";
-  const [form, setForm] = useState<Record<string, string>>({});
-  const field = (key: string) => (key in form ? form[key] : getVal(key));
-  const set = (key: string, val: string) =>
-    setForm(f => ({ ...f, [key]: val }));
-  const save = (key: string) => setMutation.mutate({ key, value: field(key) });
-
-  return (
-    <div className="bg-background border border-border rounded-xl p-6 shadow-sm">
-      <h2 className="font-serif text-lg font-bold text-primary mb-1 flex items-center gap-2">
-        <Search className="w-5 h-5" /> SEO et Méta-données
-      </h2>
-      <p className="text-sm text-muted-foreground font-sans mb-4">
-        Paramètres par défaut pour les moteurs de recherche.
-      </p>
-      <div className="space-y-4">
-        <div className="space-y-1">
-          <Label className="font-sans text-xs">
-            Description par défaut (meta description)
-          </Label>
-          <div className="flex gap-2">
-            <textarea
-              placeholder="Habari Magazine, l'actualité économique, financière et environnementale de l'Afrique centrale..."
-              value={field("seo_meta_description")}
-              onChange={e => set("seo_meta_description", e.target.value)}
-              rows={3}
-              className="w-full border border-input rounded-md px-3 py-2 text-sm font-sans bg-background resize-none"
-            />
-            <Button
-              size="sm"
-              onClick={() => save("seo_meta_description")}
-              disabled={setMutation.isPending}
-              className="font-sans shrink-0 self-start"
-            >
-              OK
-            </Button>
-          </div>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="space-y-1">
-            <ImagePickerWithAI
-              label="Image Open Graph par défaut (URL)"
-              value={field("seo_og_image")}
-              onChange={v => { set("seo_og_image", v); setMutation.mutate({ key: "seo_og_image", value: v }); }}
-              folder="seo"
-              uploadEndpoint="/api/upload/image"
-              aiPromptContext="Open Graph social sharing image for Habari Magazine"
-              previewHeight="h-20"
-            />
-          </div>
-          <div className="space-y-1">
-            <Label className="font-sans text-xs">Mots-clés par défaut</Label>
-            <div className="flex gap-2">
-              <Input
-                placeholder="économie, Afrique, finance, CEEAC"
-                value={field("seo_keywords")}
-                onChange={e => set("seo_keywords", e.target.value)}
-                className="font-sans text-sm"
-              />
-              <Button
-                size="sm"
-                onClick={() => save("seo_keywords")}
-                disabled={setMutation.isPending}
-                className="font-sans shrink-0"
-              >
-                OK
-              </Button>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );
@@ -867,31 +691,44 @@ function LaunchSettings() {
 // ─── Prix abonnements ─────────────────────────────────────────────────────────
 
 function SubscriptionPriceSettings() {
-  const { data: plans, isLoading } = trpc.subscriptions.plans.useQuery();
-  const setMutation = trpc.admin.settings.set.useMutation({
-    onSuccess: () => toast.success("Enregistré (référence interne)"),
+  const { data: plans, refetch } = trpc.subscriptions.plans.useQuery();
+  const updateMutation = trpc.admin.subscriptionPlans.update.useMutation({
+    onSuccess: () => { toast.success("Prix mis à jour"); refetch(); },
     onError: e => toast.error(e.message),
   });
-  const { data: settings, refetch } = trpc.admin.settings.list.useQuery();
 
-  const getVal = (key: string) =>
-    settings?.find(s => s.key === key)?.value ?? "";
+  // magazine_pdf_price stays in siteSettings (handled separately)
+  const { data: settings, refetch: refetchSettings } = trpc.admin.settings.list.useQuery();
+  const setMutation = trpc.admin.settings.set.useMutation({
+    onSuccess: () => { toast.success("Prix PDF mis à jour"); refetchSettings(); },
+    onError: e => toast.error(e.message),
+  });
+
+  const [pdfPrice, setPdfPrice] = useState("");
+  const getPdfVal = () => pdfPrice !== "" ? pdfPrice : (settings?.find(s => s.key === "magazine_pdf_price")?.value ?? "");
+
+  const getPlan = (tier: "premium" | "integral") =>
+    plans?.find(p => p.tier === tier);
+
   const [form, setForm] = useState<Record<string, string>>({});
-  const field = (key: string) => (key in form ? form[key] : getVal(key));
-  const set = (key: string, val: string) =>
-    setForm(f => ({ ...f, [key]: val }));
-  const save = (key: string) => {
-    setMutation.mutate({ key, value: field(key) });
-    refetch();
+  const getField = (key: string, fallback: string) => key in form ? form[key] : fallback;
+  const setField = (key: string, val: string) => setForm(f => ({ ...f, [key]: val }));
+
+  const premium = getPlan("premium");
+  const integral = getPlan("integral");
+
+  const savePlan = (tier: "premium" | "integral", monthlyKey: string, annualKey: string) => {
+    const plan = getPlan(tier);
+    updateMutation.mutate({
+      tier,
+      monthlyPrice: getField(monthlyKey, plan?.monthlyPrice ?? ""),
+      annualPrice: getField(annualKey, plan?.annualPrice ?? ""),
+    });
   };
 
-  const priceKeys = [
-    { key: "price_premium_monthly", label: "Premium mensuel (€)" },
-    { key: "price_premium_annual", label: "Premium annuel (€)" },
-    { key: "price_integral_monthly", label: "Habari Intégral mensuel (€)" },
-    { key: "price_integral_annual", label: "Habari Intégral annuel (€)" },
-    { key: "price_newsletter_premium_monthly", label: "Newsletter Premium mensuelle (€)" },
-    { key: "price_magazine_pdf_unit", label: "Magazine PDF à l'unité (€)" },
+  const planRows: { tier: "premium" | "integral"; monthlyKey: string; annualKey: string; label: string }[] = [
+    { tier: "premium", monthlyKey: "premium_monthly", annualKey: "premium_annual", label: "Accès Premium" },
+    { tier: "integral", monthlyKey: "integral_monthly", annualKey: "integral_annual", label: "Habari Intégral" },
   ];
 
   return (
@@ -899,41 +736,77 @@ function SubscriptionPriceSettings() {
       <h2 className="font-serif text-lg font-bold text-primary mb-1 flex items-center gap-2">
         <CreditCard className="w-5 h-5" /> Prix des abonnements
       </h2>
-      <p className="text-sm text-muted-foreground font-sans mb-2">
-        Référence interne des prix affichés. Les prix Stripe restent dans le
-        dashboard Stripe.
+      <p className="text-sm text-muted-foreground font-sans mb-4">
+        Ces prix sont affichés sur la page abonnements. Les prix Stripe (facturation réelle) restent dans le dashboard Stripe.
       </p>
-      {isLoading ? (
-        <div className="flex justify-center py-4">
-          <Loader2 className="w-5 h-5 animate-spin text-primary" />
-        </div>
-      ) : (
-        <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {priceKeys.map(pk => (
-              <div key={pk.key} className="space-y-1">
-                <Label className="font-sans text-xs">{pk.label}</Label>
-                <div className="flex gap-2">
+      <div className="space-y-4">
+        {planRows.map(({ tier, monthlyKey, annualKey, label }) => {
+          const plan = getPlan(tier);
+          return (
+            <div key={tier} className="border border-border rounded-lg p-4">
+              <p className="font-sans text-sm font-semibold text-foreground mb-3">{label}</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label className="font-sans text-xs">Mensuel (€)</Label>
                   <Input
-                    placeholder="9,99"
-                    value={field(pk.key)}
-                    onChange={e => set(pk.key, e.target.value)}
+                    placeholder="ex: 4.50"
+                    value={getField(monthlyKey, plan?.monthlyPrice ?? "")}
+                    onChange={e => setField(monthlyKey, e.target.value)}
                     className="font-sans text-sm"
                   />
-                  <Button
-                    size="sm"
-                    onClick={() => save(pk.key)}
-                    disabled={setMutation.isPending}
-                    className="font-sans shrink-0"
-                  >
-                    OK
-                  </Button>
+                </div>
+                <div className="space-y-1">
+                  <Label className="font-sans text-xs">Annuel (€)</Label>
+                  <Input
+                    placeholder="ex: 45.00"
+                    value={getField(annualKey, plan?.annualPrice ?? "")}
+                    onChange={e => setField(annualKey, e.target.value)}
+                    className="font-sans text-sm"
+                  />
                 </div>
               </div>
-            ))}
+              <div className="flex justify-end mt-3">
+                <Button
+                  size="sm"
+                  onClick={() => savePlan(tier, monthlyKey, annualKey)}
+                  disabled={updateMutation.isPending}
+                  className="font-sans"
+                >
+                  {updateMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : "Enregistrer"}
+                </Button>
+              </div>
+            </div>
+          );
+        })}
+
+        {/* Magazine PDF */}
+        <div className="border border-border rounded-lg p-4">
+          <p className="font-sans text-sm font-semibold text-foreground mb-3">Magazine PDF — à l'unité</p>
+          <div className="space-y-1 max-w-xs">
+            <Label className="font-sans text-xs">Prix (€)</Label>
+            <div className="flex gap-2">
+              <Input
+                placeholder="ex: 4.99"
+                value={getPdfVal()}
+                onChange={e => setPdfPrice(e.target.value)}
+                className="font-sans text-sm"
+              />
+              <Button
+                size="sm"
+                onClick={() => {
+                  const cents = Math.round(parseFloat(getPdfVal().replace(",", ".")) * 100).toString();
+                  setMutation.mutate({ key: "magazine_pdf_price", value: cents });
+                }}
+                disabled={setMutation.isPending}
+                className="font-sans shrink-0"
+              >
+                {setMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : "OK"}
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground font-sans">Valeur actuelle en DB : {settings?.find(s => s.key === "magazine_pdf_price")?.value ?? "499"} centimes</p>
           </div>
-        </>
-      )}
+        </div>
+      </div>
     </div>
   );
 }
@@ -1160,9 +1033,7 @@ export default function AdminSettings() {
             Configuration de la plateforme et codes promotionnels
           </p>
         </div>
-        <SiteInfoSettings />
         <SocialSettings />
-        <SeoSettings />
         <LaunchSettings />
         <ActivePromoSettings />
         <PdfPriceSettings />

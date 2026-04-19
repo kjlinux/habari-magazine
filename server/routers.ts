@@ -148,6 +148,7 @@ import {
   adminCreateEconomicIndicator,
   adminUpdateEconomicIndicator,
   adminDeleteEconomicIndicator,
+  updateSubscriptionPlan,
 } from "./db";
 
 // Admin-only procedure middleware
@@ -1466,6 +1467,24 @@ export const appRouter = router({
             await setSetting(input.key, input.value);
             return { success: true };
           } catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la sauvegarde du paramètre" }); }
+        }),
+    }),
+
+    /** Subscription plans pricing */
+    subscriptionPlans: router({
+      update: adminProcedure
+        .input(z.object({
+          tier: z.enum(["premium", "integral"]),
+          monthlyPrice: z.string(),
+          annualPrice: z.string(),
+        }))
+        .mutation(async ({ input }) => {
+          try {
+            await updateSubscriptionPlan(input.tier, input.monthlyPrice, input.annualPrice);
+            return { success: true };
+          } catch {
+            throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la mise à jour du plan" });
+          }
         }),
     }),
 

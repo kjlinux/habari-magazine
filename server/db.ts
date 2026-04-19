@@ -356,6 +356,14 @@ export async function getSubscriptionPlans() {
   return result;
 }
 
+export async function updateSubscriptionPlan(tier: "premium" | "integral", monthlyPrice: string, annualPrice: string): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(subscriptionPlans)
+    .set({ monthlyPrice, annualPrice, updatedAt: new Date() })
+    .where(eq(subscriptionPlans.tier, tier));
+}
+
 export async function getUserSubscription(userId: number) {
   const db = await getDb();
   if (!db) return undefined;
