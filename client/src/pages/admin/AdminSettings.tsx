@@ -819,7 +819,17 @@ function HeroSlidesSettings() {
             </div>
             <div><Label className="font-sans text-xs">Titre</Label><Input value={slide.title} onChange={e => update(i, "title", e.target.value)} className="font-sans text-sm" /></div>
             <div><Label className="font-sans text-xs">Extrait</Label><Input value={slide.excerpt} onChange={e => update(i, "excerpt", e.target.value)} className="font-sans text-sm" /></div>
-            <div><Label className="font-sans text-xs">Image URL</Label><Input value={slide.image} onChange={e => update(i, "image", e.target.value)} className="font-sans text-sm" /></div>
+            <div>
+                <ImagePickerWithAI
+                  label="Image"
+                  value={slide.image}
+                  onChange={url => update(i, "image", url)}
+                  folder="hero-slides"
+                  uploadEndpoint="/api/upload/image"
+                  aiPromptContext={`Hero carousel image for article: "${slide.title || slide.rubrique || ""}"`}
+                  previewHeight="h-32"
+                />
+              </div>
             <div className="grid grid-cols-3 gap-2">
               <div><Label className="font-sans text-xs">Stat 1</Label><Input value={slide.stats?.label1 ?? ""} onChange={e => update(i, "stats.label1", e.target.value)} className="font-sans text-sm" /></div>
               <div><Label className="font-sans text-xs">Stat 2</Label><Input value={slide.stats?.label2 ?? ""} onChange={e => update(i, "stats.label2", e.target.value)} className="font-sans text-sm" /></div>

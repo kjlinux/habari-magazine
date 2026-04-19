@@ -80,6 +80,7 @@ import {
   adminGetAllMagazineIssues,
   adminGetMagazineIssueById,
   adminCreateMagazineIssue,
+  getNextMagazineIssueNumber,
   adminUpdateMagazineIssue,
   adminDeleteMagazineIssue,
   // Stats
@@ -803,7 +804,7 @@ export const appRouter = router({
 
       create: adminProcedure
         .input(z.object({
-          issueNumber: z.string().min(1),
+          issueNumber: z.string().optional(),
           title: z.string().min(1),
           description: z.string().optional(),
           coverUrl: z.string().optional(),
@@ -816,8 +817,10 @@ export const appRouter = router({
           sommaire: z.string().optional(),
         }))
         .mutation(async ({ input }) => {
-          try { return await adminCreateMagazineIssue(input); }
-          catch (e) {
+          try {
+            const issueNumber = input.issueNumber || await getNextMagazineIssueNumber();
+            return await adminCreateMagazineIssue({ ...input, issueNumber });
+          } catch (e) {
             if (e instanceof TRPCError) throw e;
             throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la création du numéro" });
           }

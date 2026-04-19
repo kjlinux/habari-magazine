@@ -176,8 +176,8 @@ export default function AdminMagazine() {
   };
 
   const handleSubmit = () => {
-    if (!form.issueNumber || !form.title) {
-      toast.error("Le numéro et le titre sont requis");
+    if (!form.title) {
+      toast.error("Le titre est requis");
       return;
     }
 
@@ -348,18 +348,16 @@ export default function AdminMagazine() {
           <div className="space-y-5 mt-4">
             {/* Issue number + Title */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-sans font-medium text-foreground mb-1.5">
-                  Numéro <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={form.issueNumber}
-                  onChange={(e) => setForm({ ...form, issueNumber: e.target.value })}
-                  placeholder="N°001"
-                  className="w-full px-3 py-2 border border-border rounded-lg text-sm font-sans bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
-                />
-              </div>
+              {editingId && (
+                <div>
+                  <label className="block text-sm font-sans font-medium text-foreground mb-1.5">
+                    Numéro
+                  </label>
+                  <div className="w-full px-3 py-2 border border-border rounded-lg text-sm font-sans bg-muted text-muted-foreground">
+                    {form.issueNumber}
+                  </div>
+                </div>
+              )}
               <div>
                 <label className="block text-sm font-sans font-medium text-foreground mb-1.5">
                   Nombre de pages
