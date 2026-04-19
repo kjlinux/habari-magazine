@@ -697,15 +697,6 @@ function SubscriptionPriceSettings() {
     onError: e => toast.error(e.message),
   });
 
-  // magazine_pdf_price stays in siteSettings (handled separately)
-  const { data: settings, refetch: refetchSettings } = trpc.admin.settings.list.useQuery();
-  const setMutation = trpc.admin.settings.set.useMutation({
-    onSuccess: () => { toast.success("Prix PDF mis à jour"); refetchSettings(); },
-    onError: e => toast.error(e.message),
-  });
-
-  const [pdfPrice, setPdfPrice] = useState("");
-  const getPdfVal = () => pdfPrice !== "" ? pdfPrice : (settings?.find(s => s.key === "magazine_pdf_price")?.value ?? "");
 
   const getPlan = (tier: "premium" | "integral") =>
     plans?.find(p => p.tier === tier);
@@ -779,33 +770,6 @@ function SubscriptionPriceSettings() {
           );
         })}
 
-        {/* Magazine PDF */}
-        <div className="border border-border rounded-lg p-4">
-          <p className="font-sans text-sm font-semibold text-foreground mb-3">Magazine PDF — à l'unité</p>
-          <div className="space-y-1 max-w-xs">
-            <Label className="font-sans text-xs">Prix (€)</Label>
-            <div className="flex gap-2">
-              <Input
-                placeholder="ex: 4.99"
-                value={getPdfVal()}
-                onChange={e => setPdfPrice(e.target.value)}
-                className="font-sans text-sm"
-              />
-              <Button
-                size="sm"
-                onClick={() => {
-                  const cents = Math.round(parseFloat(getPdfVal().replace(",", ".")) * 100).toString();
-                  setMutation.mutate({ key: "magazine_pdf_price", value: cents });
-                }}
-                disabled={setMutation.isPending}
-                className="font-sans shrink-0"
-              >
-                {setMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : "OK"}
-              </Button>
-            </div>
-            <p className="text-xs text-muted-foreground font-sans">Valeur actuelle en DB : {settings?.find(s => s.key === "magazine_pdf_price")?.value ?? "499"} centimes</p>
-          </div>
-        </div>
       </div>
     </div>
   );
@@ -955,7 +919,7 @@ function GreenCategoriesSettings() {
               <div><Label className="font-sans text-xs">Lien (href)</Label><Input value={c.href} onChange={e => update(i, "href", e.target.value)} className="font-sans text-sm" /></div>
               <div>
                 <Label className="font-sans text-xs">Icône</Label>
-                <select value={c.iconKey} onChange={e => update(i, "iconKey", e.target.value)} className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm font-sans">
+                <select title="Icône" value={c.iconKey} onChange={e => update(i, "iconKey", e.target.value)} className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm font-sans">
                   {GREEN_ICON_OPTIONS.map(k => <option key={k} value={k}>{k}</option>)}
                 </select>
               </div>
