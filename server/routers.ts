@@ -140,6 +140,13 @@ import {
   adminUpdatePartner,
   adminDeletePartner,
   adminTogglePartnerFeatured,
+  // Economic indicators
+  getEconomicIndicators,
+  getInvestmentStats,
+  adminGetAllEconomicIndicators,
+  adminCreateEconomicIndicator,
+  adminUpdateEconomicIndicator,
+  adminDeleteEconomicIndicator,
 } from "./db";
 
 // Admin-only procedure middleware
@@ -338,6 +345,16 @@ export const appRouter = router({
         }
         catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement des investissements" }); }
       }),
+
+    stats: publicProcedure.query(async () => {
+      try { return await getInvestmentStats(); }
+      catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du calcul des statistiques" }); }
+    }),
+
+    indicators: publicProcedure.query(async () => {
+      try { return await getEconomicIndicators(); }
+      catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement des indicateurs" }); }
+    }),
   }),
 
   events: router({
@@ -1115,6 +1132,54 @@ export const appRouter = router({
         .query(async () => {
           try { return await adminCountInvestments(); }
           catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du comptage" }); }
+        }),
+    }),
+
+    /** Economic Indicators CRUD */
+    economicIndicators: router({
+      list: adminProcedure.query(async () => {
+        try { return await adminGetAllEconomicIndicators(); }
+        catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement des indicateurs" }); }
+      }),
+
+      create: adminProcedure
+        .input(z.object({
+          label: z.string().min(1),
+          value: z.string().min(1),
+          trend: z.enum(["up", "down", "stable"]).default("stable"),
+          delta: z.string().optional(),
+          category: z.enum(["macro", "commodity"]).default("macro"),
+          periodLabel: z.string().optional(),
+          sortOrder: z.number().default(0),
+        }))
+        .mutation(async ({ input }) => {
+          try { return await adminCreateEconomicIndicator(input); }
+          catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la création" }); }
+        }),
+
+      update: adminProcedure
+        .input(z.object({
+          id: z.number(),
+          label: z.string().optional(),
+          value: z.string().optional(),
+          trend: z.enum(["up", "down", "stable"]).optional(),
+          delta: z.string().nullable().optional(),
+          category: z.enum(["macro", "commodity"]).optional(),
+          periodLabel: z.string().nullable().optional(),
+          sortOrder: z.number().optional(),
+        }))
+        .mutation(async ({ input }) => {
+          try {
+            const { id, ...data } = input;
+            return await adminUpdateEconomicIndicator(id, data);
+          } catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la mise à jour" }); }
+        }),
+
+      delete: adminProcedure
+        .input(z.object({ id: z.number() }))
+        .mutation(async ({ input }) => {
+          try { return await adminDeleteEconomicIndicator(input.id); }
+          catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la suppression" }); }
         }),
     }),
 

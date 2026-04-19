@@ -11,8 +11,8 @@ import { paywallCta, paywallMessage, type SubscriptionTier } from "@/lib/access"
 
 const sectors = ["Tous", "Agriculture", "Énergie", "Services financiers", "Tourisme", "Construction"];
 
-/* ═══ INDICATEURS ÉCONOMIQUES CEEAC PAR PAYS ═══ */
-const ceeacIndicators = [
+/* ═══ INDICATEURS ÉCONOMIQUES CEEAC PAR PAYS (hardcodé) ═══ */
+const ceeacCountryIndicators = [
   { flag: "🇨🇩", country: "RDC", pib: "~65 Mds $", croissance: "+6,2%", croissanceTrend: "up", inflation: "5,5%", population: "105M" },
   { flag: "🇦🇴", country: "Angola", pib: "~70 Mds $", croissance: "+3,0%", croissanceTrend: "up", inflation: "13,8%", population: "30M" },
   { flag: "🇨🇲", country: "Cameroun", pib: "~45 Mds $", croissance: "+4,2%", croissanceTrend: "up", inflation: "5,8%", population: "28M" },
@@ -33,6 +33,8 @@ export default function Investments() {
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>("deals");
   const { data: dbInvestments, isLoading } = trpc.investments.list.useQuery({ limit: 40, offset: 0 });
+  const { data: statsData } = trpc.investments.stats.useQuery();
+  const { data: indicatorsData } = trpc.investments.indicators.useQuery();
 
   const investments = useMemo(() => {
     let list = dbInvestments ?? [];
@@ -67,28 +69,25 @@ export default function Investments() {
           <div className="flex items-center gap-3 mb-6">
             <BarChart3 className="w-5 h-5 text-[oklch(0.72_0.15_75)]" />
             <h2 className="font-serif text-xl font-bold text-foreground">Baromètre économique CEEAC</h2>
-            <span className="text-xs font-sans text-muted-foreground bg-muted px-2 py-0.5 rounded">Mars 2026</span>
+            <span className="text-xs font-sans text-muted-foreground bg-muted px-2 py-0.5 rounded">{indicatorsData?.[0]?.periodLabel ?? "—"}</span>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {[
-              { label: "PIB CEEAC", value: "~265 Mds $", trend: "up", delta: "+2.8%" },
-              { label: "Inflation moy.", value: "6.2%", trend: "down", delta: "-0.4 pts" },
-              { label: "IDE entrants", value: "12.3 Mds $", trend: "up", delta: "+8.5%" },
-              { label: "Pétrole (Brent)", value: "78.40 $", trend: "stable", delta: "+0.2%" },
-              { label: "Cacao (t)", value: "8 240 $", trend: "up", delta: "+12%" },
-              { label: "Cobalt (t)", value: "35 200 $", trend: "down", delta: "-3.1%" },
-            ].map((item, i) => (
-              <div key={i} className="bg-background rounded-lg border border-border p-4">
-                <div className="text-xs text-muted-foreground font-sans mb-1">{item.label}</div>
-                <div className="text-lg font-serif font-bold text-foreground">{item.value}</div>
-                <div className={`flex items-center gap-1 text-xs font-sans mt-1 ${
-                  item.trend === "up" ? "text-green-600" : item.trend === "down" ? "text-red-500" : "text-muted-foreground"
-                }`}>
-                  {item.trend === "up" ? <ArrowUpRight className="w-3 h-3" /> : item.trend === "down" ? <ArrowDownRight className="w-3 h-3" /> : <Minus className="w-3 h-3" />}
-                  {item.delta}
+            {indicatorsData && indicatorsData.length > 0 ? (
+              indicatorsData.map((item, i) => (
+                <div key={i} className="bg-background rounded-lg border border-border p-4">
+                  <div className="text-xs text-muted-foreground font-sans mb-1">{item.label}</div>
+                  <div className="text-lg font-serif font-bold text-foreground">{item.value}</div>
+                  <div className={`flex items-center gap-1 text-xs font-sans mt-1 ${
+                    item.trend === "up" ? "text-green-600" : item.trend === "down" ? "text-red-500" : "text-muted-foreground"
+                  }`}>
+                    {item.trend === "up" ? <ArrowUpRight className="w-3 h-3" /> : item.trend === "down" ? <ArrowDownRight className="w-3 h-3" /> : <Minus className="w-3 h-3" />}
+                    {item.delta}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              <p className="text-sm text-muted-foreground col-span-6 text-center py-4">Aucun indicateur disponible.</p>
+            )}
           </div>
         </div>
       </section>
@@ -98,15 +97,15 @@ export default function Investments() {
         <div className="container py-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             <div className="text-center">
-              <div className="text-3xl font-serif font-bold text-primary">34.5M</div>
+              <div className="text-3xl font-serif font-bold text-primary">{statsData?.totalAmount ?? "—"}</div>
               <div className="text-sm text-muted-foreground font-sans">USD en deal flow</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-serif font-bold text-primary">6</div>
+              <div className="text-3xl font-serif font-bold text-primary">{statsData?.activeCount ?? "—"}</div>
               <div className="text-sm text-muted-foreground font-sans">Projets actifs</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-serif font-bold text-primary">5</div>
+              <div className="text-3xl font-serif font-bold text-primary">{statsData?.sectorCount ?? "—"}</div>
               <div className="text-sm text-muted-foreground font-sans">Secteurs couverts</div>
             </div>
             <div className="text-center">
@@ -170,7 +169,7 @@ export default function Investments() {
             <div className="flex items-center gap-3 mb-8">
               <BarChart3 className="w-5 h-5 text-[oklch(0.72_0.15_75)]" />
               <h2 className="font-serif text-2xl font-bold text-foreground">Indicateurs économiques CEEAC</h2>
-              <span className="text-xs font-sans text-muted-foreground bg-muted px-2 py-0.5 rounded">Mars 2026</span>
+              <span className="text-xs font-sans text-muted-foreground bg-muted px-2 py-0.5 rounded">{indicatorsData?.[0]?.periodLabel ?? "—"}</span>
               <Link href="/investisseurs" className="ml-auto text-sm font-sans text-primary hover:underline flex items-center gap-1">
                 Analyse complète <ArrowRight className="w-3 h-3" />
               </Link>
@@ -189,7 +188,7 @@ export default function Investments() {
                   </tr>
                 </thead>
                 <tbody>
-                  {ceeacIndicators.map((row, i) => (
+                  {ceeacCountryIndicators.map((row, i) => (
                     <tr key={row.country} className={`border-b border-border transition-colors hover:bg-muted/50 ${i % 2 === 0 ? "bg-background" : "bg-muted/20"}`}>
                       <td className="px-4 py-3.5 font-sans font-medium text-foreground">
                         <span className="mr-2">{row.flag}</span>

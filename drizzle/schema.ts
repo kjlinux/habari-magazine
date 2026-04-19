@@ -491,3 +491,18 @@ export const pushSubscriptions = mysqlTable("pushSubscriptions", {
 
 export type PushSubscription = typeof pushSubscriptions.$inferSelect;
 export type InsertPushSubscription = typeof pushSubscriptions.$inferInsert;
+
+export const economicIndicators = mysqlTable("economicIndicators", {
+  id: int("id").autoincrement().primaryKey(),
+  label: varchar("label", { length: 255 }).notNull(),
+  value: varchar("value", { length: 100 }).notNull(),
+  trend: mysqlEnum("trend", ["up", "down", "stable"]).default("stable").notNull(),
+  delta: varchar("delta", { length: 50 }),
+  category: mysqlEnum("category", ["macro", "commodity"]).default("macro").notNull(),
+  periodLabel: varchar("periodLabel", { length: 100 }),
+  sortOrder: int("sortOrder").default(0),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type EconomicIndicator = typeof economicIndicators.$inferSelect;
+export type InsertEconomicIndicator = typeof economicIndicators.$inferInsert;

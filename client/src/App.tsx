@@ -33,6 +33,7 @@ import AdminDirectory from "./pages/admin/AdminDirectory";
 import AdminDirectoryForm from "./pages/admin/AdminDirectoryForm";
 import AdminInvestments from "./pages/admin/AdminInvestments";
 import AdminInvestmentForm from "./pages/admin/AdminInvestmentForm";
+import AdminEconomicIndicators from "./pages/admin/AdminEconomicIndicators";
 import AdminPartners from "./pages/admin/AdminPartners";
 import AdminPartnerForm from "./pages/admin/AdminPartnerForm";
 import AdminSettings from "./pages/admin/AdminSettings";
@@ -108,6 +109,7 @@ function Router() {
       <Route path={"/admin/investisseurs"} component={AdminInvestments} />
       <Route path={"/admin/investisseurs/nouveau"} component={AdminInvestmentForm} />
       <Route path={"/admin/investisseurs/:id"} component={AdminInvestmentForm} />
+      <Route path={"/admin/indicateurs-economiques"} component={AdminEconomicIndicators} />
       <Route path={"/admin/partenaires"} component={AdminPartners} />
       <Route path={"/admin/partenaires/nouveau"} component={AdminPartnerForm} />
       <Route path={"/admin/partenaires/:id"} component={AdminPartnerForm} />

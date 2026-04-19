@@ -27,6 +27,9 @@ import {
   InsertAuthor,
   partners,
   InsertPartner,
+  economicIndicators,
+  InsertEconomicIndicator,
+  EconomicIndicator,
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -2032,4 +2035,77 @@ export async function adminTogglePartnerFeatured(id: number) {
   const newValue = !existing.featured;
   await db.update(partners).set({ featured: newValue }).where(eq(partners.id, id));
   return { success: true, featured: newValue };
+}
+
+/**
+ * Investment stats aggregation
+ */
+export async function getInvestmentStats() {
+  const db = await getDb();
+  if (!db) return { totalAmount: "0", activeCount: 0, sectorCount: 0 };
+
+  const [totals] = await db
+    .select({
+      totalAmount: sql<string>`COALESCE(SUM(CAST(${investmentOpportunities.targetAmount} AS DECIMAL(15,2))), 0)`,
+      activeCount: sql<number>`COUNT(*)`,
+    })
+    .from(investmentOpportunities)
+    .where(eq(investmentOpportunities.status, "open"));
+
+  const [sectors] = await db
+    .select({ sectorCount: sql<number>`COUNT(DISTINCT ${investmentOpportunities.sector})` })
+    .from(investmentOpportunities)
+    .where(eq(investmentOpportunities.status, "open"));
+
+  const totalUsd = parseFloat(totals?.totalAmount ?? "0");
+  const formatted = totalUsd >= 1_000_000
+    ? `${(totalUsd / 1_000_000).toFixed(1)}M`
+    : totalUsd >= 1_000
+    ? `${(totalUsd / 1_000).toFixed(0)}K`
+    : totalUsd.toFixed(0);
+
+  return {
+    totalAmount: formatted,
+    activeCount: Number(totals?.activeCount ?? 0),
+    sectorCount: Number(sectors?.sectorCount ?? 0),
+  };
+}
+
+/**
+ * Economic indicators queries
+ */
+export async function getEconomicIndicators() {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select()
+    .from(economicIndicators)
+    .orderBy(economicIndicators.sortOrder);
+}
+
+export async function adminGetAllEconomicIndicators() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(economicIndicators).orderBy(economicIndicators.sortOrder);
+}
+
+export async function adminCreateEconomicIndicator(data: Omit<InsertEconomicIndicator, "id" | "updatedAt">) {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  const [result] = await db.insert(economicIndicators).values(data);
+  return { id: (result as any).insertId };
+}
+
+export async function adminUpdateEconomicIndicator(id: number, data: Partial<Omit<InsertEconomicIndicator, "id" | "updatedAt">>) {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  await db.update(economicIndicators).set(data).where(eq(economicIndicators.id, id));
+  return { success: true };
+}
+
+export async function adminDeleteEconomicIndicator(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  await db.delete(economicIndicators).where(eq(economicIndicators.id, id));
+  return { success: true };
 }

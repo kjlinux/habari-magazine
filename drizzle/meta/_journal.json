@@ -78,6 +78,13 @@
       "when": 1776565170423,
       "tag": "0010_black_brother_voodoo",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "5",
+      "when": 1745078400000,
+      "tag": "0011_economic_indicators",
+      "breakpoints": true
     }
   ]
 }
