@@ -1369,7 +1369,7 @@ export const appRouter = router({
     events: router({
       list: adminProcedure.query(async () => {
         try { return await adminGetAllEvents(); }
-        catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement des événements" }); }
+        catch (e) { console.error("[events.list error]", e); throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: e instanceof Error ? e.message : "Erreur lors du chargement des événements" }); }
       }),
 
       byId: adminProcedure
@@ -1408,7 +1408,8 @@ export const appRouter = router({
             return event;
           } catch (e) {
             if (e instanceof TRPCError) throw e;
-            throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la création de l'événement" });
+            console.error("[events.create error]", e);
+            throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: e instanceof Error ? e.message : "Erreur lors de la création de l'événement" });
           }
         }),
 
