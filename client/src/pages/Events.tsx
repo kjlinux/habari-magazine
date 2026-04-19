@@ -2,16 +2,25 @@ import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { trpc } from "@/lib/trpc";
-import { Loader2, Search, Calendar, MapPin } from "lucide-react";
+import { Loader2, Search, Calendar, MapPin, X, Users, Clock } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const types = ["Tous", "conference", "webinar", "training", "workshop", "networking"];
 const typeLabels: Record<string, string> = { conference: "Conférence", webinar: "Webinaire", training: "Formation", workshop: "Atelier", networking: "Networking" };
 
+type EventItem = NonNullable<ReturnType<typeof trpc.events.upcoming.useQuery>["data"]>[0];
+
 export default function Events() {
   const [activeType, setActiveType] = useState("Tous");
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedEvent, setSelectedEvent] = useState<EventItem | null>(null);
   const { data: dbEvents, isLoading } = trpc.events.upcoming.useQuery({ limit: 20 });
 
   const filteredEvents = useMemo(() => {
@@ -89,8 +98,13 @@ export default function Events() {
                       </div>
                     </div>
                     {ev.description && <p className="text-sm text-muted-foreground font-sans line-clamp-2 mb-3">{ev.description}</p>}
-                    <div className="flex items-center gap-4 text-xs text-muted-foreground font-sans">
-                      {ev.location && <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{ev.location}</span>}
+                    <div className="flex items-center justify-between mt-3">
+                      <div className="flex items-center gap-3 text-xs text-muted-foreground font-sans">
+                        {ev.location && <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{ev.location}</span>}
+                      </div>
+                      <Button size="sm" variant="outline" className="font-sans text-xs" onClick={() => setSelectedEvent(ev)}>
+                        Voir plus
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -101,6 +115,65 @@ export default function Events() {
       </section>
 
       <Footer />
+
+      {/* Event detail modal */}
+      <Dialog open={!!selectedEvent} onOpenChange={(open) => !open && setSelectedEvent(null)}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          {selectedEvent && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="font-serif text-xl leading-snug">{selectedEvent.title}</DialogTitle>
+              </DialogHeader>
+              {(selectedEvent as any).image && (
+                <img src={(selectedEvent as any).image} alt={selectedEvent.title} className="w-full h-48 object-cover rounded-lg" />
+              )}
+              <div className="space-y-4 mt-2">
+                <div className="flex flex-wrap gap-2">
+                  <span className="text-xs font-sans px-2 py-0.5 bg-habari-gold/10 text-[oklch(0.55_0.12_75)] rounded capitalize">
+                    {typeLabels[selectedEvent.type] || selectedEvent.type}
+                  </span>
+                  {(selectedEvent as any).isExclusive && (
+                    <span className="text-xs font-sans font-semibold px-2 py-0.5 bg-primary/10 text-primary rounded">Intégral</span>
+                  )}
+                  {selectedEvent.status && (
+                    <span className="text-xs font-sans px-2 py-0.5 bg-muted text-muted-foreground rounded capitalize">{selectedEvent.status}</span>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm font-sans text-muted-foreground">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4 shrink-0" />
+                    <span>
+                      {new Date(selectedEvent.startDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                      {(selectedEvent as any).endDate && (
+                        <> → {new Date((selectedEvent as any).endDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</>
+                      )}
+                    </span>
+                  </div>
+                  {selectedEvent.location && (
+                    <div className="flex items-center gap-2">
+                      <MapPin className="w-4 h-4 shrink-0" />
+                      <span>{selectedEvent.location}</span>
+                    </div>
+                  )}
+                  {(selectedEvent as any).capacity && (
+                    <div className="flex items-center gap-2">
+                      <Users className="w-4 h-4 shrink-0" />
+                      <span>Capacité : {(selectedEvent as any).capacity} participants</span>
+                    </div>
+                  )}
+                </div>
+
+                {selectedEvent.description && (
+                  <div>
+                    <p className="text-sm font-sans text-foreground leading-relaxed whitespace-pre-line">{selectedEvent.description}</p>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

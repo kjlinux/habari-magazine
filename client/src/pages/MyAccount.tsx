@@ -630,13 +630,14 @@ export default function MyAccount() {
                     </div>
 
                     {!profile?.profileCompleted && (
-                      <div className="mt-3 p-3 rounded-lg bg-[oklch(0.72_0.15_75)]/10 border border-[oklch(0.72_0.15_75)]/20">
+                      <div className="mt-3 p-3 rounded-lg bg-muted/50 border border-border">
                         <p className="text-xs font-sans text-muted-foreground mb-2">
-                          Complétez votre profil pour accéder à tous les contenus premium.
+                          Votre profil est incomplet. Ajoutez vos informations professionnelles pour personnaliser votre expérience.
                         </p>
                         <Button
                           size="sm"
-                          className="font-sans text-xs bg-[oklch(0.72_0.15_75)] text-[oklch(0.15_0.02_250)] hover:bg-[oklch(0.78_0.15_75)]"
+                          variant="outline"
+                          className="font-sans text-xs"
                           onClick={() => setEditing(true)}
                         >
                           <Pencil className="w-3 h-3 mr-1.5" /> Compléter mon profil

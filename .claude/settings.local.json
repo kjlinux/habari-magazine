@@ -1,7 +1,9 @@
 {
   "permissions": {
-    "defaultMode": "bypassPermissions",
-    "allow": [],
-    "deny": []
+    "allow": [
+      "Bash(mysql -h 127.0.0.1 -P 3306 -u habari_user -pxjXerkV8Su habari_db -e \"ALTER TABLE \\\\`events\\\\` ADD \\\\`isExclusive\\\\` boolean DEFAULT false NOT NULL;\")"
+    ],
+    "deny": [],
+    "defaultMode": "bypassPermissions"
   }
 }

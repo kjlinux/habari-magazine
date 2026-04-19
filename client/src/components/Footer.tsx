@@ -1,7 +1,14 @@
 import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
+import { useState } from "react";
 
 export default function Footer() {
+  const [nlEmail, setNlEmail] = useState("");
+  const [nlDone, setNlDone] = useState(false);
+  const subscribeMutation = trpc.newsletter.subscribe.useMutation({
+    onSuccess: () => setNlDone(true),
+  });
+
   const { data: settings } = trpc.siteConfig.homepageSettings.useQuery({
     keys: ["site_logo_url", "site_name", "contact_email", "social_twitter", "social_linkedin", "social_facebook", "social_instagram", "social_youtube"],
   });
@@ -75,6 +82,42 @@ export default function Footer() {
                 </a>
               </li>
             </ul>
+          </div>
+        </div>
+      </div>
+
+      {/* Newsletter strip */}
+      <div className="border-t border-white/10">
+        <div className="container py-8">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div>
+              <p className="font-serif font-bold text-white text-sm">Newsletter gratuite</p>
+              <p className="text-xs text-white/50 mt-0.5">Résumé hebdomadaire de l'actualité économique de l'Afrique centrale.</p>
+            </div>
+            {nlDone ? (
+              <p className="text-xs text-habari-gold font-sans">✓ Inscription confirmée !</p>
+            ) : (
+              <form
+                onSubmit={(e) => { e.preventDefault(); if (nlEmail) subscribeMutation.mutate({ email: nlEmail, tier: "free" }); }}
+                className="flex gap-2 w-full md:w-auto"
+              >
+                <input
+                  type="email"
+                  required
+                  placeholder="votre@email.com"
+                  value={nlEmail}
+                  onChange={(e) => setNlEmail(e.target.value)}
+                  className="flex-1 md:w-56 px-3 py-2 rounded-md bg-white/10 border border-white/20 text-white placeholder:text-white/40 text-sm font-sans focus:outline-none focus:ring-2 focus:ring-habari-gold/50"
+                />
+                <button
+                  type="submit"
+                  disabled={subscribeMutation.isPending}
+                  className="px-4 py-2 rounded-md bg-habari-gold text-[oklch(0.15_0.02_250)] text-sm font-sans font-semibold hover:bg-habari-gold/90 transition-colors shrink-0"
+                >
+                  {subscribeMutation.isPending ? "…" : "S'inscrire"}
+                </button>
+              </form>
+            )}
           </div>
         </div>
       </div>
