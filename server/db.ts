@@ -1640,6 +1640,7 @@ export async function adminCreateEvent(data: {
   image?: string;
   capacity?: number;
   status?: 'upcoming' | 'ongoing' | 'completed' | 'cancelled';
+  isExclusive?: boolean;
 }) {
   const db = await getDb();
   if (!db) return undefined;
@@ -1655,6 +1656,7 @@ export async function adminCreateEvent(data: {
     image: data.image ?? null,
     capacity: data.capacity ?? null,
     status: data.status ?? 'upcoming',
+    isExclusive: data.isExclusive ?? false,
   });
   return { success: true, insertId: result[0].insertId };
 }
@@ -2133,79 +2135,3 @@ export async function adminDeleteEconomicIndicator(id: number) {
   return { success: true };
 }
 
-// ═══════════════════════════════════════════════
-// EVENTS ADMIN HELPERS
-// ═══════════════════════════════════════════════
-
-export async function adminGetAllEvents() {
-  const db = await getDb();
-  if (!db) return [];
-  return await db.select().from(events).orderBy(desc(events.startDate));
-}
-
-export async function adminGetEventById(id: number) {
-  const db = await getDb();
-  if (!db) return undefined;
-  const result = await db.select().from(events).where(eq(events.id, id)).limit(1);
-  return result[0];
-}
-
-export async function adminCreateEvent(data: {
-  title: string;
-  slug: string;
-  description?: string;
-  type: "conference" | "webinar" | "training" | "workshop" | "networking";
-  startDate: Date;
-  endDate?: Date;
-  location?: string;
-  countryId?: number;
-  image?: string;
-  capacity?: number;
-  status?: "upcoming" | "ongoing" | "completed" | "cancelled";
-  isExclusive?: boolean;
-}) {
-  const db = await getDb();
-  if (!db) return undefined;
-  const result = await db.insert(events).values({
-    title: data.title,
-    slug: data.slug,
-    description: data.description ?? null,
-    type: data.type,
-    startDate: data.startDate,
-    endDate: data.endDate ?? null,
-    location: data.location ?? null,
-    countryId: data.countryId ?? null,
-    image: data.image ?? null,
-    capacity: data.capacity ?? null,
-    status: data.status ?? "upcoming",
-    isExclusive: data.isExclusive ?? false,
-  });
-  return { success: true, insertId: result[0].insertId };
-}
-
-export async function adminUpdateEvent(id: number, data: Partial<{
-  title: string;
-  slug: string;
-  description: string | null;
-  type: "conference" | "webinar" | "training" | "workshop" | "networking";
-  startDate: Date;
-  endDate: Date | null;
-  location: string | null;
-  countryId: number | null;
-  image: string | null;
-  capacity: number | null;
-  status: "upcoming" | "ongoing" | "completed" | "cancelled";
-  isExclusive: boolean;
-}>) {
-  const db = await getDb();
-  if (!db) throw new Error("DB unavailable");
-  await db.update(events).set(data).where(eq(events.id, id));
-  return { success: true };
-}
-
-export async function adminDeleteEvent(id: number) {
-  const db = await getDb();
-  if (!db) throw new Error("DB unavailable");
-  await db.delete(events).where(eq(events.id, id));
-  return { success: true };
-}
