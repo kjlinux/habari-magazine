@@ -4,6 +4,7 @@ import { constructWebhookEvent } from "./stripe";
 import { getDb } from "../db";
 import { users, userSubscriptions, newsletterSubscribers, magazinePurchases } from "../../drizzle/schema";
 import { and, eq } from "drizzle-orm";
+import { sendEmail } from "../_core/email";
 
 /**
  * Register the Stripe webhook endpoint.
@@ -60,6 +61,13 @@ export function registerStripeWebhook(app: Express) {
               const issueNumber = session.metadata.issue_number || "";
               if (!issueId) {
                 console.error("[Webhook] magazine_pdf without issue_id");
+                break;
+              }
+              // Deduplication: skip if already processed
+              const existing = await db.select().from(magazinePurchases)
+                .where(eq(magazinePurchases.stripeSessionId, session.id)).limit(1);
+              if (existing.length > 0) {
+                console.log(`[Webhook] Duplicate checkout.session.completed for ${session.id}, skipping`);
                 break;
               }
               await db.insert(magazinePurchases).values({
@@ -122,6 +130,18 @@ export function registerStripeWebhook(app: Express) {
               });
             }
 
+            // Send confirmation email
+            const userRow = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+            if (userRow.length > 0 && userRow[0].email) {
+              const productLabel = productKey === "bundle" ? "Pack Intégral" : productKey === "newsletterPremium" ? "Newsletter Premium" : "Accès Premium";
+              await sendEmail({
+                to: userRow[0].email,
+                subject: "Confirmation de votre abonnement — Habari Magazine",
+                html: `<p>Bonjour${userRow[0].name ? ` ${userRow[0].name}` : ""},</p><p>Votre abonnement <strong>${productLabel}</strong> est maintenant actif. Merci pour votre confiance !</p><p>— L'équipe Habari Magazine</p>`,
+                text: `Votre abonnement ${productLabel} est maintenant actif. Merci !`,
+              });
+            }
+
             console.log(`[Webhook] User ${userId} subscribed to ${productKey} (siteTier: ${siteTier}, newsletter: ${grantNewsletter})`);
             break;
           }
@@ -173,6 +193,105 @@ export function registerStripeWebhook(app: Express) {
 
               console.log(`[Webhook] User ${userId} subscription cancelled (product: ${cancelledProduct})`);
             }
+            break;
+          }
+
+          case "invoice.payment_succeeded": {
+            // Handles recurring renewals — skip the first invoice (already handled by checkout.session.completed)
+            const invoice = event.data.object as any;
+            const subscriptionId = invoice.subscription;
+            if (!subscriptionId) break;
+            if (invoice.billing_reason === "subscription_create") break;
+
+            const db = await getDb();
+            if (!db) break;
+
+            // Find the local subscription record
+            const subResult = await db.select().from(userSubscriptions)
+              .where(eq(userSubscriptions.stripeSubscriptionId, subscriptionId)).limit(1);
+
+            if (subResult.length > 0) {
+              const sub = subResult[0];
+              // Re-activate if it was previously expired/cancelled
+              await db.update(userSubscriptions)
+                .set({ status: "active", endDate: null })
+                .where(eq(userSubscriptions.stripeSubscriptionId, subscriptionId));
+
+              const grantNewsletter = sub.stripeProductKey === "newsletterPremium" || sub.stripeProductKey === "bundle";
+              const siteTier: "free" | "premium" | "integral" =
+                sub.stripeProductKey === "bundle" ? "integral" :
+                sub.stripeProductKey === "premiumAccess" ? "premium" : "free";
+
+              await db.update(users)
+                .set({ subscriptionTier: siteTier, hasNewsletterPremium: grantNewsletter })
+                .where(eq(users.id, sub.userId));
+
+              if (grantNewsletter) {
+                const userRow = await db.select().from(users).where(eq(users.id, sub.userId)).limit(1);
+                if (userRow.length > 0 && userRow[0].email) {
+                  await db.update(newsletterSubscribers)
+                    .set({ tier: "premium" })
+                    .where(eq(newsletterSubscribers.email, userRow[0].email));
+                }
+              }
+              console.log(`[Webhook] Renewal OK for user ${sub.userId} (${sub.stripeProductKey})`);
+            }
+            break;
+          }
+
+          case "customer.subscription.updated": {
+            const subscription = event.data.object as any;
+            const subscriptionId = subscription.id;
+
+            const db = await getDb();
+            if (!db) break;
+
+            const subResult = await db.select().from(userSubscriptions)
+              .where(eq(userSubscriptions.stripeSubscriptionId, subscriptionId)).limit(1);
+
+            if (subResult.length === 0) break;
+            const sub = subResult[0];
+
+            // Detect plan change via metadata on the subscription items
+            const newProductKey = subscription.metadata?.product_key || sub.stripeProductKey;
+            const grantNewsletter = newProductKey === "newsletterPremium" || newProductKey === "bundle";
+            const siteTier: "free" | "premium" | "integral" =
+              newProductKey === "bundle" ? "integral" :
+              newProductKey === "premiumAccess" ? "premium" : "free";
+
+            await db.update(userSubscriptions)
+              .set({ stripeProductKey: newProductKey, tier: siteTier !== "free" ? siteTier : sub.tier })
+              .where(eq(userSubscriptions.stripeSubscriptionId, subscriptionId));
+
+            await db.update(users)
+              .set({ subscriptionTier: siteTier, hasNewsletterPremium: grantNewsletter })
+              .where(eq(users.id, sub.userId));
+
+            const userRow = await db.select().from(users).where(eq(users.id, sub.userId)).limit(1);
+            if (userRow.length > 0 && userRow[0].email) {
+              await db.update(newsletterSubscribers)
+                .set({ tier: grantNewsletter ? "premium" : "free" })
+                .where(eq(newsletterSubscribers.email, userRow[0].email));
+            }
+
+            console.log(`[Webhook] Subscription updated for user ${sub.userId} → ${newProductKey}`);
+            break;
+          }
+
+          case "charge.refunded": {
+            const charge = event.data.object as any;
+            const paymentIntent = charge.payment_intent;
+            if (!paymentIntent) break;
+
+            const db = await getDb();
+            if (!db) break;
+
+            // Mark magazine purchase as refunded
+            await db.update(magazinePurchases)
+              .set({ status: "refunded" })
+              .where(eq(magazinePurchases.stripePaymentIntentId, paymentIntent));
+
+            console.log(`[Webhook] Charge refunded for payment_intent ${paymentIntent}`);
             break;
           }
 

@@ -286,7 +286,7 @@ export default function AdminInvestmentForm() {
                   onChange={(url) => setForm({ ...form, image: url })}
                   folder="investments"
                   uploadEndpoint="/api/upload/image"
-                  aiPromptContext={`Investment opportunity image for: "${form.title || ""}"`}
+                  aiPromptContext={`Professional financial investment image for: "${form.title || ""}"${form.sector ? `, sector: ${form.sector}` : ""}${form.investmentType ? `, type: ${form.investmentType}` : ""}${form.description ? `. ${form.description.slice(0, 120)}` : ""}`}
                   previewHeight="h-40"
                 />
               </div>

@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { trpc } from "@/lib/trpc";
@@ -10,6 +10,7 @@ import Footer from "@/components/Footer";
 import { paywallCta, paywallMessage, type SubscriptionTier } from "@/lib/access";
 
 const sectors = ["Tous", "Agriculture", "Énergie", "Services financiers", "Tourisme", "Construction"];
+const LIMIT = 10;
 
 /* ═══ INDICATEURS ÉCONOMIQUES CEEAC PAR PAYS (hardcodé) ═══ */
 const ceeacCountryIndicators = [
@@ -32,12 +33,42 @@ export default function Investments() {
   const [activeSector, setActiveSector] = useState("Tous");
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>("deals");
-  const { data: dbInvestments, isLoading } = trpc.investments.list.useQuery({ limit: 40, offset: 0 });
+  const [offset, setOffset] = useState(0);
+  const [allItems, setAllItems] = useState<any[]>([]);
+  const [hasMore, setHasMore] = useState(true);
+
+  const { isFetching, data: pageData, isLoading } = trpc.investments.list.useQuery({ limit: LIMIT, offset });
   const { data: statsData } = trpc.investments.stats.useQuery();
   const { data: indicatorsData } = trpc.investments.indicators.useQuery();
 
+  useEffect(() => {
+    if (!pageData) return;
+    if (offset === 0) {
+      setAllItems(pageData);
+    } else {
+      setAllItems((prev) => [...prev, ...pageData]);
+    }
+    setHasMore(pageData.length === LIMIT);
+  }, [pageData, offset]);
+
+  const handleSectorChange = (sector: string) => {
+    setActiveSector(sector);
+    setOffset(0);
+    setAllItems([]);
+    setHasMore(true);
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value);
+    setOffset(0);
+    setAllItems([]);
+    setHasMore(true);
+  };
+
+  const handleLoadMore = () => setOffset((prev) => prev + LIMIT);
+
   const investments = useMemo(() => {
-    let list = dbInvestments ?? [];
+    let list = allItems;
     if (activeSector !== "Tous") list = list.filter((i: any) => i.sector === activeSector);
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
@@ -46,7 +77,9 @@ export default function Investments() {
       );
     }
     return list;
-  }, [dbInvestments, activeSector, searchQuery]);
+  }, [allItems, activeSector, searchQuery]);
+
+  const isInitialLoading = isLoading && offset === 0 && allItems.length === 0;
 
   return (
     <div className="min-h-screen bg-background">
@@ -119,7 +152,6 @@ export default function Investments() {
       {/* ═══ ONGLETS : DEALS / INDICATEURS ÉCONOMIQUES ═══ */}
       <section className="border-b border-border sticky top-16 bg-background/98 backdrop-blur-sm z-40">
         <div className="container py-4">
-          {/* Sélecteur principal : Deals vs Indicateurs */}
           <div className="flex items-center gap-3 mb-3">
             <button
               onClick={() => setViewMode("deals")}
@@ -145,17 +177,16 @@ export default function Investments() {
             </button>
           </div>
 
-          {/* Filtres de catégories (uniquement en mode deals) */}
           {viewMode === "deals" && (
             <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
               <div className="flex flex-wrap gap-2 flex-1">
                 {sectors.map((s) => (
-                  <button key={s} onClick={() => setActiveSector(s)} className={`px-3 py-1.5 text-sm font-sans font-medium rounded-md transition-colors ${activeSector === s ? "bg-primary text-white" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}>{s}</button>
+                  <button key={s} onClick={() => handleSectorChange(s)} className={`px-3 py-1.5 text-sm font-sans font-medium rounded-md transition-colors ${activeSector === s ? "bg-primary text-white" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}>{s}</button>
                 ))}
               </div>
               <div className="relative w-full md:w-64">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <input type="text" placeholder="Rechercher un projet..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full pl-9 pr-4 py-2 text-sm font-sans border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary/30" />
+                <input type="text" placeholder="Rechercher un projet..." value={searchQuery} onChange={(e) => handleSearchChange(e.target.value)} className="w-full pl-9 pr-4 py-2 text-sm font-sans border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary/30" />
               </div>
             </div>
           )}
@@ -175,7 +206,6 @@ export default function Investments() {
               </Link>
             </div>
 
-            {/* Tableau par pays */}
             <div className="overflow-x-auto rounded-xl border border-border">
               <table className="w-full text-sm">
                 <thead>
@@ -209,7 +239,6 @@ export default function Investments() {
               </table>
             </div>
 
-            {/* Source */}
             <p className="text-xs text-muted-foreground font-sans mt-4 text-right">
               Sources : FMI, Banque mondiale, BAD — Données estimées 2025-2026
             </p>
@@ -218,59 +247,69 @@ export default function Investments() {
       ) : (
         <section className="py-12">
           <div className="container">
-            {isLoading ? (
+            {isInitialLoading ? (
               <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
             ) : investments.length === 0 ? (
               <div className="text-center py-20">
                 <TrendingUp className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
                 <p className="text-muted-foreground font-sans">
-                  {(dbInvestments?.length ?? 0) === 0
+                  {allItems.length === 0
                     ? "Les opportunités d'investissement seront bientôt disponibles."
                     : "Aucune opportunité ne correspond à votre recherche."}
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {investments.map((inv: any) => {
-                  const access = inv.access;
-                  const locked = access && !access.allowed;
-                  const cta = locked ? paywallCta(access.reason, access.requiredTier as SubscriptionTier | undefined) : null;
-                  const msg = locked ? paywallMessage(access.reason, access.trialDaysRemaining ?? 0, access.requiredTier as SubscriptionTier | undefined) : "";
-                  return (
-                    <Card key={inv.id} className={`border shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden ${locked ? "relative" : ""}`}>
-                      <CardContent className="p-6">
-                        <div className="flex items-center gap-2 mb-3">
-                          <span className="habari-rubrique text-xs">{inv.sector}</span>
-                          <span className="text-xs font-sans px-2 py-0.5 bg-green-50 text-green-700 rounded capitalize">{inv.status}</span>
-                          {locked && (
-                            <span className="text-xs font-sans font-semibold px-2 py-0.5 bg-primary/10 text-primary rounded inline-flex items-center gap-1">
-                              <Lock className="w-3 h-3" /> Premium
-                            </span>
-                          )}
-                        </div>
-                        <h3 className="font-serif font-bold text-lg text-foreground mb-2">{inv.title}</h3>
-                        {inv.description && <p className="text-sm text-muted-foreground font-sans line-clamp-2 mb-4">{inv.description}</p>}
-                        {locked ? (
-                          <div className="pt-3 border-t border-border space-y-3">
-                            <p className="text-xs text-muted-foreground font-sans">{msg}</p>
-                            <Link href={cta!.href}>
-                              <Button size="sm" className="font-sans w-full">{cta!.label}</Button>
-                            </Link>
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {investments.map((inv: any) => {
+                    const access = inv.access;
+                    const locked = access && !access.allowed;
+                    const cta = locked ? paywallCta(access.reason, access.requiredTier as SubscriptionTier | undefined) : null;
+                    const msg = locked ? paywallMessage(access.reason, access.trialDaysRemaining ?? 0, access.requiredTier as SubscriptionTier | undefined) : "";
+                    return (
+                      <Card key={inv.id} className={`border shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden ${locked ? "relative" : ""}`}>
+                        <CardContent className="p-6">
+                          <div className="flex items-center gap-2 mb-3">
+                            <span className="habari-rubrique text-xs">{inv.sector}</span>
+                            <span className="text-xs font-sans px-2 py-0.5 bg-green-50 text-green-700 rounded capitalize">{inv.status}</span>
+                            {locked && (
+                              <span className="text-xs font-sans font-semibold px-2 py-0.5 bg-primary/10 text-primary rounded inline-flex items-center gap-1">
+                                <Lock className="w-3 h-3" /> Premium
+                              </span>
+                            )}
                           </div>
-                        ) : (
-                          <div className="flex items-center justify-between pt-3 border-t border-border">
-                            <div className="flex items-center gap-1 text-[oklch(0.72_0.15_75)]">
-                              <DollarSign className="w-4 h-4" />
-                              <span className="font-bold font-sans">{inv.targetAmount} {inv.currency}</span>
+                          <h3 className="font-serif font-bold text-lg text-foreground mb-2">{inv.title}</h3>
+                          {inv.description && <p className="text-sm text-muted-foreground font-sans line-clamp-2 mb-4">{inv.description}</p>}
+                          {locked ? (
+                            <div className="pt-3 border-t border-border space-y-3">
+                              <p className="text-xs text-muted-foreground font-sans">{msg}</p>
+                              <Link href={cta!.href}>
+                                <Button size="sm" className="font-sans w-full">{cta!.label}</Button>
+                              </Link>
                             </div>
-                            <span className="text-xs font-sans px-2 py-1 bg-primary/10 text-primary rounded capitalize">{inv.investmentType}</span>
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-              </div>
+                          ) : (
+                            <div className="flex items-center justify-between pt-3 border-t border-border">
+                              <div className="flex items-center gap-1 text-[oklch(0.72_0.15_75)]">
+                                <DollarSign className="w-4 h-4" />
+                                <span className="font-bold font-sans">{inv.targetAmount} {inv.currency}</span>
+                              </div>
+                              <span className="text-xs font-sans px-2 py-1 bg-primary/10 text-primary rounded capitalize">{inv.investmentType}</span>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+                {hasMore && (
+                  <div className="flex justify-center mt-10">
+                    <Button variant="outline" onClick={handleLoadMore} disabled={isFetching} className="font-sans px-8">
+                      {isFetching ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                      Voir plus
+                    </Button>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </section>

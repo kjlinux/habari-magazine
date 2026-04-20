@@ -388,7 +388,9 @@ function IssueCard({ issue, user, launchPeriod }: { issue: any; user: any; launc
     ? new Date(issue.publishedAt).toLocaleDateString("fr-FR", { month: "long", year: "numeric" })
     : null;
 
-  const canAccess = !issue.isPremium || user || launchPeriod;
+  const userTier: string = (user as any)?.subscriptionTier ?? "free";
+  const hasPremiumTier = userTier === "premium" || userTier === "integral";
+  const canAccess = !issue.isPremium || launchPeriod || hasPremiumTier;
 
   return (
     <div className="group bg-card rounded-xl border border-border overflow-hidden hover:border-habari-gold/50 hover:shadow-lg transition-all duration-300">

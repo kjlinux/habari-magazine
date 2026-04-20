@@ -199,7 +199,7 @@ export default function AdminPartnerForm() {
                     onChange={(url) => setForm({ ...form, image: url })}
                     folder="partners"
                     uploadEndpoint="/api/upload/image"
-                    aiPromptContext={`Partner image for: "${form.title || ""}"`}
+                    aiPromptContext={`Professional editorial image for a partner content titled: "${form.title || ""}"${form.tag ? `, sector: ${form.tag}` : ""}${form.excerpt ? `. Context: ${form.excerpt}` : ""}${form.category ? `. Type: ${form.category}` : ""}`}
                     previewHeight="h-40"
                   />
                 </div>

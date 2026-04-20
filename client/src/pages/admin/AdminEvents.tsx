@@ -183,7 +183,7 @@ export default function AdminEvents() {
                   onChange={(url) => setF("image", url)}
                   folder="events"
                   uploadEndpoint="/api/upload/image"
-                  aiPromptContext={`Event image for: "${form.title || ""}"`}
+                  aiPromptContext={`Professional event banner image for: "${form.title || ""}"${form.type ? `, type: ${form.type}` : ""}${form.location ? `, location: ${form.location}` : ""}${form.description ? `. ${form.description.slice(0, 120)}` : ""}`}
                   previewHeight="h-40"
                 />
               </div>
