@@ -1097,8 +1097,14 @@ export const appRouter = router({
           minSubscriptionTier: z.enum(['free', 'premium', 'integral']).default('premium'),
         }))
         .mutation(async ({ input }) => {
-          try { return await adminCreateInvestment(input); }
-          catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la création" }); }
+          try {
+            const result = await adminCreateInvestment(input);
+            if (!result) throw new Error("Database connection failed");
+            return result;
+          } catch (e) {
+            console.error("[admin.investments.create]", e);
+            throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la création" });
+          }
         }),
 
       update: adminProcedure
