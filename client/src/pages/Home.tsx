@@ -296,7 +296,7 @@ export default function Home() {
               <h1 className="font-serif text-3xl md:text-4xl font-bold text-[oklch(0.20_0.02_250)] leading-tight mb-4">
                 Habari Magazine
               </h1>
-              <div className="w-16 h-1 bg-[oklch(0.42_0.18_10)] mb-4"></div>
+              <div className="w-16 h-1 bg-[oklch(0.72_0.15_75)] mb-4"></div>
               <p className="text-sm text-[oklch(0.35_0.02_250)] font-sans leading-relaxed mb-6">
                 Connexion économique pour l'intégration de l'Afrique Centrale. Analyses de fond, données exclusives, réseau de décideurs.
               </p>
@@ -333,7 +333,7 @@ export default function Home() {
               {/* CTA */}
               <div className="mt-auto">
                 <Link href="/abonnements">
-                  <Button className="font-sans bg-[oklch(0.42_0.18_10)] text-[oklch(0.15_0.02_250)] hover:bg-[oklch(0.50_0.18_10)] w-full font-semibold">
+                  <Button className="font-sans bg-[oklch(0.72_0.15_75)] text-[oklch(0.15_0.02_250)] hover:bg-[oklch(0.78_0.15_75)] w-full font-semibold">
                     Découvrir nos offres <ArrowRight className="ml-2 w-4 h-4" />
                   </Button>
                 </Link>
@@ -361,7 +361,7 @@ export default function Home() {
                 {/* Content */}
                 <div className="relative h-full flex flex-col justify-end p-6 md:p-8">
                   <div className="mb-auto flex items-center justify-between pt-2">
-                    <span className="text-xs font-sans font-semibold uppercase tracking-wider text-[oklch(0.42_0.18_10)] bg-white/10 backdrop-blur-sm px-3 py-1 rounded-full">
+                    <span className="text-xs font-sans font-semibold uppercase tracking-wider text-[oklch(0.72_0.15_75)] bg-white/10 backdrop-blur-sm px-3 py-1 rounded-full">
                       {slide.rubrique}
                     </span>
                     <span className="text-xs font-sans text-white/40">
@@ -372,7 +372,7 @@ export default function Home() {
                   <div>
                     {slide.slug ? (
                       <Link href={`/article/${slide.slug}`}>
-                        <h2 className="font-serif text-2xl md:text-3xl font-bold text-white leading-tight mb-3 hover:text-[oklch(0.42_0.18_10)] transition-colors cursor-pointer">
+                        <h2 className="font-serif text-2xl md:text-3xl font-bold text-white leading-tight mb-3 hover:text-[oklch(0.72_0.15_75)] transition-colors cursor-pointer">
                           {slide.title}
                         </h2>
                       </Link>
@@ -398,7 +398,7 @@ export default function Home() {
                     <div className="flex items-center justify-between">
                       {slide.slug && (
                         <Link href={`/article/${slide.slug}`}>
-                          <Button size="sm" className="font-sans bg-[oklch(0.42_0.18_10)] text-[oklch(0.15_0.02_250)] hover:bg-[oklch(0.50_0.18_10)]">
+                          <Button size="sm" className="font-sans bg-[oklch(0.72_0.15_75)] text-[oklch(0.15_0.02_250)] hover:bg-[oklch(0.78_0.15_75)]">
                             Lire l'article <ArrowRight className="ml-1.5 w-3.5 h-3.5" />
                           </Button>
                         </Link>
@@ -431,7 +431,7 @@ export default function Home() {
                         onClick={() => setCurrentSlide(i)}
                         aria-label={`Aller au slide ${i + 1}`}
                         className={`h-1.5 rounded-full transition-all duration-300 ${
-                          i === currentSlide ? "w-6 bg-[oklch(0.42_0.18_10)]" : "w-1.5 bg-white/30 hover:bg-white/50"
+                          i === currentSlide ? "w-6 bg-[oklch(0.72_0.15_75)]" : "w-1.5 bg-white/30 hover:bg-white/50"
                         }`}
                       />
                     ))}
@@ -456,7 +456,7 @@ export default function Home() {
                 {[...freeContent, ...freeContent].map((item, i) => (
                   <Link key={i} href={item.slug ? `/article/${item.slug}` : "/magazine"}>
                     <span className="inline-flex items-center gap-2 text-sm font-sans text-foreground/80 hover:text-primary transition-colors cursor-pointer">
-                      <span className="text-[oklch(0.42_0.18_10)] font-semibold text-xs">{(item as any).rubrique}</span>
+                      <span className="text-[oklch(0.72_0.15_75)] font-semibold text-xs">{(item as any).rubrique}</span>
                       <span className="text-muted-foreground/40">—</span>
                       <span className="font-medium">{item.title}</span>
                     </span>
@@ -518,7 +518,7 @@ export default function Home() {
                           <Lock className="w-2.5 h-2.5" /> Intégral
                         </span>
                       ) : (
-                        <span className="absolute top-3 left-3 text-[0.6rem] font-sans bg-green-100 text-green-700 px-2.5 py-1 rounded-full font-semibold uppercase tracking-wider">
+                        <span className="absolute top-3 left-3 text-[0.6rem] font-sans bg-white/15 text-white border border-white/30 px-2.5 py-1 rounded-full font-semibold uppercase tracking-wider flex items-center gap-1 backdrop-blur-sm shadow-sm">
                           Accès libre
                         </span>
                       )}
@@ -606,9 +606,9 @@ export default function Home() {
           <div className="flex items-end justify-between mb-8">
             <div>
               <div className="flex items-center gap-2 mb-2">
-                <Sparkles className="w-4 h-4 text-[oklch(0.42_0.18_10)]" />
+                <Sparkles className="w-4 h-4 text-[oklch(0.72_0.15_75)]" />
                 <span className="habari-rubrique">Contenu premium</span>
-                <span className="text-[0.6rem] font-sans bg-[oklch(0.42_0.18_10)]/15 text-[oklch(0.30_0.15_10)] px-2.5 py-0.5 rounded-full font-semibold uppercase tracking-wider flex items-center gap-1"><Gift className="w-3 h-3" /> Offre lancement</span>
+                <span className="text-[0.6rem] font-sans bg-[oklch(0.72_0.15_75)]/15 text-[oklch(0.55_0.12_75)] px-2.5 py-0.5 rounded-full font-semibold uppercase tracking-wider flex items-center gap-1"><Gift className="w-3 h-3" /> Offre lancement</span>
               </div>
               <h2 className="font-serif text-3xl font-bold text-primary">Accès gratuit pour les inscrits</h2>
               <p className="text-sm text-muted-foreground font-sans mt-2">Jusqu'au 1er juin 2026, tout le contenu premium est accessible gratuitement. Inscrivez-vous !</p>
@@ -616,7 +616,7 @@ export default function Home() {
             </div>
             {!isAuthenticated && (
               <a href={"/login"}>
-                <Button className="font-sans gap-2 bg-[oklch(0.42_0.18_10)] text-[oklch(0.15_0.02_250)] hover:bg-[oklch(0.50_0.18_10)]">
+                <Button className="font-sans gap-2 bg-[oklch(0.72_0.15_75)] text-[oklch(0.15_0.02_250)] hover:bg-[oklch(0.78_0.15_75)]">
                   <Gift className="w-4 h-4" /> S'inscrire gratuitement
                 </Button>
               </a>
@@ -627,12 +627,12 @@ export default function Home() {
             {premiumContent.map((item, i) => (
               <div key={i} className="relative group">
                 <Card className="border-0 shadow-sm overflow-hidden h-full opacity-90">
-                  <div className="w-full h-52 bg-gradient-to-br from-[oklch(0.42_0.18_10)]/15 to-primary/10 relative overflow-hidden">
+                  <div className="w-full h-52 bg-gradient-to-br from-[oklch(0.72_0.15_75)]/15 to-primary/10 relative overflow-hidden">
                     {((item as any).image || (item as any).featuredImage) ? (
                       <img src={(item as any).image ?? (item as any).featuredImage} alt={item.title} className="w-full h-full object-cover object-top opacity-70" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
-                        <Lock className="w-10 h-10 text-[oklch(0.42_0.18_10)]/40" />
+                        <Lock className="w-10 h-10 text-[oklch(0.72_0.15_75)]/40" />
                       </div>
                     )}
                     <span className="absolute top-3 left-3 text-[0.6rem] font-sans bg-white/15 text-white border border-white/30 px-2.5 py-1 rounded-full font-semibold uppercase tracking-wider flex items-center gap-1 backdrop-blur-sm shadow-sm">
@@ -650,7 +650,7 @@ export default function Home() {
                 {!isAuthenticated && (
                   <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center pb-6">
                     <a href={"/login"}>
-                      <Button size="sm" className="font-sans bg-[oklch(0.42_0.18_10)] text-[oklch(0.15_0.02_250)] hover:bg-[oklch(0.50_0.18_10)]">
+                      <Button size="sm" className="font-sans bg-[oklch(0.72_0.15_75)] text-[oklch(0.15_0.02_250)] hover:bg-[oklch(0.78_0.15_75)]">
                         <Gift className="w-3.5 h-3.5 mr-1.5" /> S'inscrire pour lire
                       </Button>
                     </a>
@@ -672,7 +672,7 @@ export default function Home() {
             <h2 className="font-serif text-3xl font-bold text-primary mb-3">
               Votre Accès Habari
             </h2>
-            <div className="w-16 h-1 bg-[oklch(0.42_0.18_10)] mx-auto mb-5"></div>
+            <div className="w-16 h-1 bg-[oklch(0.72_0.15_75)] mx-auto mb-5"></div>
             <p className="text-muted-foreground font-sans mb-8 max-w-lg mx-auto">
               Choisissez la formule qui vous convient. Accédez aux analyses, données et événements de la zone CEEAC.
             </p>
@@ -701,26 +701,26 @@ export default function Home() {
                 </div>
               </Link>
               <Link href="/abonnements">
-                <div className="border-2 border-[oklch(0.42_0.18_10)] rounded-xl p-6 bg-[oklch(0.42_0.18_10)]/5 relative hover:shadow-lg transition-all cursor-pointer h-full group">
-                  <div className="absolute -top-3 right-4 bg-[oklch(0.42_0.18_10)] text-[oklch(0.15_0.02_250)] text-[0.6rem] font-sans font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                <div className="border-2 border-[oklch(0.72_0.15_75)] rounded-xl p-6 bg-[oklch(0.72_0.15_75)]/5 relative hover:shadow-lg transition-all cursor-pointer h-full group">
+                  <div className="absolute -top-3 right-4 bg-[oklch(0.72_0.15_75)] text-[oklch(0.15_0.02_250)] text-[0.6rem] font-sans font-bold px-3 py-1 rounded-full uppercase tracking-wider">
                     Recommandé
                   </div>
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 rounded-full bg-[oklch(0.42_0.18_10)]/20 flex items-center justify-center">
-                      <Shield className="w-5 h-5 text-[oklch(0.30_0.15_10)]" />
+                    <div className="w-10 h-10 rounded-full bg-[oklch(0.72_0.15_75)]/20 flex items-center justify-center">
+                      <Shield className="w-5 h-5 text-[oklch(0.55_0.12_75)]" />
                     </div>
                     <div>
-                      <h3 className="font-serif font-bold text-foreground group-hover:text-[oklch(0.30_0.15_10)] transition-colors">Accès Premium</h3>
-                      <span className="text-xs font-sans text-[oklch(0.30_0.15_10)] font-semibold">À partir de 4,50 € / mois</span>
+                      <h3 className="font-serif font-bold text-foreground group-hover:text-[oklch(0.55_0.12_75)] transition-colors">Accès Premium</h3>
+                      <span className="text-xs font-sans text-[oklch(0.55_0.12_75)] font-semibold">À partir de 4,50 € / mois</span>
                     </div>
                   </div>
                   <ul className="space-y-2 text-sm font-sans text-muted-foreground mb-4">
-                    <li className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-[oklch(0.42_0.18_10)] mt-0.5 shrink-0" /> Analyse approfondie hebdomadaire</li>
-                    <li className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-[oklch(0.42_0.18_10)] mt-0.5 shrink-0" /> Données exclusives et tableaux de bord</li>
-                    <li className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-[oklch(0.42_0.18_10)] mt-0.5 shrink-0" /> Accès aux archives complètes</li>
-                    <li className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-[oklch(0.42_0.18_10)] mt-0.5 shrink-0" /> Invitations événements Habari</li>
+                    <li className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-[oklch(0.72_0.15_75)] mt-0.5 shrink-0" /> Analyse approfondie hebdomadaire</li>
+                    <li className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-[oklch(0.72_0.15_75)] mt-0.5 shrink-0" /> Données exclusives et tableaux de bord</li>
+                    <li className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-[oklch(0.72_0.15_75)] mt-0.5 shrink-0" /> Accès aux archives complètes</li>
+                    <li className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-[oklch(0.72_0.15_75)] mt-0.5 shrink-0" /> Invitations événements Habari</li>
                   </ul>
-                  <div className="flex items-center gap-2 text-[oklch(0.30_0.15_10)] font-sans text-sm font-medium group-hover:gap-3 transition-all">
+                  <div className="flex items-center gap-2 text-[oklch(0.55_0.12_75)] font-sans text-sm font-medium group-hover:gap-3 transition-all">
                     Voir les offres <ArrowRight className="w-4 h-4" />
                   </div>
                 </div>
@@ -764,7 +764,7 @@ export default function Home() {
               <div className="flex items-center gap-2 mb-2">
                 <Calendar className="w-4 h-4 text-primary" />
                 <span className="habari-rubrique">Agenda</span>
-                <span className="text-[0.6rem] font-sans bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium uppercase tracking-wider">Accès libre</span>
+                <span className="text-[0.6rem] font-sans bg-white/15 text-foreground border border-border px-2 py-0.5 rounded-full font-medium uppercase tracking-wider backdrop-blur-sm">Accès libre</span>
               </div>
               <h2 className="font-serif text-3xl font-bold text-primary">Événements à venir</h2>
               <div className="habari-separator mt-3"></div>
@@ -791,7 +791,7 @@ export default function Home() {
                   <div className="flex-1">
                     <h3 className="font-serif font-bold text-foreground mb-1 line-clamp-2">{ev.title}</h3>
                     <p className="text-sm text-muted-foreground font-sans">{ev.location}</p>
-                    <span className="inline-block mt-2 text-xs font-sans px-2 py-1 bg-[oklch(0.42_0.18_10)]/10 text-[oklch(0.30_0.15_10)] rounded capitalize">{ev.type}</span>
+                    <span className="inline-block mt-2 text-xs font-sans px-2 py-1 bg-[oklch(0.72_0.15_75)]/10 text-[oklch(0.55_0.12_75)] rounded capitalize">{ev.type}</span>
                   </div>
                 </div>
               </div>
@@ -821,7 +821,7 @@ export default function Home() {
                 <Link key={svc.href || idx} href={svc.href}>
                   <div className="group bg-background border border-border rounded-xl p-6 hover:shadow-lg hover:border-primary/20 transition-all cursor-pointer h-full relative">
                     {svc.badge && (
-                      <span className="absolute top-3 right-3 text-[0.55rem] font-sans bg-[oklch(0.42_0.18_10)]/15 text-[oklch(0.30_0.15_10)] px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider flex items-center gap-1">
+                      <span className="absolute top-3 right-3 text-[0.55rem] font-sans bg-[oklch(0.72_0.15_75)]/15 text-[oklch(0.55_0.12_75)] px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider flex items-center gap-1">
                         {(svc.badge === "Premium" || svc.badge === "Intégral") && <Lock className="w-2.5 h-2.5" />} {svc.badge}
                       </span>
                     )}
@@ -848,14 +848,14 @@ export default function Home() {
           <h2 className="font-serif text-3xl md:text-4xl font-bold text-white mb-4">
             Rejoignez la communauté Habari
           </h2>
-          <div className="w-20 h-1 bg-[oklch(0.42_0.18_10)] mx-auto mb-6"></div>
+          <div className="w-20 h-1 bg-[oklch(0.72_0.15_75)] mx-auto mb-6"></div>
           <p className="text-lg text-white/70 max-w-2xl mx-auto mb-10 font-sans">
             Accédez à des analyses exclusives, des données économiques fiables et un réseau de décideurs
             engagés dans le développement de la zone CEEAC.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/abonnements">
-              <Button size="lg" className="font-sans bg-[oklch(0.42_0.18_10)] text-[oklch(0.15_0.02_250)] hover:bg-[oklch(0.50_0.18_10)] font-semibold">
+              <Button size="lg" className="font-sans bg-[oklch(0.72_0.15_75)] text-[oklch(0.15_0.02_250)] hover:bg-[oklch(0.78_0.15_75)] font-semibold">
                 Découvrir nos offres
               </Button>
             </Link>

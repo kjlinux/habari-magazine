@@ -38,9 +38,9 @@ export default function Events() {
 
       <section className="bg-[oklch(0.20_0.02_250)] py-14">
         <div className="container">
-          <div className="habari-rubrique text-[oklch(0.42_0.18_10)] mb-3">Agenda</div>
+          <div className="habari-rubrique text-[oklch(0.72_0.15_75)] mb-3">Agenda</div>
           <h1 className="font-serif text-4xl md:text-5xl font-bold text-white mb-4">Événements &amp; Formations</h1>
-          <div className="w-20 h-1 bg-[oklch(0.42_0.18_10)] mb-4"></div>
+          <div className="w-20 h-1 bg-[oklch(0.72_0.15_75)] mb-4"></div>
           <p className="text-lg text-white/60 font-sans max-w-2xl">
             Conférences, formations, webinaires et rencontres professionnelles dédiés à l'économie de la zone CEEAC.
           </p>
@@ -88,7 +88,7 @@ export default function Events() {
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2 flex-wrap">
-                          <span className="inline-block text-xs font-sans px-2 py-0.5 bg-[oklch(0.42_0.18_10)]/10 text-[oklch(0.30_0.15_10)] rounded capitalize">{typeLabels[ev.type] || ev.type}</span>
+                          <span className="inline-block text-xs font-sans px-2 py-0.5 bg-[oklch(0.72_0.15_75)]/10 text-[oklch(0.55_0.12_75)] rounded capitalize">{typeLabels[ev.type] || ev.type}</span>
                           {(ev as any).isExclusive && (
                             <span className="inline-block text-xs font-sans font-semibold px-2 py-0.5 bg-primary/10 text-primary rounded">Intégral</span>
                           )}
@@ -128,7 +128,7 @@ export default function Events() {
               )}
               <div className="space-y-4 mt-2">
                 <div className="flex flex-wrap gap-2">
-                  <span className="text-xs font-sans px-2 py-0.5 bg-habari-gold/10 text-[oklch(0.30_0.15_10)] rounded capitalize">
+                  <span className="text-xs font-sans px-2 py-0.5 bg-habari-gold/10 text-[oklch(0.55_0.12_75)] rounded capitalize">
                     {typeLabels[selectedEvent.type] || selectedEvent.type}
                   </span>
                   {(selectedEvent as any).isExclusive && (

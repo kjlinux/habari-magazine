@@ -58,7 +58,7 @@ function LaunchBanner() {
   if (!launchStatus?.isLaunchPeriod) return null;
 
   return (
-    <div className="bg-gradient-to-r from-[oklch(0.42_0.18_10)] via-[oklch(0.40_0.17_10)] to-[oklch(0.42_0.18_10)] text-[oklch(0.15_0.02_250)]">
+    <div className="bg-gradient-to-r from-[oklch(0.72_0.15_75)] via-[oklch(0.68_0.14_65)] to-[oklch(0.72_0.15_75)] text-[oklch(0.15_0.02_250)]">
       <div className="container py-3">
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 text-center">
           <div className="flex items-center gap-2">
@@ -96,7 +96,7 @@ function AccessBadge({ level, isLaunchPeriod }: { level: "free" | "premium"; isL
   }
   if (isLaunchPeriod) {
     return (
-      <span className="inline-flex items-center gap-1 text-xs font-sans bg-[oklch(0.42_0.18_10)]/15 text-[oklch(0.32_0.15_10)] px-2.5 py-1 rounded-full font-semibold uppercase tracking-wider">
+      <span className="inline-flex items-center gap-1 text-xs font-sans bg-[oklch(0.72_0.15_75)]/15 text-[oklch(0.45_0.15_75)] px-2.5 py-1 rounded-full font-semibold uppercase tracking-wider">
         <Gift className="w-3 h-3" /> Offre lancement
       </span>
     );
@@ -130,9 +130,9 @@ function DownloadButton({ issue }: { issue: MagazineIssue }) {
     return (
       <div className="space-y-4">
         {access.reason === "launch_promo" && (
-          <div className="bg-gradient-to-r from-[oklch(0.42_0.18_10)]/10 to-[oklch(0.40_0.17_10)]/10 border border-[oklch(0.42_0.18_10)]/30 rounded-xl p-4">
+          <div className="bg-gradient-to-r from-[oklch(0.72_0.15_75)]/10 to-[oklch(0.68_0.14_65)]/10 border border-[oklch(0.72_0.15_75)]/30 rounded-xl p-4">
             <div className="flex items-start gap-3">
-              <Sparkles className="w-5 h-5 text-[oklch(0.30_0.15_10)] mt-0.5 shrink-0" />
+              <Sparkles className="w-5 h-5 text-[oklch(0.55_0.12_75)] mt-0.5 shrink-0" />
               <div>
                 <p className="font-sans font-semibold text-[oklch(0.35_0.08_75)] text-sm mb-0.5">Accès offert — Période de lancement</p>
                 <p className="text-xs font-sans text-[oklch(0.45_0.08_75)]">
@@ -163,10 +163,10 @@ function DownloadButton({ issue }: { issue: MagazineIssue }) {
     const isLaunch = access?.isLaunchPeriod;
     return (
       <div className="space-y-4">
-        <div className={`border rounded-xl p-5 ${isLaunch ? "bg-gradient-to-r from-[oklch(0.42_0.18_10)]/10 to-[oklch(0.40_0.17_10)]/10 border-[oklch(0.42_0.18_10)]/30" : "bg-amber-50 border-amber-200"}`}>
+        <div className={`border rounded-xl p-5 ${isLaunch ? "bg-gradient-to-r from-[oklch(0.72_0.15_75)]/10 to-[oklch(0.68_0.14_65)]/10 border-[oklch(0.72_0.15_75)]/30" : "bg-amber-50 border-amber-200"}`}>
           <div className="flex items-start gap-3">
             {isLaunch ? (
-              <Gift className="w-5 h-5 text-[oklch(0.30_0.15_10)] mt-0.5 shrink-0" />
+              <Gift className="w-5 h-5 text-[oklch(0.55_0.12_75)] mt-0.5 shrink-0" />
             ) : (
               <Lock className="w-5 h-5 text-amber-600 mt-0.5 shrink-0" />
             )}
@@ -191,7 +191,7 @@ function DownloadButton({ issue }: { issue: MagazineIssue }) {
         </div>
         <div className="flex flex-col sm:flex-row gap-3">
           <a href={"/login"}>
-            <Button size="lg" className={`font-sans w-full sm:w-auto ${isLaunch ? "bg-[oklch(0.42_0.18_10)] text-[oklch(0.15_0.02_250)] hover:bg-[oklch(0.50_0.18_10)]" : "bg-primary hover:bg-primary/90"}`}>
+            <Button size="lg" className={`font-sans w-full sm:w-auto ${isLaunch ? "bg-[oklch(0.72_0.15_75)] text-[oklch(0.15_0.02_250)] hover:bg-[oklch(0.78_0.15_75)]" : "bg-primary hover:bg-primary/90"}`}>
               {isLaunch ? <><Gift className="w-4 h-4 mr-2" /> S'inscrire gratuitement</> : "Se connecter"}
             </Button>
           </a>
@@ -256,7 +256,7 @@ function DownloadButton({ issue }: { issue: MagazineIssue }) {
           )}
         </Button>
         <Link href="/abonnements">
-          <Button size="lg" variant="outline" className="font-sans border-[oklch(0.42_0.18_10)] text-[oklch(0.30_0.15_10)] hover:bg-[oklch(0.42_0.18_10)]/10 w-full sm:w-auto">
+          <Button size="lg" variant="outline" className="font-sans border-[oklch(0.72_0.15_75)] text-[oklch(0.55_0.12_75)] hover:bg-[oklch(0.72_0.15_75)]/10 w-full sm:w-auto">
             <Crown className="w-4 h-4 mr-2" /> Ou s'abonner
           </Button>
         </Link>
@@ -289,7 +289,7 @@ function CoverWithPaywall({ issue }: { issue: MagazineIssue }) {
               rel="noopener noreferrer"
               className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300"
             >
-              <Button size="lg" className="font-sans bg-[oklch(0.42_0.18_10)] text-[oklch(0.15_0.02_250)] hover:bg-[oklch(0.50_0.18_10)] shadow-lg">
+              <Button size="lg" className="font-sans bg-[oklch(0.72_0.15_75)] text-[oklch(0.15_0.02_250)] hover:bg-[oklch(0.78_0.15_75)] shadow-lg">
                 <Eye className="w-5 h-5 mr-2" /> Feuilleter en ligne
               </Button>
             </a>
@@ -315,7 +315,7 @@ function CoverWithPaywall({ issue }: { issue: MagazineIssue }) {
               rel="noopener noreferrer"
               className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300"
             >
-              <Button size="lg" className="font-sans bg-[oklch(0.42_0.18_10)] text-[oklch(0.15_0.02_250)] hover:bg-[oklch(0.50_0.18_10)] shadow-lg">
+              <Button size="lg" className="font-sans bg-[oklch(0.72_0.15_75)] text-[oklch(0.15_0.02_250)] hover:bg-[oklch(0.78_0.15_75)] shadow-lg">
                 <Eye className="w-5 h-5 mr-2" /> Feuilleter en ligne
               </Button>
             </a>
@@ -324,7 +324,7 @@ function CoverWithPaywall({ issue }: { issue: MagazineIssue }) {
       </div>
       {/* Badge numéro + access level */}
       <div className="absolute -top-3 -right-3 lg:-right-6 flex flex-col items-end gap-2">
-        <div className="bg-[oklch(0.42_0.18_10)] text-[oklch(0.15_0.02_250)] font-sans font-bold text-sm px-4 py-2 rounded-full shadow-lg">
+        <div className="bg-[oklch(0.72_0.15_75)] text-[oklch(0.15_0.02_250)] font-sans font-bold text-sm px-4 py-2 rounded-full shadow-lg">
           {issue.numero}
         </div>
         <AccessBadge level={issue.accessLevel} isLaunchPeriod={access?.isLaunchPeriod} />
@@ -397,19 +397,19 @@ export default function Downloads() {
         <div className="container">
           <div className="max-w-3xl">
             <div className="flex items-center gap-2 mb-4">
-              <BookOpen className="w-5 h-5 text-[oklch(0.42_0.18_10)]" />
-              <span className="text-[oklch(0.42_0.18_10)] font-sans text-sm font-semibold tracking-widest uppercase">
+              <BookOpen className="w-5 h-5 text-[oklch(0.72_0.15_75)]" />
+              <span className="text-[oklch(0.72_0.15_75)] font-sans text-sm font-semibold tracking-widest uppercase">
                 Kiosque numérique
               </span>
             </div>
             <h1 className="font-serif text-4xl md:text-5xl font-bold leading-tight mb-4">
               Téléchargez Habari Magazine
             </h1>
-            <div className="w-16 h-1 bg-[oklch(0.42_0.18_10)] mb-6"></div>
+            <div className="w-16 h-1 bg-[oklch(0.72_0.15_75)] mb-6"></div>
             <p className="text-lg text-white/65 leading-relaxed font-sans">
               Retrouvez tous les numéros de Habari Magazine en version PDF. Le premier numéro est en accès libre.
               {launchStatus?.isLaunchPeriod ? (
-                <> <strong className="text-[oklch(0.42_0.18_10)]">Offre de lancement : inscrivez-vous pour accéder gratuitement à tout le contenu premium jusqu'au 1er juin 2026.</strong></>
+                <> <strong className="text-[oklch(0.72_0.15_75)]">Offre de lancement : inscrivez-vous pour accéder gratuitement à tout le contenu premium jusqu'au 1er juin 2026.</strong></>
               ) : (
                 <> Les numéros suivants sont réservés aux abonnés Premium.</>
               )}
@@ -428,7 +428,7 @@ export default function Downloads() {
             </span>
             {launchStatus?.isLaunchPeriod ? (
               <span className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-[oklch(0.42_0.18_10)]"></span>
+                <span className="w-2.5 h-2.5 rounded-full bg-[oklch(0.72_0.15_75)]"></span>
                 Offre lancement — gratuit pour les inscrits jusqu'au 1er juin 2026
               </span>
             ) : (
@@ -452,7 +452,7 @@ export default function Downloads() {
               {/* Details */}
               <div>
                 <div className="flex items-center gap-3 mb-4">
-                  <span className="habari-rubrique text-[oklch(0.42_0.18_10)]">Dernier numéro</span>
+                  <span className="habari-rubrique text-[oklch(0.72_0.15_75)]">Dernier numéro</span>
                   <span className="text-xs font-sans text-muted-foreground flex items-center gap-1">
                     <Calendar className="w-3.5 h-3.5" /> {mag.date}
                   </span>
@@ -476,7 +476,7 @@ export default function Downloads() {
                   <ul className="space-y-2.5">
                     {mag.sommaire.map((item, i) => (
                       <li key={i} className="flex items-start gap-3 text-sm font-sans text-foreground/70">
-                        <span className="text-[oklch(0.42_0.18_10)] font-bold mt-0.5 shrink-0">{String(i + 1).padStart(2, '0')}</span>
+                        <span className="text-[oklch(0.72_0.15_75)] font-bold mt-0.5 shrink-0">{String(i + 1).padStart(2, '0')}</span>
                         {item}
                       </li>
                     ))}
@@ -518,7 +518,7 @@ export default function Downloads() {
                       <AccessBadge level={mag.accessLevel} isLaunchPeriod={launchStatus?.isLaunchPeriod} />
                     </div>
                     <div className="absolute bottom-3 left-3">
-                      <span className="bg-[oklch(0.42_0.18_10)] text-[oklch(0.15_0.02_250)] font-sans font-bold text-xs px-3 py-1 rounded-full">{mag.numero}</span>
+                      <span className="bg-[oklch(0.72_0.15_75)] text-[oklch(0.15_0.02_250)] font-sans font-bold text-xs px-3 py-1 rounded-full">{mag.numero}</span>
                     </div>
                   </div>
                   <div className="p-5">
@@ -560,21 +560,21 @@ export default function Downloads() {
                 {/* Ribbon */}
                 <div className="absolute top-0 right-0">
                   <div className={`text-white text-[0.5rem] font-sans font-bold px-6 py-1 transform rotate-45 translate-x-5 translate-y-2 ${
-                    launchStatus?.isLaunchPeriod ? "bg-[oklch(0.30_0.15_10)]" : "bg-amber-500"
+                    launchStatus?.isLaunchPeriod ? "bg-[oklch(0.55_0.12_75)]" : "bg-amber-500"
                   }`}>
                     {launchStatus?.isLaunchPeriod ? "GRATUIT" : "PREMIUM"}
                   </div>
                 </div>
                 <div className={`w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 ${
-                  launchStatus?.isLaunchPeriod ? "bg-[oklch(0.42_0.18_10)]/15" : "bg-amber-100"
+                  launchStatus?.isLaunchPeriod ? "bg-[oklch(0.72_0.15_75)]/15" : "bg-amber-100"
                 }`}>
                   {launchStatus?.isLaunchPeriod ? (
-                    <Gift className="w-5 h-5 text-[oklch(0.30_0.15_10)]" />
+                    <Gift className="w-5 h-5 text-[oklch(0.55_0.12_75)]" />
                   ) : (
                     <Crown className="w-5 h-5 text-amber-600" />
                   )}
                 </div>
-                <div className="font-sans text-xs text-[oklch(0.42_0.18_10)] font-semibold uppercase tracking-wider mb-2">
+                <div className="font-sans text-xs text-[oklch(0.72_0.15_75)] font-semibold uppercase tracking-wider mb-2">
                   {upcoming.numero}
                 </div>
                 <h3 className="font-serif font-bold text-foreground mb-1">{upcoming.date}</h3>
@@ -596,13 +596,13 @@ export default function Downloads() {
           <div className="text-center mt-10">
             {launchStatus?.isLaunchPeriod ? (
               <a href={"/login"}>
-                <Button className="font-sans bg-[oklch(0.42_0.18_10)] text-[oklch(0.15_0.02_250)] hover:bg-[oklch(0.50_0.18_10)] font-semibold">
+                <Button className="font-sans bg-[oklch(0.72_0.15_75)] text-[oklch(0.15_0.02_250)] hover:bg-[oklch(0.78_0.15_75)] font-semibold">
                   <Gift className="w-4 h-4 mr-2" /> S'inscrire pour accéder gratuitement
                 </Button>
               </a>
             ) : (
               <Link href="/abonnements">
-                <Button className="font-sans bg-[oklch(0.42_0.18_10)] text-[oklch(0.15_0.02_250)] hover:bg-[oklch(0.50_0.18_10)] font-semibold">
+                <Button className="font-sans bg-[oklch(0.72_0.15_75)] text-[oklch(0.15_0.02_250)] hover:bg-[oklch(0.78_0.15_75)] font-semibold">
                   <Crown className="w-4 h-4 mr-2" /> S'abonner pour accéder à tous les numéros
                 </Button>
               </Link>
@@ -618,9 +618,9 @@ export default function Downloads() {
             <div className="text-center mb-10">
               {launchStatus?.isLaunchPeriod ? (
                 <>
-                  <div className="inline-flex items-center gap-2 bg-[oklch(0.42_0.18_10)]/15 rounded-full px-4 py-1.5 mb-4">
-                    <Sparkles className="w-4 h-4 text-[oklch(0.30_0.15_10)]" />
-                    <span className="text-sm font-sans font-semibold text-[oklch(0.32_0.15_10)]">Offre de lancement</span>
+                  <div className="inline-flex items-center gap-2 bg-[oklch(0.72_0.15_75)]/15 rounded-full px-4 py-1.5 mb-4">
+                    <Sparkles className="w-4 h-4 text-[oklch(0.55_0.12_75)]" />
+                    <span className="text-sm font-sans font-semibold text-[oklch(0.45_0.15_75)]">Offre de lancement</span>
                   </div>
                   <h2 className="font-serif text-3xl font-bold text-primary">Pourquoi s'inscrire maintenant ?</h2>
                 </>
@@ -649,8 +649,8 @@ export default function Downloads() {
                 { icon: Calendar, title: "Événements VIP", desc: "Recevez des invitations aux événements Habari : conférences, networking, formations." },
               ]).map((benefit) => (
                 <div key={benefit.title} className="flex items-start gap-4 p-5 bg-muted/30 rounded-xl border border-border">
-                  <div className="w-10 h-10 rounded-lg bg-[oklch(0.42_0.18_10)]/15 flex items-center justify-center shrink-0">
-                    <benefit.icon className="w-5 h-5 text-[oklch(0.30_0.15_10)]" />
+                  <div className="w-10 h-10 rounded-lg bg-[oklch(0.72_0.15_75)]/15 flex items-center justify-center shrink-0">
+                    <benefit.icon className="w-5 h-5 text-[oklch(0.55_0.12_75)]" />
                   </div>
                   <div>
                     <h3 className="font-serif font-bold text-foreground mb-1">{benefit.title}</h3>
@@ -663,7 +663,7 @@ export default function Downloads() {
             <div className="text-center mt-8">
               {launchStatus?.isLaunchPeriod ? (
                 <a href={"/login"}>
-                  <Button size="lg" className="font-sans bg-[oklch(0.42_0.18_10)] text-[oklch(0.15_0.02_250)] hover:bg-[oklch(0.50_0.18_10)] shadow-md">
+                  <Button size="lg" className="font-sans bg-[oklch(0.72_0.15_75)] text-[oklch(0.15_0.02_250)] hover:bg-[oklch(0.78_0.15_75)] shadow-md">
                     Créer mon compte gratuitement <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
                 </a>
@@ -685,13 +685,13 @@ export default function Downloads() {
           <h2 className="font-serif text-3xl font-bold text-white mb-4">
             Vous souhaitez contribuer ?
           </h2>
-          <div className="w-16 h-1 bg-[oklch(0.42_0.18_10)] mx-auto mb-6"></div>
+          <div className="w-16 h-1 bg-[oklch(0.72_0.15_75)] mx-auto mb-6"></div>
           <p className="text-white/70 font-sans max-w-xl mx-auto mb-8">
             Habari accueille les contributions d'experts, d'analystes et de professionnels de l'Afrique Centrale.
             Proposez un article, une tribune ou une analyse.
           </p>
           <Link href="/a-propos">
-            <Button size="lg" className="font-sans bg-[oklch(0.42_0.18_10)] text-[oklch(0.15_0.02_250)] hover:bg-[oklch(0.50_0.18_10)]">
+            <Button size="lg" className="font-sans bg-[oklch(0.72_0.15_75)] text-[oklch(0.15_0.02_250)] hover:bg-[oklch(0.78_0.15_75)]">
               Contacter la rédaction
             </Button>
           </Link>

@@ -117,14 +117,14 @@ export default function ArticlePage() {
                 </Button>
               </Link>
               {(article as any).category?.name && (
-                <div className="habari-rubrique text-[oklch(0.42_0.18_10)] mb-4">
+                <div className="habari-rubrique text-[oklch(0.72_0.15_75)] mb-4">
                   {(article as any).category.name}
                 </div>
               )}
               <h1 className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight mb-6">
                 {article.title}
               </h1>
-              <div className="w-20 h-1 bg-[oklch(0.42_0.18_10)] mb-6" />
+              <div className="w-20 h-1 bg-[oklch(0.72_0.15_75)] mb-6" />
               <div className="flex flex-wrap items-center gap-4 text-sm text-white/60 font-sans">
                 {(article as any).author?.name && (
                   <>

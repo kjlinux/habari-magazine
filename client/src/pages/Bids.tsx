@@ -43,7 +43,7 @@ function DetailModal({ item, onClose }: { item: AnyItem; onClose: () => void }) 
               {item.contractType && <span className="text-xs px-2 py-0.5 bg-purple-50 text-purple-700 rounded font-sans">{item.contractType}</span>}
               {item.experienceLevel && <span className="text-xs px-2 py-0.5 bg-muted text-muted-foreground rounded font-sans">{item.experienceLevel}</span>}
               {!hasAccess && (
-                <span className="text-xs px-2 py-0.5 bg-[oklch(0.42_0.18_10)]/15 text-[oklch(0.30_0.15_10)] rounded font-sans font-semibold flex items-center gap-1">
+                <span className="text-xs px-2 py-0.5 bg-[oklch(0.72_0.15_75)]/15 text-[oklch(0.55_0.12_75)] rounded font-sans font-semibold flex items-center gap-1">
                   <Lock className="w-3 h-3" /> Premium
                 </span>
               )}
@@ -59,7 +59,7 @@ function DetailModal({ item, onClose }: { item: AnyItem; onClose: () => void }) 
           <div className="flex flex-wrap gap-4 text-sm font-sans text-muted-foreground">
             <span className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5" />{item.country}</span>
             {item.deadline && <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" />Limite : {item.deadline}</span>}
-            {hasAccess && item.budget && <span className="font-bold text-[oklch(0.42_0.18_10)]">{item.budget} {item.currency}</span>}
+            {hasAccess && item.budget && <span className="font-bold text-[oklch(0.72_0.15_75)]">{item.budget} {item.currency}</span>}
           </div>
 
           {hasAccess ? (
@@ -86,8 +86,8 @@ function DetailModal({ item, onClose }: { item: AnyItem; onClose: () => void }) 
               )}
             </>
           ) : (
-            <div className="rounded-xl border border-[oklch(0.42_0.18_10)]/30 bg-[oklch(0.42_0.18_10)]/5 p-6 text-center">
-              <Lock className="w-10 h-10 text-[oklch(0.42_0.18_10)]/40 mx-auto mb-3" />
+            <div className="rounded-xl border border-[oklch(0.72_0.15_75)]/30 bg-[oklch(0.72_0.15_75)]/5 p-6 text-center">
+              <Lock className="w-10 h-10 text-[oklch(0.72_0.15_75)]/40 mx-auto mb-3" />
               <h3 className="font-serif font-bold text-foreground mb-1">Contenu réservé aux abonnés Premium</h3>
               <p className="text-sm text-muted-foreground font-sans mb-4">
                 Accédez à la description complète, au budget, aux contacts et au dossier de candidature.
@@ -225,13 +225,13 @@ export default function Bids() {
 
       <section className="bg-[oklch(0.20_0.02_250)] py-14">
         <div className="container">
-          <div className="habari-rubrique text-[oklch(0.42_0.18_10)] mb-3">
+          <div className="habari-rubrique text-[oklch(0.72_0.15_75)] mb-3">
             Opportunités
           </div>
           <h1 className="font-serif text-4xl md:text-5xl font-bold text-white mb-4">
             Appels d'offres, AMI et Emplois
           </h1>
-          <div className="w-20 h-1 bg-[oklch(0.42_0.18_10)] mb-4"></div>
+          <div className="w-20 h-1 bg-[oklch(0.72_0.15_75)] mb-4"></div>
           <p className="text-lg text-white/60 font-sans max-w-2xl">
             Consultez les dernières opportunités commerciales, appels à
             manifestation d'intérêt, partenariats et offres d'emploi dans la
@@ -305,13 +305,13 @@ export default function Bids() {
               {filteredBids.map(bid => (
                 <Card
                   key={bid.id}
-                  className={`border shadow-sm hover:shadow-md transition-all duration-300 ${bid.featured ? "border-[oklch(0.42_0.18_10)] ring-1 ring-[oklch(0.42_0.18_10)]/20" : ""}`}
+                  className={`border shadow-sm hover:shadow-md transition-all duration-300 ${bid.featured ? "border-[oklch(0.72_0.15_75)] ring-1 ring-[oklch(0.72_0.15_75)]/20" : ""}`}
                 >
                   <CardContent className="p-6">
                     {bid.featured && (
-                      <div className="flex items-center gap-2 mb-3 pb-3 border-b border-[oklch(0.42_0.18_10)]/20">
-                        <Sun className="w-4 h-4 text-[oklch(0.42_0.18_10)]" />
-                        <span className="text-xs font-sans font-bold text-[oklch(0.42_0.18_10)] uppercase tracking-wider">
+                      <div className="flex items-center gap-2 mb-3 pb-3 border-b border-[oklch(0.72_0.15_75)]/20">
+                        <Sun className="w-4 h-4 text-[oklch(0.72_0.15_75)]" />
+                        <span className="text-xs font-sans font-bold text-[oklch(0.72_0.15_75)] uppercase tracking-wider">
                           À la une
                         </span>
                       </div>
@@ -328,7 +328,7 @@ export default function Bids() {
                             Ouvert
                           </span>
                           {!(bid as any).access?.allowed && (
-                            <span className="text-xs font-sans px-2 py-0.5 bg-[oklch(0.42_0.18_10)]/15 text-[oklch(0.30_0.15_10)] rounded flex items-center gap-1">
+                            <span className="text-xs font-sans px-2 py-0.5 bg-[oklch(0.72_0.15_75)]/15 text-[oklch(0.55_0.12_75)] rounded flex items-center gap-1">
                               <Lock className="w-2.5 h-2.5" /> Premium
                             </span>
                           )}
@@ -357,7 +357,7 @@ export default function Bids() {
                           </div>
                         )}
                         {bid.budget && (
-                          <div className="text-lg font-bold text-[oklch(0.42_0.18_10)]">
+                          <div className="text-lg font-bold text-[oklch(0.72_0.15_75)]">
                             {bid.budget} {bid.currency}
                           </div>
                         )}
@@ -389,13 +389,13 @@ export default function Bids() {
               {filteredAMI.map(item => (
                 <Card
                   key={item.id}
-                  className={`border shadow-sm hover:shadow-md transition-all duration-300 ${item.featured ? "border-[oklch(0.42_0.18_10)] ring-1 ring-[oklch(0.42_0.18_10)]/20" : ""}`}
+                  className={`border shadow-sm hover:shadow-md transition-all duration-300 ${item.featured ? "border-[oklch(0.72_0.15_75)] ring-1 ring-[oklch(0.72_0.15_75)]/20" : ""}`}
                 >
                   <CardContent className="p-6">
                     {item.featured && (
-                      <div className="flex items-center gap-2 mb-3 pb-3 border-b border-[oklch(0.42_0.18_10)]/20">
-                        <Sun className="w-4 h-4 text-[oklch(0.42_0.18_10)]" />
-                        <span className="text-xs font-sans font-bold text-[oklch(0.42_0.18_10)] uppercase tracking-wider">
+                      <div className="flex items-center gap-2 mb-3 pb-3 border-b border-[oklch(0.72_0.15_75)]/20">
+                        <Sun className="w-4 h-4 text-[oklch(0.72_0.15_75)]" />
+                        <span className="text-xs font-sans font-bold text-[oklch(0.72_0.15_75)] uppercase tracking-wider">
                           Nouveau — À la une
                         </span>
                       </div>
@@ -481,13 +481,13 @@ export default function Bids() {
               {filteredJobs.map(job => (
                 <Card
                   key={job.id}
-                  className={`border shadow-sm hover:shadow-md transition-all duration-300 ${job.featured ? "border-[oklch(0.42_0.18_10)] ring-1 ring-[oklch(0.42_0.18_10)]/20" : ""}`}
+                  className={`border shadow-sm hover:shadow-md transition-all duration-300 ${job.featured ? "border-[oklch(0.72_0.15_75)] ring-1 ring-[oklch(0.72_0.15_75)]/20" : ""}`}
                 >
                   <CardContent className="p-6">
                     {job.featured && (
-                      <div className="flex items-center gap-2 mb-3 pb-3 border-b border-[oklch(0.42_0.18_10)]/20">
-                        <Sun className="w-4 h-4 text-[oklch(0.42_0.18_10)]" />
-                        <span className="text-xs font-sans font-bold text-[oklch(0.42_0.18_10)] uppercase tracking-wider">
+                      <div className="flex items-center gap-2 mb-3 pb-3 border-b border-[oklch(0.72_0.15_75)]/20">
+                        <Sun className="w-4 h-4 text-[oklch(0.72_0.15_75)]" />
+                        <span className="text-xs font-sans font-bold text-[oklch(0.72_0.15_75)] uppercase tracking-wider">
                           À la une
                         </span>
                       </div>

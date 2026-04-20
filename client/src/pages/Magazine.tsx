@@ -48,9 +48,9 @@ export default function Magazine() {
       {/* Header */}
       <section className="bg-[oklch(0.20_0.02_250)] py-14">
         <div className="container">
-          <div className="habari-rubrique text-[oklch(0.42_0.18_10)] mb-3">Magazine</div>
+          <div className="habari-rubrique text-[oklch(0.72_0.15_75)] mb-3">Magazine</div>
           <h1 className="font-serif text-4xl md:text-5xl font-bold text-white mb-4">Habari Magazine</h1>
-          <div className="w-20 h-1 bg-[oklch(0.42_0.18_10)] mb-4"></div>
+          <div className="w-20 h-1 bg-[oklch(0.72_0.15_75)] mb-4"></div>
           <p className="text-lg text-white/60 font-sans max-w-2xl">
             Analyses, dossiers, interviews et portraits — le décryptage de l'économie de la zone CEEAC.
             <span className="block mt-2 text-sm text-white/40">Fréquence : 2-4 contenus par mois + baromètre mensuel. Qualité avant quantité.</span>
@@ -103,7 +103,7 @@ export default function Magazine() {
                   onClick={() => setActiveAccess(f.id)}
                   className={`px-2.5 py-1 text-xs font-sans font-medium rounded-full transition-colors ${
                     activeAccess === f.id
-                      ? f.id === "premium" ? "bg-[oklch(0.42_0.18_10)]/20 text-[oklch(0.30_0.15_10)]" : "bg-primary/10 text-primary"
+                      ? f.id === "premium" ? "bg-[oklch(0.72_0.15_75)]/20 text-[oklch(0.55_0.12_75)]" : "bg-primary/10 text-primary"
                       : "bg-muted/50 text-muted-foreground hover:bg-muted"
                   }`}
                 >
@@ -141,7 +141,7 @@ export default function Magazine() {
                       <span className={`absolute top-3 left-3 text-[0.6rem] font-sans px-2.5 py-1 rounded-full font-semibold uppercase tracking-wider ${
                         article.minSubscriptionTier === "free"
                           ? "bg-green-100 text-green-700"
-                          : "bg-[oklch(0.42_0.18_10)]/15 text-[oklch(0.30_0.15_10)]"
+                          : "bg-[oklch(0.72_0.15_75)]/15 text-[oklch(0.55_0.12_75)]"
                       }`}>
                         {article.minSubscriptionTier === "free" ? "Accès libre" : "Premium"}
                       </span>

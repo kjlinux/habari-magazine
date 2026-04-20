@@ -35,21 +35,21 @@ export default function TrialBanner() {
   // Bannière code promo (visible pour tous, même non connectés)
   if (promo?.active && !dismissed) {
     return (
-      <div className="bg-[oklch(0.42_0.18_10)]/15 border-b border-[oklch(0.42_0.18_10)]/30">
+      <div className="bg-[oklch(0.72_0.15_75)]/15 border-b border-[oklch(0.72_0.15_75)]/30">
         <div className="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between gap-4 text-sm">
           <div className="flex items-center gap-2 min-w-0">
-            <Tag className="w-4 h-4 text-[oklch(0.38_0.16_10)] shrink-0" />
+            <Tag className="w-4 h-4 text-[oklch(0.50_0.15_75)] shrink-0" />
             <span className="truncate">
               {promo.message && <span>{promo.message} — </span>}
               Utilisez le code{" "}
-              <span className="font-mono font-bold bg-[oklch(0.42_0.18_10)]/20 px-1.5 py-0.5 rounded text-[oklch(0.28_0.14_10)]">
+              <span className="font-mono font-bold bg-[oklch(0.72_0.15_75)]/20 px-1.5 py-0.5 rounded text-[oklch(0.40_0.15_75)]">
                 {promo.code}
               </span>{" "}
               lors du paiement
             </span>
           </div>
           <div className="flex items-center gap-3 shrink-0">
-            <Link href="/abonnements" className="font-medium text-[oklch(0.32_0.15_10)] hover:underline whitespace-nowrap">
+            <Link href="/abonnements" className="font-medium text-[oklch(0.45_0.15_75)] hover:underline whitespace-nowrap">
               S'abonner
             </Link>
             <button

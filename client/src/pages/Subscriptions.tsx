@@ -98,11 +98,11 @@ export default function Subscriptions() {
       {/* Header */}
       <section className="bg-[oklch(0.20_0.02_250)] py-16 md:py-20">
         <div className="container text-center">
-          <div className="habari-rubrique text-[oklch(0.42_0.18_10)] mb-4">Votre Accès Habari</div>
+          <div className="habari-rubrique text-[oklch(0.72_0.15_75)] mb-4">Votre Accès Habari</div>
           <h1 className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight mb-4">
             Choisissez votre formule
           </h1>
-          <div className="w-20 h-1 bg-[oklch(0.42_0.18_10)] mx-auto mb-6"></div>
+          <div className="w-20 h-1 bg-[oklch(0.72_0.15_75)] mx-auto mb-6"></div>
           <p className="text-lg text-white/65 max-w-2xl mx-auto font-sans">
             Accédez au contenu qui correspond à vos besoins. Du résumé hebdomadaire gratuit aux analyses exclusives réservées aux abonnés premium.
           </p>
@@ -111,13 +111,13 @@ export default function Subscriptions() {
 
       {/* Promo Banner */}
       {promo?.active && (
-        <div className="bg-[oklch(0.42_0.18_10)]/10 border-b border-[oklch(0.42_0.18_10)]/20 py-3">
+        <div className="bg-[oklch(0.72_0.15_75)]/10 border-b border-[oklch(0.72_0.15_75)]/20 py-3">
           <div className="container flex items-center justify-center gap-3 text-sm font-sans flex-wrap">
-            <Tag className="w-4 h-4 text-[oklch(0.38_0.16_10)] shrink-0" />
+            <Tag className="w-4 h-4 text-[oklch(0.50_0.15_75)] shrink-0" />
             <span className="text-foreground">
               {promo.message && <span className="mr-1">{promo.message} —</span>}
               Utilisez le code{" "}
-              <span className="font-mono font-bold text-base bg-white border border-[oklch(0.42_0.18_10)]/40 px-2 py-0.5 rounded tracking-widest">
+              <span className="font-mono font-bold text-base bg-white border border-[oklch(0.72_0.15_75)]/40 px-2 py-0.5 rounded tracking-widest">
                 {promo.code}
               </span>{" "}
               lors du paiement pour bénéficier de la réduction.
@@ -148,7 +148,7 @@ export default function Subscriptions() {
             </span>
             <button
               onClick={() => setInterval(interval === "monthly" ? "annual" : "monthly")}
-              className={`relative w-14 h-7 rounded-full transition-colors ${interval === "annual" ? "bg-[oklch(0.42_0.18_10)]" : "bg-muted"}`}
+              className={`relative w-14 h-7 rounded-full transition-colors ${interval === "annual" ? "bg-[oklch(0.72_0.15_75)]" : "bg-muted"}`}
             >
               <span className={`absolute top-0.5 left-0.5 w-6 h-6 rounded-full bg-white shadow transition-transform ${interval === "annual" ? "translate-x-7" : ""}`} />
             </button>
@@ -222,18 +222,18 @@ export default function Subscriptions() {
             </Card>
 
             {/* ── Premium ── */}
-            <Card className="border-2 border-[oklch(0.42_0.18_10)] overflow-hidden relative shadow-lg">
-              <div className="absolute top-0 left-0 right-0 bg-[oklch(0.42_0.18_10)] text-[oklch(0.15_0.02_250)] text-center py-1.5 text-xs font-sans font-bold uppercase tracking-wider">
+            <Card className="border-2 border-[oklch(0.72_0.15_75)] overflow-hidden relative shadow-lg">
+              <div className="absolute top-0 left-0 right-0 bg-[oklch(0.72_0.15_75)] text-[oklch(0.15_0.02_250)] text-center py-1.5 text-xs font-sans font-bold uppercase tracking-wider">
                 Recommandé
               </div>
               <CardContent className="p-7 pt-11">
                 <div className="flex items-center gap-3 mb-5">
-                  <div className="w-11 h-11 rounded-full bg-[oklch(0.42_0.18_10)]/20 flex items-center justify-center">
-                    <Shield className="w-5 h-5 text-[oklch(0.30_0.15_10)]" />
+                  <div className="w-11 h-11 rounded-full bg-[oklch(0.72_0.15_75)]/20 flex items-center justify-center">
+                    <Shield className="w-5 h-5 text-[oklch(0.55_0.12_75)]" />
                   </div>
                   <div>
                     <h3 className="font-serif text-lg font-bold text-foreground">Accès Premium</h3>
-                    <span className="text-xs font-sans text-[oklch(0.30_0.15_10)] font-semibold">Site complet</span>
+                    <span className="text-xs font-sans text-[oklch(0.55_0.12_75)] font-semibold">Site complet</span>
                   </div>
                 </div>
                 <div className="mb-5">
@@ -251,41 +251,41 @@ export default function Subscriptions() {
                 </div>
                 <ul className="space-y-2.5 text-sm font-sans text-muted-foreground mb-6">
                   <li className="flex items-start gap-2">
-                    <Check className="w-4 h-4 text-[oklch(0.42_0.18_10)] mt-0.5 shrink-0" />
+                    <Check className="w-4 h-4 text-[oklch(0.72_0.15_75)] mt-0.5 shrink-0" />
                     <span><strong className="text-foreground">Tout l'accès libre</strong> inclus</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <Check className="w-4 h-4 text-[oklch(0.42_0.18_10)] mt-0.5 shrink-0" />
+                    <Check className="w-4 h-4 text-[oklch(0.72_0.15_75)] mt-0.5 shrink-0" />
                     <span>Dossiers complets et analyses approfondies</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <Check className="w-4 h-4 text-[oklch(0.42_0.18_10)] mt-0.5 shrink-0" />
+                    <Check className="w-4 h-4 text-[oklch(0.72_0.15_75)] mt-0.5 shrink-0" />
                     <span>Archives complètes du magazine</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <Check className="w-4 h-4 text-[oklch(0.42_0.18_10)] mt-0.5 shrink-0" />
+                    <Check className="w-4 h-4 text-[oklch(0.72_0.15_75)] mt-0.5 shrink-0" />
                     <span>Analyses pays détaillées</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <Check className="w-4 h-4 text-[oklch(0.42_0.18_10)] mt-0.5 shrink-0" />
+                    <Check className="w-4 h-4 text-[oklch(0.72_0.15_75)] mt-0.5 shrink-0" />
                     <span>Tribunes exclusives de décideurs</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <Check className="w-4 h-4 text-[oklch(0.42_0.18_10)] mt-0.5 shrink-0" />
+                    <Check className="w-4 h-4 text-[oklch(0.72_0.15_75)] mt-0.5 shrink-0" />
                     <span>Espace investisseurs et deal flow</span>
                   </li>
                 </ul>
                 {isAuthenticated && userTier === "integral" ? (
                   <Button className="w-full font-sans" variant="outline" disabled>
-                    <CheckCircle2 className="w-4 h-4 mr-2 text-[oklch(0.42_0.18_10)]" /> Inclus dans votre abonnement
+                    <CheckCircle2 className="w-4 h-4 mr-2 text-[oklch(0.72_0.15_75)]" /> Inclus dans votre abonnement
                   </Button>
                 ) : isAuthenticated && userTier === "premium" ? (
                   <Button className="w-full font-sans" variant="outline" disabled>
-                    <CheckCircle2 className="w-4 h-4 mr-2 text-[oklch(0.42_0.18_10)]" /> Abonnement actif
+                    <CheckCircle2 className="w-4 h-4 mr-2 text-[oklch(0.72_0.15_75)]" /> Abonnement actif
                   </Button>
                 ) : (
                   <Button
-                    className="w-full font-sans bg-[oklch(0.42_0.18_10)] text-[oklch(0.15_0.02_250)] hover:bg-[oklch(0.50_0.18_10)] font-semibold"
+                    className="w-full font-sans bg-[oklch(0.72_0.15_75)] text-[oklch(0.15_0.02_250)] hover:bg-[oklch(0.78_0.15_75)] font-semibold"
                     onClick={() => handleCheckout("premiumAccess")}
                     disabled={checkoutLoading === "premiumAccess"}
                   >
@@ -368,11 +368,11 @@ export default function Subscriptions() {
 
           {/* Magazine PDF à l'unité */}
           <div className="mt-10 max-w-5xl mx-auto">
-            <Card className="border border-dashed border-[oklch(0.42_0.18_10)]/50 bg-[oklch(0.42_0.18_10)]/5">
+            <Card className="border border-dashed border-[oklch(0.72_0.15_75)]/50 bg-[oklch(0.72_0.15_75)]/5">
               <CardContent className="p-6 flex flex-col md:flex-row items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
-                  <div className="w-11 h-11 rounded-full bg-[oklch(0.42_0.18_10)]/15 flex items-center justify-center">
-                    <BookOpen className="w-5 h-5 text-[oklch(0.30_0.15_10)]" />
+                  <div className="w-11 h-11 rounded-full bg-[oklch(0.72_0.15_75)]/15 flex items-center justify-center">
+                    <BookOpen className="w-5 h-5 text-[oklch(0.55_0.12_75)]" />
                   </div>
                   <div>
                     <h3 className="font-serif font-bold text-foreground">Magazine PDF — Numéro à l'unité</h3>
@@ -384,7 +384,7 @@ export default function Subscriptions() {
                     <span className="text-2xl font-serif font-bold text-foreground">{pdfPriceFmt}</span>
                   </div>
                   <Link href="/archives">
-                    <Button variant="outline" className="font-sans border-[oklch(0.42_0.18_10)] text-[oklch(0.30_0.15_10)] hover:bg-[oklch(0.42_0.18_10)]/10">
+                    <Button variant="outline" className="font-sans border-[oklch(0.72_0.15_75)] text-[oklch(0.55_0.12_75)] hover:bg-[oklch(0.72_0.15_75)]/10">
                       Voir les numéros <ArrowRight className="w-4 h-4 ml-2" />
                     </Button>
                   </Link>
@@ -450,14 +450,14 @@ export default function Subscriptions() {
             </div>
 
             {/* Newsletter premium */}
-            <div className="border-2 border-[oklch(0.42_0.18_10)] rounded-xl p-8 bg-[oklch(0.42_0.18_10)]/5 relative">
-              <div className="absolute -top-3 right-4 bg-[oklch(0.42_0.18_10)] text-[oklch(0.15_0.02_250)] text-[0.6rem] font-sans font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+            <div className="border-2 border-[oklch(0.72_0.15_75)] rounded-xl p-8 bg-[oklch(0.72_0.15_75)]/5 relative">
+              <div className="absolute -top-3 right-4 bg-[oklch(0.72_0.15_75)] text-[oklch(0.15_0.02_250)] text-[0.6rem] font-sans font-bold px-3 py-1 rounded-full uppercase tracking-wider">
                 Premium
               </div>
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-serif text-lg font-bold text-foreground">Newsletter Premium</h3>
                 <div className="text-right">
-                  <span className="text-2xl font-serif font-bold text-[oklch(0.30_0.15_10)]">
+                  <span className="text-2xl font-serif font-bold text-[oklch(0.55_0.12_75)]">
                     {interval === "monthly" ? "5 €" : "50 €"}
                   </span>
                   <span className="text-xs text-muted-foreground font-sans block">
@@ -467,19 +467,19 @@ export default function Subscriptions() {
               </div>
               <p className="text-sm text-muted-foreground font-sans mb-6">Hebdomadaire — Chaque lundi + alertes</p>
               <ul className="space-y-2.5 text-sm font-sans text-muted-foreground mb-6">
-                <li className="flex items-start gap-2"><Check className="w-4 h-4 text-[oklch(0.42_0.18_10)] mt-0.5 shrink-0" /> Tout le contenu de la newsletter gratuite</li>
-                <li className="flex items-start gap-2"><Check className="w-4 h-4 text-[oklch(0.42_0.18_10)] mt-0.5 shrink-0" /> Analyse approfondie hebdomadaire</li>
-                <li className="flex items-start gap-2"><Check className="w-4 h-4 text-[oklch(0.42_0.18_10)] mt-0.5 shrink-0" /> Données exclusives et indicateurs</li>
-                <li className="flex items-start gap-2"><Check className="w-4 h-4 text-[oklch(0.42_0.18_10)] mt-0.5 shrink-0" /> Accès aux archives complètes</li>
-                <li className="flex items-start gap-2"><Check className="w-4 h-4 text-[oklch(0.42_0.18_10)] mt-0.5 shrink-0" /> Invitations événements exclusifs</li>
+                <li className="flex items-start gap-2"><Check className="w-4 h-4 text-[oklch(0.72_0.15_75)] mt-0.5 shrink-0" /> Tout le contenu de la newsletter gratuite</li>
+                <li className="flex items-start gap-2"><Check className="w-4 h-4 text-[oklch(0.72_0.15_75)] mt-0.5 shrink-0" /> Analyse approfondie hebdomadaire</li>
+                <li className="flex items-start gap-2"><Check className="w-4 h-4 text-[oklch(0.72_0.15_75)] mt-0.5 shrink-0" /> Données exclusives et indicateurs</li>
+                <li className="flex items-start gap-2"><Check className="w-4 h-4 text-[oklch(0.72_0.15_75)] mt-0.5 shrink-0" /> Accès aux archives complètes</li>
+                <li className="flex items-start gap-2"><Check className="w-4 h-4 text-[oklch(0.72_0.15_75)] mt-0.5 shrink-0" /> Invitations événements exclusifs</li>
               </ul>
               {isAuthenticated && userTier === "integral" ? (
                 <Button className="w-full font-sans" variant="outline" disabled>
-                  <CheckCircle2 className="w-4 h-4 mr-2 text-[oklch(0.42_0.18_10)]" /> Inclus dans votre abonnement Intégral
+                  <CheckCircle2 className="w-4 h-4 mr-2 text-[oklch(0.72_0.15_75)]" /> Inclus dans votre abonnement Intégral
                 </Button>
               ) : (
                 <Button
-                  className="w-full font-sans bg-[oklch(0.42_0.18_10)] text-[oklch(0.15_0.02_250)] hover:bg-[oklch(0.50_0.18_10)] font-semibold"
+                  className="w-full font-sans bg-[oklch(0.72_0.15_75)] text-[oklch(0.15_0.02_250)] hover:bg-[oklch(0.78_0.15_75)] font-semibold"
                   onClick={() => handleCheckout("newsletterPremium")}
                   disabled={checkoutLoading === "newsletterPremium"}
                 >
