@@ -1,7 +1,8 @@
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { trpc } from "@/lib/trpc";
-import { Loader2, BookOpen, Search, Globe } from "lucide-react";
+import { Loader2, BookOpen, Search, Globe, Lock } from "lucide-react";
 import SocialShare from "@/components/SocialShare";
 import { Link } from "wouter";
 import { useState, useMemo } from "react";
@@ -137,66 +138,88 @@ export default function AnalysesPays() {
                 {selectedCountryId !== "all" && countries && ` — ${countries.find((c: { id: number; name: string }) => c.id === selectedCountryId)?.name}`}
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filtered.map((article) => (
-                  <Link key={article.id} href={`/article/${article.slug}`}>
-                    <Card className="group cursor-pointer border-0 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden h-full">
-                      <div className="w-full h-48 bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center relative overflow-hidden">
-                        {article.featuredImage ? (
-                          <img
-                            src={article.featuredImage}
-                            alt={article.title}
-                            className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
-                          />
-                        ) : (
-                          <Globe className="w-10 h-10 text-primary/30" />
-                        )}
-                        <span
-                          className={`absolute top-3 left-3 text-[0.6rem] font-sans px-2.5 py-1 rounded-full font-semibold uppercase tracking-wider ${
-                            article.minSubscriptionTier === "free"
-                              ? "bg-green-100 text-green-700"
-                              : "bg-[oklch(0.72_0.15_75)]/15 text-[oklch(0.55_0.12_75)]"
-                          }`}
-                        >
-                          {article.minSubscriptionTier === "free" ? "Accès libre" : "Premium"}
-                        </span>
-                        {(article as any).country?.flag && (
-                          <span className="absolute top-3 right-3 text-xl">
-                            {(article as any).country.flag}
+                {filtered.map((article) => {
+                  const isLocked = (article as any).access && !(article as any).access.allowed;
+                  const CardWrapper = isLocked
+                    ? ({ children }: { children: React.ReactNode }) => (
+                        <Link href="/abonnements"><div className="block">{children}</div></Link>
+                      )
+                    : ({ children }: { children: React.ReactNode }) => (
+                        <Link href={`/article/${article.slug}`}><div className="block">{children}</div></Link>
+                      );
+                  return (
+                    <CardWrapper key={article.id}>
+                      <Card className={`group border-0 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden h-full ${isLocked ? "cursor-pointer opacity-80" : "cursor-pointer"}`}>
+                        <div className="w-full h-48 bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center relative overflow-hidden">
+                          {article.featuredImage ? (
+                            <img
+                              src={article.featuredImage}
+                              alt={article.title}
+                              className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
+                            />
+                          ) : (
+                            <Globe className="w-10 h-10 text-primary/30" />
+                          )}
+                          {isLocked && (
+                            <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                              <Lock className="w-8 h-8 text-white/80" />
+                            </div>
+                          )}
+                          <span
+                            className={`absolute top-3 left-3 text-[0.6rem] font-sans px-2.5 py-1 rounded-full font-semibold uppercase tracking-wider ${
+                              article.minSubscriptionTier === "free"
+                                ? "bg-green-100 text-green-700"
+                                : "bg-[oklch(0.72_0.15_75)]/15 text-[oklch(0.55_0.12_75)]"
+                            }`}
+                          >
+                            {article.minSubscriptionTier === "free" ? "Accès libre" : "Premium"}
                           </span>
-                        )}
-                      </div>
-                      <CardContent className="p-5">
-                        {(article as any).country?.name && (
-                          <div className="habari-rubrique text-xs mb-2">{(article as any).country.name}</div>
-                        )}
-                        <h3 className="font-serif font-bold text-lg text-foreground leading-snug mb-2 group-hover:text-primary transition-colors line-clamp-2">
-                          {article.title}
-                        </h3>
-                        {article.excerpt && (
-                          <p className="text-sm text-muted-foreground font-sans line-clamp-2 mb-3">
-                            {article.excerpt}
-                          </p>
-                        )}
-                        <div className="flex items-center justify-between">
-                          <p className="text-xs text-muted-foreground font-sans">
-                            {article.publishedAt &&
-                              new Date(article.publishedAt).toLocaleDateString("fr-FR", {
-                                day: "numeric",
-                                month: "long",
-                                year: "numeric",
-                              })}
-                          </p>
-                          <SocialShare
-                            title={article.title}
-                            excerpt={article.excerpt || ""}
-                            url={`${window.location.origin}/article/${article.slug}`}
-                            variant="compact"
-                          />
+                          {(article as any).country?.flag && (
+                            <span className="absolute top-3 right-3 text-xl">
+                              {(article as any).country.flag}
+                            </span>
+                          )}
                         </div>
-                      </CardContent>
-                    </Card>
-                  </Link>
-                ))}
+                        <CardContent className="p-5">
+                          {(article as any).country?.name && (
+                            <div className="habari-rubrique text-xs mb-2">{(article as any).country.name}</div>
+                          )}
+                          <h3 className="font-serif font-bold text-lg text-foreground leading-snug mb-2 group-hover:text-primary transition-colors line-clamp-2">
+                            {article.title}
+                          </h3>
+                          {article.excerpt && (
+                            <p className="text-sm text-muted-foreground font-sans line-clamp-2 mb-3">
+                              {article.excerpt}
+                            </p>
+                          )}
+                          <div className="flex items-center justify-between">
+                            <p className="text-xs text-muted-foreground font-sans">
+                              {article.publishedAt &&
+                                new Date(article.publishedAt).toLocaleDateString("fr-FR", {
+                                  day: "numeric",
+                                  month: "long",
+                                  year: "numeric",
+                                })}
+                            </p>
+                            {!isLocked && (
+                              <SocialShare
+                                title={article.title}
+                                excerpt={article.excerpt || ""}
+                                url={`${window.location.origin}/article/${article.slug}`}
+                                variant="compact"
+                              />
+                            )}
+                          </div>
+                          {isLocked && (
+                            <p className="text-xs text-[oklch(0.55_0.12_75)] font-sans font-medium mt-2">
+                              Réservé aux abonnés Premium — S'abonner →
+                            </p>
+                          )}
+                        </CardContent>
+                      </Card>
+                    </CardWrapper>
+                  );
+                })}
               </div>
             </>
           )}

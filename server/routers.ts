@@ -210,9 +210,15 @@ export const appRouter = router({
   articles: router({
     list: publicProcedure
       .input(z.object({ limit: z.number().default(10), offset: z.number().default(0) }))
-      .query(async ({ input }) => {
-        try { return await getPublishedArticles(input.limit, input.offset); }
-        catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement des articles" }); }
+      .query(async ({ ctx, input }) => {
+        try {
+          const rawArticles = await getPublishedArticles(input.limit, input.offset);
+          const activeSub = ctx.user ? await getUserSubscription(ctx.user.id) : null;
+          return rawArticles.map((article) => {
+            const access = canAccessArticle(ctx.user, article, activeSub ?? null);
+            return { ...(!access.allowed ? stripPremiumContent(article) : article), access };
+          });
+        } catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement des articles" }); }
       }),
 
     free: publicProcedure
@@ -276,16 +282,28 @@ export const appRouter = router({
 
     byCategory: publicProcedure
       .input(z.object({ categoryId: z.number(), limit: z.number().default(10) }))
-      .query(async ({ input }) => {
-        try { return await getArticlesByCategory(input.categoryId, input.limit); }
-        catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement des articles" }); }
+      .query(async ({ ctx, input }) => {
+        try {
+          const rawArticles = await getArticlesByCategory(input.categoryId, input.limit);
+          const activeSub = ctx.user ? await getUserSubscription(ctx.user.id) : null;
+          return rawArticles.map((article) => {
+            const access = canAccessArticle(ctx.user, article, activeSub ?? null);
+            return { ...(!access.allowed ? stripPremiumContent(article) : article), access };
+          });
+        } catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement des articles" }); }
       }),
 
     byCountry: publicProcedure
       .input(z.object({ countryId: z.number(), limit: z.number().default(10) }))
-      .query(async ({ input }) => {
-        try { return await getArticlesByCountry(input.countryId, input.limit); }
-        catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement des articles" }); }
+      .query(async ({ ctx, input }) => {
+        try {
+          const rawArticles = await getArticlesByCountry(input.countryId, input.limit);
+          const activeSub = ctx.user ? await getUserSubscription(ctx.user.id) : null;
+          return rawArticles.map((article) => {
+            const access = canAccessArticle(ctx.user, article, activeSub ?? null);
+            return { ...(!access.allowed ? stripPremiumContent(article) : article), access };
+          });
+        } catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement des articles" }); }
       }),
   }),
 
@@ -440,6 +458,33 @@ export const appRouter = router({
       .query(async ({ input }) => {
         try { return await getCommunityMembers(input.limit, input.offset); }
         catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement de la communauté" }); }
+      }),
+
+    join: publicProcedure
+      .input(z.object({
+        name: z.string().min(2, "Le nom est requis"),
+        role: z.string().optional(),
+        company: z.string().optional(),
+        country: z.string().optional(),
+        category: z.string().optional(),
+        bio: z.string().max(500).optional(),
+        linkedin: z.string().url("URL LinkedIn invalide").optional().or(z.literal("")),
+        email: z.string().email("Email invalide").optional().or(z.literal("")),
+      }))
+      .mutation(async ({ input }) => {
+        try {
+          return await adminCreateCommunityMember({
+            ...input,
+            linkedin: input.linkedin || null,
+            email: input.email || null,
+            verified: false,
+            featured: false,
+            published: false,
+          });
+        } catch (e) {
+          if (e instanceof TRPCError) throw e;
+          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de l'envoi de la demande" });
+        }
       }),
   }),
 

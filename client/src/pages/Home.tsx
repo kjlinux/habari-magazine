@@ -475,7 +475,7 @@ export default function Home() {
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <BookOpen className="w-4 h-4 text-primary" />
-                <span className="habari-rubrique">En accès libre</span>
+                <span className="habari-rubrique">Articles du magazine</span>
               </div>
               <h2 className="font-serif text-3xl font-bold text-primary">Articles du numéro</h2>
               <p className="text-sm text-muted-foreground font-sans mt-2">Les dossiers et enquêtes du numéro inaugural.</p>
@@ -509,9 +509,19 @@ export default function Home() {
                           <BookOpen className="w-10 h-10 text-primary/25" />
                         </div>
                       )}
-                      <span className="absolute top-3 left-3 text-[0.6rem] font-sans bg-green-100 text-green-700 px-2.5 py-1 rounded-full font-semibold uppercase tracking-wider">
-                        Accès libre
-                      </span>
+                      {item.minSubscriptionTier === "premium" ? (
+                        <span className="absolute top-3 left-3 text-[0.6rem] font-sans bg-[oklch(0.72_0.15_75)]/15 text-[oklch(0.55_0.12_75)] px-2.5 py-1 rounded-full font-semibold uppercase tracking-wider flex items-center gap-1">
+                          <Lock className="w-2.5 h-2.5" /> Premium
+                        </span>
+                      ) : item.minSubscriptionTier === "integral" ? (
+                        <span className="absolute top-3 left-3 text-[0.6rem] font-sans bg-purple-100 text-purple-700 px-2.5 py-1 rounded-full font-semibold uppercase tracking-wider flex items-center gap-1">
+                          <Lock className="w-2.5 h-2.5" /> Intégral
+                        </span>
+                      ) : (
+                        <span className="absolute top-3 left-3 text-[0.6rem] font-sans bg-green-100 text-green-700 px-2.5 py-1 rounded-full font-semibold uppercase tracking-wider">
+                          Accès libre
+                        </span>
+                      )}
                     </div>
                     <CardContent className="p-5">
                       <div className="habari-rubrique text-xs mb-2">{item.rubrique || "Article"}</div>
@@ -808,7 +818,7 @@ export default function Home() {
                   <div className="group bg-background border border-border rounded-xl p-6 hover:shadow-lg hover:border-primary/20 transition-all cursor-pointer h-full relative">
                     {svc.badge && (
                       <span className="absolute top-3 right-3 text-[0.55rem] font-sans bg-[oklch(0.72_0.15_75)]/15 text-[oklch(0.55_0.12_75)] px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider flex items-center gap-1">
-                        <Lock className="w-2.5 h-2.5" /> {svc.badge}
+                        {(svc.badge === "Premium" || svc.badge === "Intégral") && <Lock className="w-2.5 h-2.5" />} {svc.badge}
                       </span>
                     )}
                     <div className="w-12 h-12 rounded-lg bg-primary/5 flex items-center justify-center mb-4 group-hover:bg-primary/10 transition-colors">
