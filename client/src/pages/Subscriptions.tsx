@@ -25,6 +25,7 @@ export default function Subscriptions() {
 
   const subscribeMutation = trpc.newsletter.subscribe.useMutation();
   const checkoutMutation = trpc.stripe.createCheckout.useMutation();
+  const userTier = user?.subscriptionTier ?? "free";
   const { data: promo } = trpc.siteConfig.promo.useQuery(undefined, { staleTime: 1000 * 60 * 10 });
   const { data: plans } = trpc.subscriptions.plans.useQuery();
   const { data: pdfPriceData } = trpc.magazine.pdfPrice.useQuery();
@@ -203,9 +204,13 @@ export default function Subscriptions() {
                       Créer un compte gratuit
                     </Button>
                   </a>
-                ) : (
+                ) : userTier === "free" ? (
                   <Button className="w-full font-sans" variant="outline" disabled>
                     <CheckCircle2 className="w-4 h-4 mr-2" /> Accès actif
+                  </Button>
+                ) : (
+                  <Button className="w-full font-sans" variant="outline" disabled>
+                    Inclus dans votre abonnement
                   </Button>
                 )}
               </CardContent>
@@ -265,17 +270,23 @@ export default function Subscriptions() {
                     <span>Espace investisseurs et deal flow</span>
                   </li>
                 </ul>
-                <Button
-                  className="w-full font-sans bg-[oklch(0.72_0.15_75)] text-[oklch(0.15_0.02_250)] hover:bg-[oklch(0.78_0.15_75)] font-semibold"
-                  onClick={() => handleCheckout("premiumAccess")}
-                  disabled={checkoutLoading === "premiumAccess"}
-                >
-                  {checkoutLoading === "premiumAccess" ? (
-                    <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Redirection...</>
-                  ) : (
-                    <>S'abonner <ArrowRight className="w-4 h-4 ml-2" /></>
-                  )}
-                </Button>
+                {isAuthenticated && (userTier === "premium" || userTier === "integral") ? (
+                  <Button className="w-full font-sans" variant="outline" disabled>
+                    <CheckCircle2 className="w-4 h-4 mr-2 text-[oklch(0.72_0.15_75)]" /> Abonnement actif
+                  </Button>
+                ) : (
+                  <Button
+                    className="w-full font-sans bg-[oklch(0.72_0.15_75)] text-[oklch(0.15_0.02_250)] hover:bg-[oklch(0.78_0.15_75)] font-semibold"
+                    onClick={() => handleCheckout("premiumAccess")}
+                    disabled={checkoutLoading === "premiumAccess"}
+                  >
+                    {checkoutLoading === "premiumAccess" ? (
+                      <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Redirection...</>
+                    ) : (
+                      <>S'abonner <ArrowRight className="w-4 h-4 ml-2" /></>
+                    )}
+                  </Button>
+                )}
               </CardContent>
             </Card>
 
@@ -325,17 +336,23 @@ export default function Subscriptions() {
                     <span>Support prioritaire</span>
                   </li>
                 </ul>
-                <Button
-                  className="w-full font-sans bg-primary hover:bg-primary/90 font-semibold"
-                  onClick={() => handleCheckout("bundle")}
-                  disabled={checkoutLoading === "bundle"}
-                >
-                  {checkoutLoading === "bundle" ? (
-                    <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Redirection...</>
-                  ) : (
-                    <>S'abonner <ArrowRight className="w-4 h-4 ml-2" /></>
-                  )}
-                </Button>
+                {isAuthenticated && userTier === "integral" ? (
+                  <Button className="w-full font-sans" variant="outline" disabled>
+                    <CheckCircle2 className="w-4 h-4 mr-2 text-primary" /> Abonnement actif
+                  </Button>
+                ) : (
+                  <Button
+                    className="w-full font-sans bg-primary hover:bg-primary/90 font-semibold"
+                    onClick={() => handleCheckout("bundle")}
+                    disabled={checkoutLoading === "bundle"}
+                  >
+                    {checkoutLoading === "bundle" ? (
+                      <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Redirection...</>
+                    ) : (
+                      <>S'abonner <ArrowRight className="w-4 h-4 ml-2" /></>
+                    )}
+                  </Button>
+                )}
               </CardContent>
             </Card>
           </div>

@@ -68,7 +68,7 @@ export default function Navbar() {
           {/* Logo */}
           <Link href="/" className="flex items-center group">
             <img
-              src="https://d2xsxph8kpxj0f.cloudfront.net/310519663347570863/C6aFnP23nadn7BHJcaRyWP/logoHABARI_transparent_b638ce27.png"
+              src="/logo-habari.png"
               alt="Habari Mag"
               className="h-10 w-auto transition-transform group-hover:scale-105"
             />

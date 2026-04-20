@@ -14,9 +14,70 @@ import {
   Handshake,
   ExternalLink,
   Sun,
+  X,
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+
+type AnyItem = {
+  id: number; title: string; organization: string; country: string;
+  sector?: string; description?: string; deadline?: string; budget?: string;
+  currency?: string; externalLink?: string; featured?: boolean;
+  amiType?: string; partners?: string; webinaire?: string;
+  contractType?: string; experienceLevel?: string;
+  type: "bid" | "ami" | "job";
+};
+
+function DetailModal({ item, onClose }: { item: AnyItem; onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
+      <div className="bg-background rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+        <div className="flex items-start justify-between p-6 border-b border-border">
+          <div className="flex-1 pr-4">
+            <div className="flex flex-wrap gap-2 mb-2">
+              {item.sector && <span className="habari-rubrique text-xs">{item.sector}</span>}
+              {item.amiType && <span className="text-xs px-2 py-0.5 bg-blue-50 text-blue-700 rounded font-sans">{item.amiType}</span>}
+              {item.contractType && <span className="text-xs px-2 py-0.5 bg-purple-50 text-purple-700 rounded font-sans">{item.contractType}</span>}
+              {item.experienceLevel && <span className="text-xs px-2 py-0.5 bg-muted text-muted-foreground rounded font-sans">{item.experienceLevel}</span>}
+            </div>
+            <h2 className="font-serif font-bold text-xl text-foreground">{item.title}</h2>
+            <p className="text-sm text-muted-foreground font-sans mt-1">{item.organization}</p>
+          </div>
+          <button type="button" aria-label="Fermer" onClick={onClose} className="text-muted-foreground hover:text-foreground shrink-0">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+        <div className="p-6 space-y-4">
+          <div className="flex flex-wrap gap-4 text-sm font-sans text-muted-foreground">
+            <span className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5" />{item.country}</span>
+            {item.deadline && <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" />Limite : {item.deadline}</span>}
+            {item.budget && <span className="font-bold text-[oklch(0.72_0.15_75)]">{item.budget} {item.currency}</span>}
+          </div>
+          {item.description && <p className="text-sm font-sans text-foreground/80 leading-relaxed whitespace-pre-wrap">{item.description}</p>}
+          {item.partners && (
+            <div className="flex items-center gap-1.5 text-sm font-sans text-muted-foreground">
+              <Users className="w-3.5 h-3.5" /><span>Partenaires : {item.partners}</span>
+            </div>
+          )}
+          {item.webinaire && (
+            <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
+              <p className="text-xs font-sans font-semibold text-blue-800 mb-1">Webinaire d'information</p>
+              <p className="text-xs font-sans text-blue-700">{item.webinaire}</p>
+            </div>
+          )}
+          {item.externalLink && (
+            <a href={item.externalLink} target="_blank" rel="noopener noreferrer">
+              <Button className="font-sans bg-primary hover:bg-primary/90 mt-2">
+                <ExternalLink className="w-4 h-4 mr-2" />
+                {item.type === "job" ? "Postuler" : "Accéder au dossier complet"}
+              </Button>
+            </a>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 /* ── Onglets principaux ── */
 type TabKey = "offres" | "ami" | "emplois";
@@ -41,6 +102,7 @@ export default function Bids() {
   const [activeTab, setActiveTab] = useState<TabKey>("offres");
   const [activeSector, setActiveSector] = useState("Tous");
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedItem, setSelectedItem] = useState<AnyItem | null>(null);
 
   const { data: dbBids, isLoading: loadingBids } =
     trpc.opportunities.list.useQuery({ type: "bid" });
@@ -270,25 +332,15 @@ export default function Bids() {
                             {bid.budget} {bid.currency}
                           </div>
                         )}
-                        {bid.externalLink ? (
-                          <a
-                            href={bid.externalLink}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-sm font-sans font-medium text-primary hover:underline"
-                          >
-                            Voir les détails{" "}
-                            <ExternalLink className="w-3 h-3" />
-                          </a>
-                        ) : (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="font-sans text-primary gap-1 p-0 h-auto"
-                          >
-                            Voir les détails <ArrowRight className="w-3 h-3" />
-                          </Button>
-                        )}
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setSelectedItem(bid)}
+                          className="font-sans text-primary gap-1 p-0 h-auto"
+                        >
+                          Voir les détails <ArrowRight className="w-3 h-3" />
+                        </Button>
                       </div>
                     </div>
                   </CardContent>
@@ -372,25 +424,15 @@ export default function Bids() {
                             <span>Limite : {item.deadline}</span>
                           </div>
                         )}
-                        {item.externalLink ? (
-                          <a
-                            href={item.externalLink}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-sm font-sans font-medium text-primary hover:underline"
-                          >
-                            Voir les détails{" "}
-                            <ExternalLink className="w-3 h-3" />
-                          </a>
-                        ) : (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="font-sans text-primary gap-1 p-0 h-auto"
-                          >
-                            Voir les détails <ArrowRight className="w-3 h-3" />
-                          </Button>
-                        )}
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setSelectedItem(item)}
+                          className="font-sans text-primary gap-1 p-0 h-auto"
+                        >
+                          Voir les détails <ArrowRight className="w-3 h-3" />
+                        </Button>
                       </div>
                     </div>
                   </CardContent>
@@ -458,24 +500,15 @@ export default function Bids() {
                             <span>Limite : {job.deadline}</span>
                           </div>
                         )}
-                        {job.externalLink ? (
-                          <a
-                            href={job.externalLink}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-sm font-sans font-medium text-primary hover:underline"
-                          >
-                            Postuler <ExternalLink className="w-3 h-3" />
-                          </a>
-                        ) : (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="font-sans text-primary gap-1 p-0 h-auto"
-                          >
-                            Postuler <ArrowRight className="w-3 h-3" />
-                          </Button>
-                        )}
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setSelectedItem(job)}
+                          className="font-sans text-primary gap-1 p-0 h-auto"
+                        >
+                          Voir les détails <ArrowRight className="w-3 h-3" />
+                        </Button>
                       </div>
                     </div>
                   </CardContent>
@@ -493,6 +526,8 @@ export default function Bids() {
           )}
         </div>
       </section>
+
+      {selectedItem && <DetailModal item={selectedItem} onClose={() => setSelectedItem(null)} />}
 
       <Footer />
     </div>
