@@ -133,7 +133,7 @@ router.post(
 
       const openai = new OpenAI({ apiKey });
       const response = await openai.images.generate({
-        model: "gpt-image-1-5",
+        model: "gpt-image-1.5",
         prompt,
         size: "1024x1024",
         quality: "high",

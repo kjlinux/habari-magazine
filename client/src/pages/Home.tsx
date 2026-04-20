@@ -178,10 +178,10 @@ const FALLBACK_GREEN_CATEGORIES: GreenCategory[] = [
 ];
 
 const FALLBACK_ECOSYSTEM_CARDS: EcosystemCard[] = [
-  { title: "Annuaire économique", desc: "Répertoire des acteurs clés de la zone CEEAC", href: "/annuaire", badge: "" },
-  { title: "Espace investisseurs", desc: "Opportunités d'investissement et baromètre CEEAC", href: "/investisseurs", badge: "Premium" },
-  { title: "Appels d'offres & AMI", desc: "Marchés publics, AMI et opportunités d'emploi", href: "/appels-offres", badge: "" },
-  { title: "Événements", desc: "Conférences, formations et networking", href: "/evenements", badge: "" },
+  { title: "Annuaire économique", desc: "Répertoire des acteurs clés de la zone CEEAC", href: "/annuaire", badge: "Nouveau" },
+  { title: "Opportunités d'affaires", desc: "Appels d'offres, partenariats et projets d'investissement en Afrique Centrale", href: "/appels-offres", badge: "Premium" },
+  { title: "Communauté Habari", desc: "Réseau professionnel des entrepreneurs et décideurs d'Afrique Centrale", href: "/communaute", badge: "Gratuit" },
+  { title: "Agenda & Événements", desc: "Conférences, forums et rendez-vous économiques en Afrique Centrale", href: "/evenements", badge: "Intégral" },
 ];
 
 const GREEN_CATEGORY_ICON_MAP: Record<string, React.ElementType> = {

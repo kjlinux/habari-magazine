@@ -2,7 +2,7 @@ import AdminLayout from "@/components/AdminLayout";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
-import { Plus, Pencil, Trash2, Eye, EyeOff, Search } from "lucide-react";
+import { Plus, Pencil, Trash2, Eye, EyeOff, Search, Archive, ArchiveRestore } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import {
@@ -72,6 +72,11 @@ export default function AdminArticles() {
 
   const handleTogglePublish = (id: number, currentStatus: string) => {
     const newStatus = currentStatus === "published" ? "draft" : "published";
+    togglePublishMutation.mutate({ id, status: newStatus });
+  };
+
+  const handleToggleArchive = (id: number, currentStatus: string) => {
+    const newStatus = currentStatus === "archived" ? "draft" : "archived";
     togglePublishMutation.mutate({ id, status: newStatus });
   };
 
@@ -173,15 +178,28 @@ export default function AdminArticles() {
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center justify-end gap-1">
+                          {article.status !== "archived" && (
+                            <button
+                              onClick={() => handleTogglePublish(article.id, article.status)}
+                              className="p-1.5 rounded-md hover:bg-muted transition-colors"
+                              title={article.status === "published" ? "Dépublier" : "Publier"}
+                            >
+                              {article.status === "published" ? (
+                                <EyeOff className="w-4 h-4 text-muted-foreground" />
+                              ) : (
+                                <Eye className="w-4 h-4 text-green-600" />
+                              )}
+                            </button>
+                          )}
                           <button
-                            onClick={() => handleTogglePublish(article.id, article.status)}
+                            onClick={() => handleToggleArchive(article.id, article.status)}
                             className="p-1.5 rounded-md hover:bg-muted transition-colors"
-                            title={article.status === "published" ? "Dépublier" : "Publier"}
+                            title={article.status === "archived" ? "Désarchiver" : "Archiver"}
                           >
-                            {article.status === "published" ? (
-                              <EyeOff className="w-4 h-4 text-muted-foreground" />
+                            {article.status === "archived" ? (
+                              <ArchiveRestore className="w-4 h-4 text-blue-500" />
                             ) : (
-                              <Eye className="w-4 h-4 text-green-600" />
+                              <Archive className="w-4 h-4 text-muted-foreground" />
                             )}
                           </button>
                           <Link href={`/admin/articles/${article.id}`}>

@@ -15,6 +15,7 @@ import {
   ExternalLink,
   Sun,
   X,
+  Lock,
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -29,6 +30,8 @@ type AnyItem = {
 };
 
 function DetailModal({ item, onClose }: { item: AnyItem; onClose: () => void }) {
+  const hasAccess = (item as any).access?.allowed !== false;
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
       <div className="bg-background rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
@@ -39,6 +42,11 @@ function DetailModal({ item, onClose }: { item: AnyItem; onClose: () => void }) 
               {item.amiType && <span className="text-xs px-2 py-0.5 bg-blue-50 text-blue-700 rounded font-sans">{item.amiType}</span>}
               {item.contractType && <span className="text-xs px-2 py-0.5 bg-purple-50 text-purple-700 rounded font-sans">{item.contractType}</span>}
               {item.experienceLevel && <span className="text-xs px-2 py-0.5 bg-muted text-muted-foreground rounded font-sans">{item.experienceLevel}</span>}
+              {!hasAccess && (
+                <span className="text-xs px-2 py-0.5 bg-[oklch(0.72_0.15_75)]/15 text-[oklch(0.55_0.12_75)] rounded font-sans font-semibold flex items-center gap-1">
+                  <Lock className="w-3 h-3" /> Premium
+                </span>
+              )}
             </div>
             <h2 className="font-serif font-bold text-xl text-foreground">{item.title}</h2>
             <p className="text-sm text-muted-foreground font-sans mt-1">{item.organization}</p>
@@ -51,27 +59,43 @@ function DetailModal({ item, onClose }: { item: AnyItem; onClose: () => void }) 
           <div className="flex flex-wrap gap-4 text-sm font-sans text-muted-foreground">
             <span className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5" />{item.country}</span>
             {item.deadline && <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" />Limite : {item.deadline}</span>}
-            {item.budget && <span className="font-bold text-[oklch(0.72_0.15_75)]">{item.budget} {item.currency}</span>}
+            {hasAccess && item.budget && <span className="font-bold text-[oklch(0.72_0.15_75)]">{item.budget} {item.currency}</span>}
           </div>
-          {item.description && <p className="text-sm font-sans text-foreground/80 leading-relaxed whitespace-pre-wrap">{item.description}</p>}
-          {item.partners && (
-            <div className="flex items-center gap-1.5 text-sm font-sans text-muted-foreground">
-              <Users className="w-3.5 h-3.5" /><span>Partenaires : {item.partners}</span>
-            </div>
-          )}
-          {item.webinaire && (
-            <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
-              <p className="text-xs font-sans font-semibold text-blue-800 mb-1">Webinaire d'information</p>
-              <p className="text-xs font-sans text-blue-700">{item.webinaire}</p>
-            </div>
-          )}
-          {item.externalLink && (
-            <a href={item.externalLink} target="_blank" rel="noopener noreferrer">
-              <Button className="font-sans bg-primary hover:bg-primary/90 mt-2">
-                <ExternalLink className="w-4 h-4 mr-2" />
-                {item.type === "job" ? "Postuler" : "Accéder au dossier complet"}
+
+          {hasAccess ? (
+            <>
+              {item.description && <p className="text-sm font-sans text-foreground/80 leading-relaxed whitespace-pre-wrap">{item.description}</p>}
+              {item.partners && (
+                <div className="flex items-center gap-1.5 text-sm font-sans text-muted-foreground">
+                  <Users className="w-3.5 h-3.5" /><span>Partenaires : {item.partners}</span>
+                </div>
+              )}
+              {item.webinaire && (
+                <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
+                  <p className="text-xs font-sans font-semibold text-blue-800 mb-1">Webinaire d'information</p>
+                  <p className="text-xs font-sans text-blue-700">{item.webinaire}</p>
+                </div>
+              )}
+              {item.externalLink && (
+                <a href={item.externalLink} target="_blank" rel="noopener noreferrer">
+                  <Button type="button" className="font-sans bg-primary hover:bg-primary/90 mt-2">
+                    <ExternalLink className="w-4 h-4 mr-2" />
+                    {item.type === "job" ? "Postuler" : "Accéder au dossier complet"}
+                  </Button>
+                </a>
+              )}
+            </>
+          ) : (
+            <div className="rounded-xl border border-[oklch(0.72_0.15_75)]/30 bg-[oklch(0.72_0.15_75)]/5 p-6 text-center">
+              <Lock className="w-10 h-10 text-[oklch(0.72_0.15_75)]/40 mx-auto mb-3" />
+              <h3 className="font-serif font-bold text-foreground mb-1">Contenu réservé aux abonnés Premium</h3>
+              <p className="text-sm text-muted-foreground font-sans mb-4">
+                Accédez à la description complète, au budget, aux contacts et au dossier de candidature.
+              </p>
+              <Button type="button" className="font-sans gap-2" asChild>
+                <a href="/abonnements">Voir les offres d'abonnement</a>
               </Button>
-            </a>
+            </div>
           )}
         </div>
       </div>
@@ -294,7 +318,7 @@ export default function Bids() {
                     )}
                     <div className="flex flex-col md:flex-row md:items-start gap-4">
                       <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
+                        <div className="flex items-center gap-2 mb-2 flex-wrap">
                           {bid.sector && (
                             <span className="habari-rubrique text-xs">
                               {bid.sector}
@@ -303,6 +327,11 @@ export default function Bids() {
                           <span className="text-xs font-sans px-2 py-0.5 bg-green-50 text-green-700 rounded">
                             Ouvert
                           </span>
+                          {!(bid as any).access?.allowed && (
+                            <span className="text-xs font-sans px-2 py-0.5 bg-[oklch(0.72_0.15_75)]/15 text-[oklch(0.55_0.12_75)] rounded flex items-center gap-1">
+                              <Lock className="w-2.5 h-2.5" /> Premium
+                            </span>
+                          )}
                         </div>
                         <h3 className="font-serif font-bold text-lg text-foreground mb-1">
                           {bid.title}

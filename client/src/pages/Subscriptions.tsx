@@ -30,8 +30,8 @@ export default function Subscriptions() {
   const { data: plans } = trpc.subscriptions.plans.useQuery();
   const { data: pdfPriceData } = trpc.magazine.pdfPrice.useQuery();
   const { data: nlStatus } = trpc.newsletter.status.useQuery(
-    { email: user?.email ?? "" },
-    { enabled: !!user?.email }
+    undefined,
+    { enabled: !!user }
   );
   const isAlreadySubscribed = !!nlStatus?.status && nlStatus.status === "active";
 

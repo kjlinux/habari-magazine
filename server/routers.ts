@@ -433,15 +433,32 @@ export const appRouter = router({
         limit: z.number().default(50),
         offset: z.number().default(0),
       }))
-      .query(async ({ input }) => {
-        try { return await getActiveOpportunities(input.type, input.limit, input.offset); }
+      .query(async ({ ctx, input }) => {
+        try {
+          const items = await getActiveOpportunities(input.type, input.limit, input.offset);
+          const activeSub = ctx.user ? await getUserSubscription(ctx.user.id) : null;
+          return items.map((opp: any) => {
+            const access = canAccess(ctx.user, "premium", activeSub ?? null);
+            if (access.allowed) return { ...opp, access };
+            const { description, externalLink, budget, webinaire, partners, ...teaser } = opp;
+            return { ...teaser, description: null, externalLink: null, budget: null, webinaire: null, partners: null, access };
+          });
+        }
         catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement des opportunités" }); }
       }),
 
     bySlug: publicProcedure
       .input(z.object({ slug: z.string() }))
-      .query(async ({ input }) => {
-        try { return await getOpportunityBySlug(input.slug); }
+      .query(async ({ ctx, input }) => {
+        try {
+          const opp = await getOpportunityBySlug(input.slug);
+          if (!opp) return null;
+          const activeSub = ctx.user ? await getUserSubscription(ctx.user.id) : null;
+          const access = canAccess(ctx.user, "premium", activeSub ?? null);
+          if (access.allowed) return { ...opp, access };
+          const { description, externalLink, budget, webinaire, partners, ...teaser } = opp;
+          return { ...teaser, description: null, externalLink: null, budget: null, webinaire: null, partners: null, access };
+        }
         catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement de l'opportunité" }); }
       }),
 
@@ -538,17 +555,15 @@ export const appRouter = router({
         }
       }),
 
-    status: publicProcedure
-      .input(z.object({ email: z.string().email() }))
-      .query(async ({ input }) => {
-        try { return await getNewsletterSubscription(input.email); }
+    status: protectedProcedure
+      .query(async ({ ctx }) => {
+        try { return await getNewsletterSubscription(ctx.user.email); }
         catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la vérification" }); }
       }),
 
-    unsubscribe: publicProcedure
-      .input(z.object({ email: z.string().email() }))
-      .mutation(async ({ input }) => {
-        try { return await unsubscribeNewsletter(input.email); }
+    unsubscribe: protectedProcedure
+      .mutation(async ({ ctx }) => {
+        try { return await unsubscribeNewsletter(ctx.user.email); }
         catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la désinscription" }); }
       }),
   }),
@@ -629,11 +644,13 @@ export const appRouter = router({
     /** Remove browser push subscription */
     removePushSubscription: protectedProcedure
       .input(z.object({ endpoint: z.string() }))
-      .mutation(async ({ input }) => {
+      .mutation(async ({ ctx, input }) => {
         try {
           const db = await getDb();
           if (!db) return { success: true };
-          await db.delete(pushSubscriptions).where(eq(pushSubscriptions.endpoint, input.endpoint));
+          await db.delete(pushSubscriptions).where(
+            and(eq(pushSubscriptions.endpoint, input.endpoint), eq(pushSubscriptions.userId, ctx.user.id))
+          );
           return { success: true };
         } catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la suppression de l'abonnement push" }); }
       }),
@@ -2063,8 +2080,17 @@ export const appRouter = router({
         year: z.number().optional(),
         search: z.string().optional(),
       }))
-      .query(async ({ input }) => {
-        try { return await getArchivedMagazineIssues(input); }
+      .query(async ({ ctx, input }) => {
+        try {
+          const issues = await getArchivedMagazineIssues(input);
+          const activeSub = ctx.user ? await getUserSubscription(ctx.user.id) : null;
+          const canDownload = hasActiveSubscription(ctx.user, activeSub ?? null);
+          return issues.map((issue) => {
+            if (!issue.isPremium || canDownload) return issue;
+            const { pdfUrl, pdfFileKey, ...safe } = issue;
+            return { ...safe, pdfUrl: null, pdfFileKey: null };
+          });
+        }
         catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement des archives magazine" }); }
       }),
   }),
