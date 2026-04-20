@@ -22,9 +22,9 @@ const reports = [
 const regulations = [
   { title: "Accord de Paris — NDC des pays CEEAC", type: "Engagement international", desc: "Synthèse des contributions nationales déterminées des 11 pays membres." },
   { title: "Plan de convergence COMIFAC 2026-2030", type: "Politique régionale", desc: "Nouveau cadre stratégique pour la gestion durable des forêts d'Afrique Centrale." },
-  { title: "Code forestier de la RDC (2002, révisé 2023)", type: "Législation nationale", desc: "Cadre juridique de la gestion forestière en République Démocratique du Congo." },
-  { title: "Loi climat du Gabon (2021)", type: "Législation nationale", desc: "Première loi climat d'Afrique Centrale, incluant le cadre carbone national." },
-  { title: "Stratégie REDD+ du Cameroun", type: "Stratégie nationale", desc: "Document de stratégie nationale pour la réduction des émissions liées à la déforestation." },
+  { title: "🇨🇩 Code forestier de la RDC (2002, révisé 2023)", type: "Législation nationale", desc: "Cadre juridique de la gestion forestière en République Démocratique du Congo." },
+  { title: "🇬🇦 Loi climat du Gabon (2021)", type: "Législation nationale", desc: "Première loi climat d'Afrique Centrale, incluant le cadre carbone national." },
+  { title: "🇨🇲 Stratégie REDD+ du Cameroun", type: "Stratégie nationale", desc: "Document de stratégie nationale pour la réduction des émissions liées à la déforestation." },
 ];
 
 export default function GreenRessources() {

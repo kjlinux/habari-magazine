@@ -16,6 +16,8 @@ import {
   Calendar,
   CreditCard,
   Upload,
+  Link2,
+  Search,
 } from "lucide-react";
 import { useRef } from "react";
 import ImagePickerWithAI from "@/components/ImagePickerWithAI";
@@ -865,6 +867,74 @@ function MagazineHomepageSettings() {
   );
 }
 
+function ArticlePicker({ onSelect }: { onSelect: (article: { title: string; excerpt: string; image: string; slug: string; rubrique: string }) => void }) {
+  const [search, setSearch] = useState("");
+  const [open, setOpen] = useState(false);
+  const { data } = trpc.admin.articles.list.useQuery({ limit: 100, offset: 0 }, { enabled: open });
+
+  const filtered = (Array.isArray(data) ? data : []).filter(a =>
+    a.title.toLowerCase().includes(search.toLowerCase()) ||
+    a.slug.toLowerCase().includes(search.toLowerCase())
+  );
+
+  return (
+    <div className="relative">
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        className="font-sans text-xs gap-1"
+        onClick={() => setOpen(o => !o)}
+      >
+        <Link2 className="w-3.5 h-3.5" /> Lier un article
+      </Button>
+      {open && (
+        <div className="absolute z-50 left-0 top-8 w-80 bg-background border border-border rounded-lg shadow-lg p-3 space-y-2">
+          <div className="flex items-center gap-2 border border-border rounded px-2">
+            <Search className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+            <input
+              autoFocus
+              className="flex-1 text-sm py-1.5 bg-transparent outline-none font-sans"
+              placeholder="Rechercher un article..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+            />
+          </div>
+          <div className="max-h-52 overflow-y-auto space-y-1">
+            {filtered.length === 0 && (
+              <p className="text-xs text-muted-foreground text-center py-3 font-sans">Aucun article trouvé</p>
+            )}
+            {filtered.map(a => (
+              <button
+                key={a.id}
+                type="button"
+                className="w-full text-left rounded px-2 py-1.5 hover:bg-muted transition-colors"
+                onClick={() => {
+                  onSelect({
+                    title: a.title,
+                    excerpt: a.excerpt ?? "",
+                    image: a.featuredImage ?? "",
+                    slug: a.slug,
+                    rubrique: a.categoryName ?? "",
+                  });
+                  setOpen(false);
+                  setSearch("");
+                }}
+              >
+                <p className="text-sm font-sans font-medium truncate">{a.title}</p>
+                <p className="text-xs text-muted-foreground font-sans truncate">{a.slug}</p>
+              </button>
+            ))}
+          </div>
+          <Button type="button" variant="ghost" size="sm" className="w-full font-sans text-xs" onClick={() => setOpen(false)}>
+            Fermer
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function HeroSlidesSettings() {
   const { data: settings, refetch } = trpc.admin.settings.list.useQuery();
   const setMutation = trpc.admin.settings.set.useMutation({ onSuccess: () => { toast.success("Slides sauvegardés"); refetch(); }, onError: e => toast.error(e.message) });
@@ -882,6 +952,18 @@ function HeroSlidesSettings() {
     setSlides(prev => prev.map((s, idx) => idx === i ? (field.startsWith("stats.") ? { ...s, stats: { ...s.stats, [field.slice(6)]: val } } : { ...s, [field]: val }) : s));
   };
 
+  const linkArticle = (i: number, article: { title: string; excerpt: string; image: string; slug: string; rubrique: string }) => {
+    setSlides(prev => prev.map((s, idx) => idx === i ? {
+      ...s,
+      title: article.title,
+      excerpt: article.excerpt,
+      image: article.image || s.image,
+      slug: article.slug,
+      rubrique: article.rubrique || s.rubrique,
+    } : s));
+    toast.success("Article lié au slide");
+  };
+
   return (
     <div className="bg-background border border-border rounded-xl p-6 shadow-sm">
       <h2 className="font-serif text-lg font-bold text-primary mb-1 flex items-center gap-2">
@@ -893,10 +975,18 @@ function HeroSlidesSettings() {
           <div key={i} className="border border-border rounded-lg p-4 space-y-3">
             <div className="flex items-center justify-between mb-1">
               <span className="text-sm font-semibold font-sans">Slide {i + 1}</span>
-              <Button size="sm" variant="ghost" onClick={() => setSlides(prev => prev.filter((_, idx) => idx !== i))} className="text-destructive hover:text-destructive">
-                <Trash2 className="w-4 h-4" />
-              </Button>
+              <div className="flex items-center gap-2">
+                <ArticlePicker onSelect={article => linkArticle(i, article)} />
+                <Button size="sm" variant="ghost" onClick={() => setSlides(prev => prev.filter((_, idx) => idx !== i))} className="text-destructive hover:text-destructive">
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
+            {slide.slug && (
+              <p className="text-xs text-muted-foreground font-sans flex items-center gap-1">
+                <Link2 className="w-3 h-3" /> Lié à : <span className="font-mono text-primary">{slide.slug}</span>
+              </p>
+            )}
             <div className="grid grid-cols-2 gap-2">
               <div><Label className="font-sans text-xs">Rubrique</Label><Input value={slide.rubrique} onChange={e => update(i, "rubrique", e.target.value)} className="font-sans text-sm" /></div>
               <div><Label className="font-sans text-xs">Slug</Label><Input value={slide.slug} onChange={e => update(i, "slug", e.target.value)} className="font-sans text-sm" /></div>

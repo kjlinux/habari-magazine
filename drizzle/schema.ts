@@ -506,3 +506,27 @@ export const economicIndicators = mysqlTable("economicIndicators", {
 
 export type EconomicIndicator = typeof economicIndicators.$inferSelect;
 export type InsertEconomicIndicator = typeof economicIndicators.$inferInsert;
+
+/**
+ * Community members (réseau professionnel CEEAC)
+ */
+export const communityMembers = mysqlTable("communityMembers", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  role: varchar("role", { length: 255 }),
+  company: varchar("company", { length: 255 }),
+  country: varchar("country", { length: 255 }),
+  category: varchar("category", { length: 100 }),
+  bio: text("bio"),
+  avatar: varchar("avatar", { length: 512 }),
+  linkedin: varchar("linkedin", { length: 512 }),
+  email: varchar("email", { length: 320 }),
+  verified: boolean("verified").default(false),
+  featured: boolean("featured").default(false),
+  published: boolean("published").default(true),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type CommunityMember = typeof communityMembers.$inferSelect;
+export type InsertCommunityMember = typeof communityMembers.$inferInsert;

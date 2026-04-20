@@ -41,6 +41,7 @@ import AdminSettings from "./pages/admin/AdminSettings";
 import AdminAuthors from "./pages/admin/AdminAuthors";
 import AdminEvents from "./pages/admin/AdminEvents";
 import AdminNotifications from "./pages/admin/AdminNotifications";
+import AdminCommunity from "./pages/admin/AdminCommunity";
 import About from "./pages/About";
 import MyAccount from "./pages/MyAccount";
 import Downloads from "./pages/Downloads";
@@ -60,6 +61,7 @@ import Partners from "./pages/Partners";
 import SearchPage from "./pages/Search";
 import AnalysesPays from "./pages/AnalysesPays";
 import Tribunes from "./pages/Tribunes";
+import Community from "./pages/Community";
 
 function Router() {
   return (
@@ -85,6 +87,7 @@ function Router() {
       <Route path={"/recherche"} component={SearchPage} />
       <Route path={"/analyses-pays"} component={AnalysesPays} />
       <Route path={"/tribunes"} component={Tribunes} />
+      <Route path={"/communaute"} component={Community} />
 
       {/* Green pages */}
       <Route path={"/green"} component={Green} />
@@ -123,6 +126,7 @@ function Router() {
       <Route path={"/admin/auteurs"} component={AdminAuthors} />
       <Route path={"/admin/evenements"} component={AdminEvents} />
       <Route path={"/admin/notifications"} component={AdminNotifications} />
+      <Route path={"/admin/communaute"} component={AdminCommunity} />
 
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />

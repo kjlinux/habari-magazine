@@ -201,7 +201,12 @@ export default function Home() {
   });
 
   const heroSlides = useMemo<HeroSlide[]>(() => {
-    try { if (hpSettings?.homepage_hero_slides) return JSON.parse(hpSettings.homepage_hero_slides); } catch {}
+    try {
+      if (hpSettings?.homepage_hero_slides) {
+        const parsed = JSON.parse(hpSettings.homepage_hero_slides);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
     return FALLBACK_HERO_SLIDES;
   }, [hpSettings]);
 
@@ -382,7 +387,7 @@ export default function Home() {
 
                     {/* Stats chips */}
                     <div className="flex flex-wrap gap-2 mb-5">
-                      {Object.values(slide.stats).filter(Boolean).map((val, i) => (
+                      {Object.values(slide.stats ?? {}).filter(Boolean).map((val, i) => (
                         <span key={i} className="text-xs font-sans font-medium bg-white/10 backdrop-blur-sm text-white/80 px-3 py-1.5 rounded-full">
                           {val}
                         </span>

@@ -30,6 +30,8 @@ import {
   economicIndicators,
   InsertEconomicIndicator,
   EconomicIndicator,
+  communityMembers,
+  InsertCommunityMember,
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -526,8 +528,20 @@ export async function adminGetAllArticles(limit: number = 50, offset: number = 0
     : undefined;
 
   const result = await db
-    .select()
+    .select({
+      id: articles.id,
+      title: articles.title,
+      slug: articles.slug,
+      excerpt: articles.excerpt,
+      featuredImage: articles.featuredImage,
+      status: articles.status,
+      minSubscriptionTier: articles.minSubscriptionTier,
+      categoryId: articles.categoryId,
+      categoryName: articleCategories.name,
+      updatedAt: articles.updatedAt,
+    })
     .from(articles)
+    .leftJoin(articleCategories, eq(articles.categoryId, articleCategories.id))
     .where(conditions)
     .orderBy(desc(articles.updatedAt))
     .limit(limit)
@@ -2141,6 +2155,73 @@ export async function adminDeleteEconomicIndicator(id: number) {
   const db = await getDb();
   if (!db) throw new Error("DB unavailable");
   await db.delete(economicIndicators).where(eq(economicIndicators.id, id));
+  return { success: true };
+}
+
+// ─── Community Members ───────────────────────────────────────────────────────
+
+export async function getCommunityMembers(limit = 50, offset = 0) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(communityMembers)
+    .where(eq(communityMembers.published, true))
+    .orderBy(desc(communityMembers.featured), desc(communityMembers.createdAt))
+    .limit(limit).offset(offset);
+}
+
+export async function adminGetAllCommunityMembers(opts: {
+  category?: string; country?: string; search?: string; limit?: number; offset?: number;
+}) {
+  const db = await getDb();
+  if (!db) return [];
+  const conditions = [];
+  if (opts.category) conditions.push(eq(communityMembers.category, opts.category));
+  if (opts.country) conditions.push(eq(communityMembers.country, opts.country));
+  if (opts.search) conditions.push(or(
+    like(communityMembers.name, `%${opts.search}%`),
+    like(communityMembers.company, `%${opts.search}%`),
+  )!);
+  const where = conditions.length > 0 ? and(...conditions) : undefined;
+  return db.select().from(communityMembers)
+    .where(where)
+    .orderBy(desc(communityMembers.createdAt))
+    .limit(opts.limit ?? 50).offset(opts.offset ?? 0);
+}
+
+export async function adminGetCommunityMemberById(id: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const rows = await db.select().from(communityMembers).where(eq(communityMembers.id, id)).limit(1);
+  return rows[0] ?? null;
+}
+
+export async function adminCreateCommunityMember(data: Omit<InsertCommunityMember, "id" | "createdAt" | "updatedAt">) {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  const [result] = await db.insert(communityMembers).values(data);
+  return { id: (result as any).insertId };
+}
+
+export async function adminUpdateCommunityMember(id: number, data: Partial<Omit<InsertCommunityMember, "id" | "createdAt" | "updatedAt">>) {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  await db.update(communityMembers).set(data).where(eq(communityMembers.id, id));
+  return { success: true };
+}
+
+export async function adminDeleteCommunityMember(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  await db.delete(communityMembers).where(eq(communityMembers.id, id));
+  return { success: true };
+}
+
+export async function adminToggleCommunityMemberVerified(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  const rows = await db.select({ verified: communityMembers.verified }).from(communityMembers).where(eq(communityMembers.id, id)).limit(1);
+  if (!rows[0]) throw new Error("Member not found");
+  await db.update(communityMembers).set({ verified: !rows[0].verified }).where(eq(communityMembers.id, id));
   return { success: true };
 }
 

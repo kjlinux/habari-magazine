@@ -10,8 +10,7 @@ import {
   Lock, Gift, CheckCircle2, BookOpen, Clock,
 } from "lucide-react";
 
-/* CDN images */
-const IMG = {
+const FALLBACK_IMG = {
   hero: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663347570863/kJAxGRcqiWlstGKH.webp",
   carbone: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663347570863/IaSyzHrryzjyeroU.png",
   forets: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663347570863/kJAxGRcqiWlstGKH.webp",
@@ -20,22 +19,14 @@ const IMG = {
   solaire: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663347570863/ZKFPmfVfXoybwtyy.jpg",
 };
 
-/* Données vitrine carbone */
-const carbonData = [
-  { label: "Prix crédit VCM", value: "$6,20", trend: "+12%", desc: "Marché volontaire" },
-  { label: "Projets REDD+ actifs", value: "47", trend: "+8", desc: "Zone CEEAC" },
-  { label: "Crédits émis 2025", value: "18,5M", trend: "+23%", desc: "Tonnes CO₂e" },
-  { label: "Finance verte captée", value: "$0,8 Md", trend: "+15%", desc: "Par an (CEEAC)" },
-];
-
-/* Sous-rubriques */
 const sections = [
   {
     icon: BarChart3,
     title: "Marchés carbone",
     desc: "Dashboard carbone : prix des crédits, volumes échangés, projets REDD+ en cours, deals récents et réglementation par pays.",
     href: "/green/carbone",
-    image: IMG.carbone,
+    imageKey: "green_carbone_image" as const,
+    fallbackImage: FALLBACK_IMG.carbone,
     badge: "Aperçu libre",
     features: ["Prix crédits temps réel", "Projets REDD+ cartographiés", "Deals récents", "Réglementation par pays"],
   },
@@ -44,7 +35,8 @@ const sections = [
     title: "Forêts & biodiversité",
     desc: "Actualités COMIFAC, aires protégées, certifications forestières, suivi de la déforestation dans le bassin du Congo.",
     href: "/green/forets",
-    image: IMG.forets,
+    imageKey: "green_forets_image" as const,
+    fallbackImage: FALLBACK_IMG.forets,
     badge: "Accès libre",
     features: ["Couvert forestier par pays", "Aires protégées CEEAC", "Certifications FSC/PEFC", "Alertes déforestation"],
   },
@@ -53,7 +45,8 @@ const sections = [
     title: "Transition énergétique",
     desc: "Hydroélectricité, solaire, biomasse : projets ENR, mix énergétique et potentiel de la zone CEEAC.",
     href: "/green/energie",
-    image: IMG.energie,
+    imageKey: "green_energie_image" as const,
+    fallbackImage: FALLBACK_IMG.energie,
     badge: "Accès libre",
     features: ["107 GW potentiel hydro", "Projets solaires actifs", "Mix énergétique par pays", "Investissements ENR"],
   },
@@ -62,7 +55,8 @@ const sections = [
     title: "Finance verte",
     desc: "Fonds climat (FVC, CAFI), obligations vertes, investisseurs ESG et mécanismes de financement de la transition.",
     href: "/green/finance",
-    image: IMG.finance,
+    imageKey: "green_finance_image" as const,
+    fallbackImage: FALLBACK_IMG.finance,
     badge: "Aperçu libre",
     features: ["Fonds Vert pour le Climat", "Obligations vertes", "Investisseurs ESG", "CAFI & fonds bilatéraux"],
   },
@@ -71,7 +65,8 @@ const sections = [
     title: "Acteurs verts",
     desc: "Annuaire des développeurs carbone, ONG environnementales, certificateurs, consultants climat et fonds ESG.",
     href: "/green/acteurs",
-    image: IMG.solaire,
+    imageKey: "green_solaire_image" as const,
+    fallbackImage: FALLBACK_IMG.solaire,
     badge: "Liste libre",
     features: ["Développeurs projets", "ONG environnement", "Certificateurs", "Consultants climat"],
   },
@@ -80,7 +75,8 @@ const sections = [
     title: "Ressources",
     desc: "Guides pratiques, rapports de référence, outils méthodologiques et veille réglementaire climat.",
     href: "/green/ressources",
-    image: null,
+    imageKey: null,
+    fallbackImage: null,
     badge: "Accès libre",
     features: ["Guides NDC par pays", "Rapports COMIFAC", "Outils MRV", "Veille réglementaire"],
   },
@@ -103,6 +99,31 @@ const greenIndicators = [
 
 export default function Green() {
   const { data: greenEvents } = trpc.events.upcoming.useQuery({ limit: 6 });
+  const { data: featuredArticles } = trpc.articles.list.useQuery({ limit: 6, offset: 0 });
+  const { data: indicators } = trpc.investments.indicators.useQuery();
+  const { data: siteImages } = trpc.siteConfig.homepageSettings.useQuery({
+    keys: ["green_hero_image", "green_solaire_image", "green_carbone_image", "green_forets_image", "green_energie_image", "green_finance_image"],
+  });
+
+  const heroImg = siteImages?.green_hero_image ?? FALLBACK_IMG.hero;
+  const solaireImg = siteImages?.green_solaire_image ?? FALLBACK_IMG.solaire;
+
+  const carbonData = indicators && indicators.length > 0
+    ? indicators.filter((i) => i.category === "commodity").slice(0, 4).map((i) => ({
+        label: i.label,
+        value: i.value,
+        trend: i.delta ?? (i.trend === "up" ? "↑" : i.trend === "down" ? "↓" : "—"),
+        desc: i.periodLabel ?? "",
+      }))
+    : [
+        { label: "Prix crédit VCM", value: "$6,20", trend: "+12%", desc: "Marché volontaire" },
+        { label: "Projets REDD+ actifs", value: "47", trend: "+8", desc: "Zone CEEAC" },
+        { label: "Crédits émis 2025", value: "18,5M", trend: "+23%", desc: "Tonnes CO₂e" },
+        { label: "Finance verte captée", value: "$0,8 Md", trend: "+15%", desc: "Par an (CEEAC)" },
+      ];
+
+  const article1 = featuredArticles?.[0] ?? null;
+  const article2 = featuredArticles?.[1] ?? null;
 
   return (
     <div className="min-h-screen bg-background">
@@ -111,7 +132,7 @@ export default function Green() {
       {/* ═══════ HERO ═══════ */}
       <section className="relative overflow-hidden bg-[oklch(0.18_0.04_155)]">
         <div className="absolute inset-0">
-          <img src={IMG.hero} alt="" className="w-full h-full object-cover opacity-30" />
+          <img src={heroImg} alt="" className="w-full h-full object-cover opacity-30" />
           <div className="absolute inset-0 bg-gradient-to-r from-[oklch(0.12_0.04_155)] via-[oklch(0.15_0.04_155)]/95 to-[oklch(0.15_0.04_155)]/70" />
         </div>
         <div className="container relative py-20 md:py-28">
@@ -172,93 +193,96 @@ export default function Green() {
       </section>
 
       {/* ═══════ DOSSIER EN VEDETTE ═══════ */}
-      <section className="py-16 border-b border-border">
-        <div className="container">
-          <div className="mb-8">
-            <div className="flex items-center gap-2 mb-2">
-              <BookOpen className="w-4 h-4 text-[oklch(0.45_0.15_145)]" />
-              <span className="text-xs font-sans font-semibold uppercase tracking-wider text-[oklch(0.45_0.15_145)]">Dossier en vedette</span>
+      {(article1 || article2) && (
+        <section className="py-16 border-b border-border">
+          <div className="container">
+            <div className="mb-8">
+              <div className="flex items-center gap-2 mb-2">
+                <BookOpen className="w-4 h-4 text-[oklch(0.45_0.15_145)]" />
+                <span className="text-xs font-sans font-semibold uppercase tracking-wider text-[oklch(0.45_0.15_145)]">Dossiers en vedette</span>
+              </div>
+              <h2 className="font-serif text-3xl font-bold text-primary">Derniers articles publiés</h2>
+              <div className="w-16 h-1 bg-[oklch(0.75_0.18_145)] mt-3"></div>
             </div>
-            <h2 className="font-serif text-3xl font-bold text-primary">L'économie verte, nouvelle doctrine de compétitivité</h2>
-            <div className="w-16 h-1 bg-[oklch(0.75_0.18_145)] mt-3"></div>
-          </div>
 
-          <Link href="/article/economie-verte-doctrine-competitivite">
-            <div className="group cursor-pointer rounded-2xl overflow-hidden border border-border hover:shadow-xl transition-all duration-300">
-              <div className="grid grid-cols-1 lg:grid-cols-2">
-                <div className="relative h-64 lg:h-auto overflow-hidden">
-                  <img
-                    src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663347570863/nlkVQeeaJhCivjDJ.jpg"
-                    alt="Économie verte Afrique Centrale"
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent lg:hidden" />
-                </div>
-                <div className="p-8 lg:p-10 flex flex-col justify-center bg-gradient-to-br from-[oklch(0.97_0.01_155)] to-background">
-                  <span className="inline-flex items-center gap-1.5 text-[0.65rem] font-sans font-semibold uppercase tracking-wider text-[oklch(0.45_0.15_145)] bg-[oklch(0.45_0.15_145)]/10 px-3 py-1 rounded-full w-fit mb-4">
-                    Dossier Central — Économie & Stratégie
-                  </span>
-                  <h3 className="font-serif text-2xl lg:text-3xl font-bold text-foreground leading-snug mb-4 group-hover:text-[oklch(0.35_0.12_145)] transition-colors">
-                    L'économie verte, nouvelle doctrine de compétitivité pour l'Afrique Centrale
-                  </h3>
-                  <p className="text-muted-foreground font-sans leading-relaxed mb-6">
-                    La transition climatique mondiale redistribue les cartes de la compétitivité économique.
-                    Pour la zone CEEAC, cette recomposition est une opportunité historique de repositionnement.
-                    Marchés carbone, minerais critiques, finance verte : analyse des trois filières de valeur que la région ne maîtrise pas encore.
-                  </p>
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground font-sans mb-6">
-                    <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> 18 min de lecture</span>
-                    <span>Février 2026</span>
-                  </div>
-                  <div className="flex flex-wrap gap-2 mb-6">
-                    <span className="text-[0.6rem] font-sans bg-[oklch(0.45_0.15_145)]/10 text-[oklch(0.35_0.12_145)] px-2.5 py-1 rounded-full font-medium">Marchés carbone</span>
-                    <span className="text-[0.6rem] font-sans bg-[oklch(0.45_0.15_145)]/10 text-[oklch(0.35_0.12_145)] px-2.5 py-1 rounded-full font-medium">Minerais critiques</span>
-                    <span className="text-[0.6rem] font-sans bg-[oklch(0.45_0.15_145)]/10 text-[oklch(0.35_0.12_145)] px-2.5 py-1 rounded-full font-medium">Finance verte</span>
-                    <span className="text-[0.6rem] font-sans bg-[oklch(0.45_0.15_145)]/10 text-[oklch(0.35_0.12_145)] px-2.5 py-1 rounded-full font-medium">Gouvernance CEEAC</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-[oklch(0.45_0.15_145)] font-sans font-semibold text-sm group-hover:gap-3 transition-all">
-                    Lire le dossier complet <ArrowRight className="w-4 h-4" />
+            {article1 && (
+              <Link href={`/article/${article1.slug}`}>
+                <div className="group cursor-pointer rounded-2xl overflow-hidden border border-border hover:shadow-xl transition-all duration-300">
+                  <div className="grid grid-cols-1 lg:grid-cols-2">
+                    {article1.featuredImage && (
+                      <div className="relative h-64 lg:h-auto overflow-hidden">
+                        <img
+                          src={article1.featuredImage}
+                          alt={article1.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent lg:hidden" />
+                      </div>
+                    )}
+                    <div className="p-8 lg:p-10 flex flex-col justify-center bg-gradient-to-br from-[oklch(0.97_0.01_155)] to-background">
+                      <h3 className="font-serif text-2xl lg:text-3xl font-bold text-foreground leading-snug mb-4 group-hover:text-[oklch(0.35_0.12_145)] transition-colors">
+                        {article1.title}
+                      </h3>
+                      {article1.excerpt && (
+                        <p className="text-muted-foreground font-sans leading-relaxed mb-6">{article1.excerpt}</p>
+                      )}
+                      {article1.publishedAt && (
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground font-sans mb-6">
+                          <span className="flex items-center gap-1.5">
+                            <Clock className="w-3.5 h-3.5" />
+                            {new Date(article1.publishedAt).toLocaleDateString("fr-FR", { month: "long", year: "numeric" })}
+                          </span>
+                        </div>
+                      )}
+                      <div className="flex items-center gap-2 text-[oklch(0.45_0.15_145)] font-sans font-semibold text-sm group-hover:gap-3 transition-all">
+                        Lire le dossier complet <ArrowRight className="w-4 h-4" />
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
-          </Link>
-          {/* Article emplois verts */}
-          <Link href="/article/emplois-verts-ceeac">
-            <div className="group cursor-pointer rounded-2xl overflow-hidden border border-border hover:shadow-xl transition-all duration-300 mt-8">
-              <div className="grid grid-cols-1 lg:grid-cols-2">
-                <div className="relative h-56 lg:h-auto overflow-hidden">
-                  <img
-                    src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663347570863/oTOnqHICldnZxqIH.jpg"
-                    alt="Emplois verts CEEAC"
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent lg:hidden" />
-                </div>
-                <div className="p-8 lg:p-10 flex flex-col justify-center bg-gradient-to-br from-[oklch(0.97_0.01_155)] to-background">
-                  <span className="inline-flex items-center gap-1.5 text-[0.65rem] font-sans font-semibold uppercase tracking-wider text-[oklch(0.45_0.15_145)] bg-[oklch(0.45_0.15_145)]/10 px-3 py-1 rounded-full w-fit mb-4">
-                    Business & Innovation — Marché de l'emploi
-                  </span>
-                  <h3 className="font-serif text-xl lg:text-2xl font-bold text-foreground leading-snug mb-4 group-hover:text-[oklch(0.35_0.12_145)] transition-colors">
-                    Emplois verts en CEEAC : le potentiel existe, la structuration manque
-                  </h3>
-                  <p className="text-muted-foreground font-sans leading-relaxed mb-6 text-sm">
-                    Aquaculture, horticulture, hydroélectricité, énergie solaire : des initiatives portent leurs fruits.
-                    Mais transformer des projets isolés en moteur d'emploi régional exige bien davantage qu'un catalogue de bonnes pratiques.
-                  </p>
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground font-sans mb-4">
-                    <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> 12 min de lecture</span>
-                    <span>Février 2026</span>
+              </Link>
+            )}
+
+            {article2 && (
+              <Link href={`/article/${article2.slug}`}>
+                <div className="group cursor-pointer rounded-2xl overflow-hidden border border-border hover:shadow-xl transition-all duration-300 mt-8">
+                  <div className="grid grid-cols-1 lg:grid-cols-2">
+                    {article2.featuredImage && (
+                      <div className="relative h-56 lg:h-auto overflow-hidden">
+                        <img
+                          src={article2.featuredImage}
+                          alt={article2.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent lg:hidden" />
+                      </div>
+                    )}
+                    <div className="p-8 lg:p-10 flex flex-col justify-center bg-gradient-to-br from-[oklch(0.97_0.01_155)] to-background">
+                      <h3 className="font-serif text-xl lg:text-2xl font-bold text-foreground leading-snug mb-4 group-hover:text-[oklch(0.35_0.12_145)] transition-colors">
+                        {article2.title}
+                      </h3>
+                      {article2.excerpt && (
+                        <p className="text-muted-foreground font-sans leading-relaxed mb-6 text-sm">{article2.excerpt}</p>
+                      )}
+                      {article2.publishedAt && (
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground font-sans mb-4">
+                          <span className="flex items-center gap-1.5">
+                            <Clock className="w-3.5 h-3.5" />
+                            {new Date(article2.publishedAt).toLocaleDateString("fr-FR", { month: "long", year: "numeric" })}
+                          </span>
+                        </div>
+                      )}
+                      <div className="flex items-center gap-2 text-[oklch(0.45_0.15_145)] font-sans font-semibold text-sm group-hover:gap-3 transition-all">
+                        Lire l'article <ArrowRight className="w-4 h-4" />
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2 text-[oklch(0.45_0.15_145)] font-sans font-semibold text-sm group-hover:gap-3 transition-all">
-                    Lire l'article <ArrowRight className="w-4 h-4" />
-                  </div>
                 </div>
-              </div>
-            </div>
-          </Link>
-        </div>
-      </section>
+              </Link>
+            )}
+          </div>
+        </section>
+      )}
 
       {/* ═══════ SOUS-RUBRIQUES ═══════ */}
       <section className="py-16">
@@ -273,12 +297,14 @@ export default function Green() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {sections.map((sec) => (
+            {sections.map((sec) => {
+              const secImage = sec.imageKey ? (siteImages?.[sec.imageKey] ?? sec.fallbackImage) : sec.fallbackImage;
+              return (
               <Link key={sec.href} href={sec.href}>
                 <Card className="group cursor-pointer border-0 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden h-full">
                   <div className="w-full h-44 bg-gradient-to-br from-[oklch(0.45_0.15_145)]/10 to-[oklch(0.45_0.15_145)]/5 relative overflow-hidden">
-                    {sec.image ? (
-                      <img src={sec.image} alt={sec.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    {secImage ? (
+                      <img src={secImage} alt={sec.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[oklch(0.45_0.15_145)]/15 to-[oklch(0.35_0.10_145)]/10">
                         <sec.icon className="w-12 h-12 text-[oklch(0.45_0.15_145)]/30" />
@@ -307,7 +333,8 @@ export default function Green() {
                   </CardContent>
                 </Card>
               </Link>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
@@ -411,7 +438,7 @@ export default function Green() {
       {/* ═══════ CTA INSCRIPTION ═══════ */}
       <section className="py-20 bg-[oklch(0.18_0.04_155)] relative overflow-hidden">
         <div className="absolute inset-0">
-          <img src={IMG.solaire} alt="" className="w-full h-full object-cover opacity-15" />
+          <img src={solaireImg} alt="" className="w-full h-full object-cover opacity-15" />
           <div className="absolute inset-0 bg-[oklch(0.18_0.04_155)]/80" />
         </div>
         <div className="container relative text-center">

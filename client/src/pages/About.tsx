@@ -803,7 +803,7 @@ export default function About() {
                     </div>
                     <div>
                       <p className="font-sans text-sm font-semibold text-foreground">Adresse</p>
-                      <p className="font-sans text-sm text-foreground/60">Douala, Cameroun</p>
+                      <p className="font-sans text-sm text-foreground/60">Douala, 🇨🇲 Cameroun</p>
                       <p className="font-sans text-sm text-foreground/60">Zone CEEAC</p>
                     </div>
                   </div>

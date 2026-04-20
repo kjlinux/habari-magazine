@@ -18,18 +18,18 @@ const climateFunds = [
 ];
 
 const greenBonds = [
-  { issuer: "République du Congo", amount: "$200M", year: "2025", type: "Obligation souveraine verte", use: "Forêts, énergie propre" },
+  { issuer: "🇨🇬 République du Congo", amount: "$200M", year: "2025", type: "Obligation souveraine verte", use: "Forêts, énergie propre" },
   { issuer: "Banque de Développement des États de l'AC", amount: "$100M", year: "2025", type: "Obligation verte BDEAC", use: "Projets ENR, agriculture durable" },
-  { issuer: "République du Gabon", amount: "$500M", year: "2024", type: "Obligation bleue souveraine", use: "Économie bleue, aires marines" },
+  { issuer: "🇬🇦 République du Gabon", amount: "$500M", year: "2024", type: "Obligation bleue souveraine", use: "Économie bleue, aires marines" },
 ];
 
 const esgInvestors = [
-  { name: "Meridiam", type: "Fonds infra", focus: "Énergie, transport durable", presence: "Cameroun, Gabon" },
+  { name: "Meridiam", type: "Fonds infra", focus: "Énergie, transport durable", presence: "🇨🇲 Cameroun, 🇬🇦 Gabon" },
   { name: "Proparco (AFD)", type: "DFI", focus: "ENR, agriculture, PME vertes", presence: "Toute la zone CEEAC" },
-  { name: "IFC (Banque mondiale)", type: "DFI", focus: "Finance climat, forêts", presence: "RDC, Cameroun, Gabon" },
-  { name: "FMO", type: "DFI", focus: "Énergie, inclusion financière verte", presence: "RDC, Rwanda" },
+  { name: "IFC (Banque mondiale)", type: "DFI", focus: "Finance climat, forêts", presence: "🇨🇩 RDC, 🇨🇲 Cameroun, 🇬🇦 Gabon" },
+  { name: "FMO", type: "DFI", focus: "Énergie, inclusion financière verte", presence: "🇨🇩 RDC, 🇷🇼 Rwanda" },
   { name: "Mirova", type: "Asset manager ESG", focus: "Forêts, capital naturel", presence: "Bassin du Congo" },
-  { name: "Norfund", type: "DFI", focus: "Énergie propre, agriculture", presence: "Rwanda, RDC" },
+  { name: "Norfund", type: "DFI", focus: "Énergie propre, agriculture", presence: "🇷🇼 Rwanda, 🇨🇩 RDC" },
 ];
 
 export default function GreenFinance() {

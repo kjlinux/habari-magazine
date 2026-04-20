@@ -150,6 +150,13 @@ import {
   adminUpdateEconomicIndicator,
   adminDeleteEconomicIndicator,
   updateSubscriptionPlan,
+  getCommunityMembers,
+  adminGetAllCommunityMembers,
+  adminGetCommunityMemberById,
+  adminCreateCommunityMember,
+  adminUpdateCommunityMember,
+  adminDeleteCommunityMember,
+  adminToggleCommunityMemberVerified,
 } from "./db";
 
 // Admin-only procedure middleware
@@ -424,6 +431,15 @@ export const appRouter = router({
       .query(async () => {
         try { return await countActiveOpportunities(); }
         catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du comptage des opportunités" }); }
+      }),
+  }),
+
+  community: router({
+    list: publicProcedure
+      .input(z.object({ limit: z.number().default(50), offset: z.number().default(0) }))
+      .query(async ({ input }) => {
+        try { return await getCommunityMembers(input.limit, input.offset); }
+        catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement de la communauté" }); }
       }),
   }),
 
@@ -1538,6 +1554,86 @@ export const appRouter = router({
             await sendEmail({ to: input.email, subject: `[TEST] ${input.subject}`, html: input.html });
             return { success: true };
           } catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de l'envoi du test" }); }
+        }),
+    }),
+
+    /** Community members CRUD */
+    community: router({
+      list: adminProcedure
+        .input(z.object({
+          category: z.string().optional(),
+          country: z.string().optional(),
+          search: z.string().optional(),
+          limit: z.number().default(50),
+          offset: z.number().default(0),
+        }))
+        .query(async ({ input }) => {
+          try { return await adminGetAllCommunityMembers(input); }
+          catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement des membres" }); }
+        }),
+
+      byId: adminProcedure
+        .input(z.object({ id: z.number() }))
+        .query(async ({ input }) => {
+          try { return await adminGetCommunityMemberById(input.id); }
+          catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement du membre" }); }
+        }),
+
+      create: adminProcedure
+        .input(z.object({
+          name: z.string().min(1),
+          role: z.string().optional(),
+          company: z.string().optional(),
+          country: z.string().optional(),
+          category: z.string().optional(),
+          bio: z.string().optional(),
+          avatar: z.string().optional(),
+          linkedin: z.string().optional(),
+          email: z.string().optional(),
+          verified: z.boolean().default(false),
+          featured: z.boolean().default(false),
+          published: z.boolean().default(true),
+        }))
+        .mutation(async ({ input }) => {
+          try { return await adminCreateCommunityMember(input); }
+          catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la création du membre" }); }
+        }),
+
+      update: adminProcedure
+        .input(z.object({
+          id: z.number(),
+          name: z.string().optional(),
+          role: z.string().nullable().optional(),
+          company: z.string().nullable().optional(),
+          country: z.string().nullable().optional(),
+          category: z.string().nullable().optional(),
+          bio: z.string().nullable().optional(),
+          avatar: z.string().nullable().optional(),
+          linkedin: z.string().nullable().optional(),
+          email: z.string().nullable().optional(),
+          verified: z.boolean().optional(),
+          featured: z.boolean().optional(),
+          published: z.boolean().optional(),
+        }))
+        .mutation(async ({ input }) => {
+          try {
+            const { id, ...data } = input;
+            return await adminUpdateCommunityMember(id, data);
+          } catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la mise à jour du membre" }); }
+        }),
+
+      delete: adminProcedure
+        .input(z.object({ id: z.number() }))
+        .mutation(async ({ input }) => {
+          try { return await adminDeleteCommunityMember(input.id); }
+          catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la suppression du membre" }); }
+        }),
+
+      toggleVerified: adminProcedure
+        .input(z.object({ id: z.number() }))
+        .mutation(async ({ input }) => {
+          try { return await adminToggleCommunityMemberVerified(input.id); }
+          catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la vérification" }); }
         }),
     }),
 

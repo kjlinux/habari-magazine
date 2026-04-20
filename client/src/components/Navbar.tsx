@@ -14,6 +14,7 @@ const navLinks = [
   { href: "/investisseurs", label: "Investisseurs" },
   { href: "/appels-offres", label: "Appels d'offres" },
   { href: "/evenements", label: "Événements" },
+  { href: "/communaute", label: "Communauté" },
   { href: "/archives", label: "Archives" },
   { href: "/partenaires", label: "Partenaires" },
   { href: "/abonnements", label: "Votre Accès" },
