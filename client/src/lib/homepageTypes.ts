@@ -25,3 +25,11 @@ export type EcosystemCard = {
   href: string;
   badge: string;
 };
+
+export type HomepageMagazine = {
+  issueLabel: string;
+  coverUrl: string;
+  pdfUrl: string;
+  pdfLabel: string;
+  isFree: boolean;
+};

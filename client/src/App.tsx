@@ -70,6 +70,7 @@ function Router() {
       <Route path={"/investisseurs"} component={Investments} />
       <Route path={"/appels-offres"} component={Bids} />
       <Route path={"/evenements"} component={Events} />
+      <Route path={"/agenda"} component={Events} />
       <Route path={"/abonnements"} component={Subscriptions} />
       <Route path={"/a-propos"} component={About} />
       <Route path={"/telecharger"} component={Downloads} />

@@ -347,12 +347,20 @@ export async function getOpenCallsForBids(limit: number = 10, offset: number = 0
 export async function getSubscriptionPlans() {
   const db = await getDb();
   if (!db) return [];
-  
-  const result = await db
+
+  let result = await db
     .select()
     .from(subscriptionPlans)
     .orderBy((t) => t.monthlyPrice);
-  
+
+  if (result.length === 0) {
+    await db.insert(subscriptionPlans).values([
+      { tier: "premium", monthlyPrice: "9.99", annualPrice: "99.99" },
+      { tier: "integral", monthlyPrice: "19.99", annualPrice: "199.99" },
+    ]).onDuplicateKeyUpdate({ set: { updatedAt: new Date() } });
+    result = await db.select().from(subscriptionPlans).orderBy((t) => t.monthlyPrice);
+  }
+
   return result;
 }
 
@@ -656,9 +664,10 @@ export async function adminUpdateUserRole(userId: number, role: 'user' | 'admin'
  */
 export async function adminUpdateUserSubscription(userId: number, tier: 'free' | 'premium' | 'integral') {
   const db = await getDb();
-  if (!db) return undefined;
+  if (!db) throw new Error("Database connection unavailable");
 
-  await db.update(users).set({ subscriptionTier: tier }).where(eq(users.id, userId));
+  const result = await db.update(users).set({ subscriptionTier: tier }).where(eq(users.id, userId));
+  if (!result) throw new Error("User not found or update failed");
   return { success: true };
 }
 

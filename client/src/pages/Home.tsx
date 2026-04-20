@@ -2,7 +2,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { trpc } from "@/lib/trpc";
-import type { HeroSlide, GreenMetric, GreenCategory, EcosystemCard } from "@/lib/homepageTypes";
+import type { HeroSlide, GreenMetric, GreenCategory, EcosystemCard, HomepageMagazine } from "@/lib/homepageTypes";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { toast } from "sonner";
@@ -197,7 +197,7 @@ export default function Home() {
   const { data: premiumArticlesData } = trpc.articles.premium.useQuery({ limit: 4, offset: 0 });
   const { data: events } = trpc.events.upcoming.useQuery({ limit: 3 });
   const { data: hpSettings } = trpc.siteConfig.homepageSettings.useQuery({
-    keys: ["homepage_hero_slides", "homepage_green_metrics", "homepage_green_categories", "homepage_ecosystem_cards"],
+    keys: ["homepage_hero_slides", "homepage_green_metrics", "homepage_green_categories", "homepage_ecosystem_cards", "homepage_magazine_featured"],
   });
 
   const heroSlides = useMemo<HeroSlide[]>(() => {
@@ -218,6 +218,17 @@ export default function Home() {
   const ecosystemCards = useMemo<EcosystemCard[]>(() => {
     try { if (hpSettings?.homepage_ecosystem_cards) return JSON.parse(hpSettings.homepage_ecosystem_cards); } catch {}
     return FALLBACK_ECOSYSTEM_CARDS;
+  }, [hpSettings]);
+
+  const featuredMagazine = useMemo<HomepageMagazine>(() => {
+    try { if (hpSettings?.homepage_magazine_featured) return JSON.parse(hpSettings.homepage_magazine_featured); } catch {}
+    return {
+      issueLabel: "Numéro 1 — Février 2026",
+      coverUrl: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663347570863/TDJnjIvMMFwogdcg.webp",
+      pdfUrl: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663347570863/pqeNdyKiCydqFTQF.pdf",
+      pdfLabel: "67 pages — Gratuit",
+      isFree: true,
+    };
   }, [hpSettings]);
 
   const freeContent = (freeArticlesData && freeArticlesData.length > 0) ? freeArticlesData : FALLBACK_FREE_CONTENT;
@@ -275,7 +286,7 @@ export default function Home() {
             <div className="lg:col-span-4 flex flex-col">
               <div className="flex items-center gap-2 mb-4">
                 <BookOpen className="w-4 h-4 text-primary" />
-                <span className="text-xs font-sans font-semibold uppercase tracking-wider text-primary">Numéro 1 — Février 2026</span>
+                <span className="text-xs font-sans font-semibold uppercase tracking-wider text-primary">{featuredMagazine.issueLabel}</span>
               </div>
               <h1 className="font-serif text-3xl md:text-4xl font-bold text-[oklch(0.20_0.02_250)] leading-tight mb-4">
                 Habari Magazine
@@ -289,20 +300,22 @@ export default function Home() {
               <div className="flex items-start gap-4 mb-6">
                 <Link href="/telecharger">
                   <img
-                    src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663347570863/TDJnjIvMMFwogdcg.webp"
-                    alt="Couverture Habari N°000"
+                    src={featuredMagazine.coverUrl}
+                    alt={`Couverture — ${featuredMagazine.issueLabel}`}
                     className="w-28 rounded-lg shadow-md border border-border hover:shadow-lg transition-shadow cursor-pointer"
                   />
                 </Link>
                 <div className="flex-1">
-                  <p className="font-serif font-bold text-sm text-foreground mb-1">N°000 — Juin 2024</p>
-                  <p className="text-xs text-muted-foreground font-sans mb-3">67 pages — Gratuit</p>
+                  <p className="font-serif font-bold text-sm text-foreground mb-1">{featuredMagazine.issueLabel}</p>
+                  <p className="text-xs text-muted-foreground font-sans mb-3">{featuredMagazine.pdfLabel}</p>
                   <div className="flex flex-col gap-2">
-                    <a href="https://files.manuscdn.com/user_upload_by_module/session_file/310519663347570863/pqeNdyKiCydqFTQF.pdf" download="Habari-Magazine-N000.pdf" target="_blank" rel="noopener noreferrer">
-                      <Button size="sm" className="font-sans bg-primary hover:bg-primary/90 w-full text-xs">
-                        <Download className="w-3.5 h-3.5 mr-1.5" /> Télécharger le PDF
-                      </Button>
-                    </a>
+                    {featuredMagazine.pdfUrl && (
+                      <a href={featuredMagazine.pdfUrl} download target="_blank" rel="noopener noreferrer">
+                        <Button size="sm" className="font-sans bg-primary hover:bg-primary/90 w-full text-xs">
+                          <Download className="w-3.5 h-3.5 mr-1.5" /> Télécharger le PDF
+                        </Button>
+                      </a>
+                    )}
                     <Link href="/telecharger">
                       <Button size="sm" variant="outline" className="font-sans w-full text-xs border-primary/30 text-primary">
                         Tous les numéros
@@ -352,18 +365,24 @@ export default function Home() {
                   </div>
 
                   <div>
-                    <Link href={`/article/${slide.slug}`}>
-                      <h2 className="font-serif text-2xl md:text-3xl font-bold text-white leading-tight mb-3 hover:text-[oklch(0.72_0.15_75)] transition-colors cursor-pointer">
+                    {slide.slug ? (
+                      <Link href={`/article/${slide.slug}`}>
+                        <h2 className="font-serif text-2xl md:text-3xl font-bold text-white leading-tight mb-3 hover:text-[oklch(0.72_0.15_75)] transition-colors cursor-pointer">
+                          {slide.title}
+                        </h2>
+                      </Link>
+                    ) : (
+                      <h2 className="font-serif text-2xl md:text-3xl font-bold text-white leading-tight mb-3">
                         {slide.title}
                       </h2>
-                    </Link>
+                    )}
                     <p className="text-sm text-white/60 font-sans leading-relaxed mb-5 max-w-2xl line-clamp-2">
                       {slide.excerpt}
                     </p>
 
                     {/* Stats chips */}
                     <div className="flex flex-wrap gap-2 mb-5">
-                      {Object.values(slide.stats).map((val, i) => (
+                      {Object.values(slide.stats).filter(Boolean).map((val, i) => (
                         <span key={i} className="text-xs font-sans font-medium bg-white/10 backdrop-blur-sm text-white/80 px-3 py-1.5 rounded-full">
                           {val}
                         </span>
@@ -372,11 +391,13 @@ export default function Home() {
 
                     {/* Navigation */}
                     <div className="flex items-center justify-between">
-                      <Link href={`/article/${slide.slug}`}>
-                        <Button size="sm" className="font-sans bg-[oklch(0.72_0.15_75)] text-[oklch(0.15_0.02_250)] hover:bg-[oklch(0.78_0.15_75)]">
-                          Lire l'article <ArrowRight className="ml-1.5 w-3.5 h-3.5" />
-                        </Button>
-                      </Link>
+                      {slide.slug && (
+                        <Link href={`/article/${slide.slug}`}>
+                          <Button size="sm" className="font-sans bg-[oklch(0.72_0.15_75)] text-[oklch(0.15_0.02_250)] hover:bg-[oklch(0.78_0.15_75)]">
+                            Lire l'article <ArrowRight className="ml-1.5 w-3.5 h-3.5" />
+                          </Button>
+                        </Link>
+                      )}
 
                       <div className="flex items-center gap-2">
                         <button

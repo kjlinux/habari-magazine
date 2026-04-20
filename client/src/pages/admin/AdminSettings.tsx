@@ -781,6 +781,90 @@ const FALLBACK_HERO_SLIDES = [
   { rubrique: "Dossier Central", title: "Panne sèche à la CEMAC", excerpt: "La zone CEMAC traverse une période charnière.", image: "", slug: "cemac-panne-seche", stats: { label1: "265M hab.", label2: "~265 Mds $ PIB", label3: "11 pays" } },
 ];
 
+function MagazineHomepageSettings() {
+  const { data: settings, refetch } = trpc.admin.settings.list.useQuery();
+  const { data: allIssues } = trpc.admin.magazineIssues.list.useQuery();
+  const setMutation = trpc.admin.settings.set.useMutation({ onSuccess: () => { toast.success("Magazine mis à jour"); refetch(); }, onError: e => toast.error(e.message) });
+
+  const raw = settings?.find(s => s.key === "homepage_magazine_featured")?.value;
+  const [mag, setMag] = useState<any>({ issueLabel: "", coverUrl: "", pdfUrl: "", pdfLabel: "", isFree: true });
+  const [initialized, setInitialized] = useState(false);
+
+  if (!initialized && settings) {
+    try { setMag(raw ? JSON.parse(raw) : { issueLabel: "Numéro 1 — Février 2026", coverUrl: "", pdfUrl: "", pdfLabel: "67 pages — Gratuit", isFree: true }); } catch {}
+    setInitialized(true);
+  }
+
+  const prefillFromIssue = (id: string) => {
+    const issue = allIssues?.find(i => String(i.id) === id);
+    if (!issue) return;
+    setMag({
+      issueLabel: `Numéro ${issue.issueNumber}`,
+      coverUrl: issue.coverUrl ?? "",
+      pdfUrl: issue.pdfUrl ?? "",
+      pdfLabel: `${issue.pageCount ?? "?"} pages — ${issue.isPremium ? "Premium" : "Gratuit"}`,
+      isFree: !issue.isPremium,
+    });
+  };
+
+  return (
+    <div className="bg-background border border-border rounded-xl p-6 shadow-sm">
+      <h2 className="font-serif text-lg font-bold text-primary mb-1 flex items-center gap-2">
+        <Settings className="w-5 h-5" /> Magazine à la une
+      </h2>
+      <p className="text-sm text-muted-foreground font-sans mb-4">Magazine affiché dans la section gauche de la page d'accueil.</p>
+
+      {allIssues && allIssues.length > 0 && (
+        <div className="mb-4">
+          <Label className="font-sans text-xs">Sélectionner un numéro existant (auto-remplissage)</Label>
+          <select
+            className="mt-1 w-full border border-border rounded-md px-3 py-2 text-sm font-sans bg-background"
+            onChange={e => prefillFromIssue(e.target.value)}
+            defaultValue=""
+          >
+            <option value="">— Choisir un numéro —</option>
+            {allIssues.map(issue => (
+              <option key={issue.id} value={String(issue.id)}>N°{issue.issueNumber} — {issue.title}</option>
+            ))}
+          </select>
+        </div>
+      )}
+
+      <div className="space-y-3">
+        <div>
+          <Label className="font-sans text-xs">Label du numéro</Label>
+          <Input value={mag.issueLabel} onChange={e => setMag((p: any) => ({ ...p, issueLabel: e.target.value }))} placeholder="Numéro 1 — Février 2026" className="font-sans text-sm" />
+        </div>
+        <div>
+          <Label className="font-sans text-xs">Label PDF (pages, accès)</Label>
+          <Input value={mag.pdfLabel} onChange={e => setMag((p: any) => ({ ...p, pdfLabel: e.target.value }))} placeholder="67 pages — Gratuit" className="font-sans text-sm" />
+        </div>
+        <ImagePickerWithAI
+          label="Couverture"
+          value={mag.coverUrl}
+          onChange={url => setMag((p: any) => ({ ...p, coverUrl: url }))}
+          folder="magazine-covers"
+          uploadEndpoint="/api/upload/image"
+          aiPromptContext="Magazine cover for Habari Magazine"
+          previewHeight="h-32"
+        />
+        <div>
+          <Label className="font-sans text-xs">URL du PDF</Label>
+          <Input value={mag.pdfUrl} onChange={e => setMag((p: any) => ({ ...p, pdfUrl: e.target.value }))} placeholder="https://..." className="font-sans text-sm" />
+        </div>
+        <div className="flex items-center gap-2">
+          <input type="checkbox" id="mag-free" checked={mag.isFree} onChange={e => setMag((p: any) => ({ ...p, isFree: e.target.checked }))} className="rounded" />
+          <Label htmlFor="mag-free" className="font-sans text-sm cursor-pointer">Accès gratuit</Label>
+        </div>
+      </div>
+
+      <Button onClick={() => setMutation.mutate({ key: "homepage_magazine_featured", value: JSON.stringify(mag) })} disabled={setMutation.isPending} className="font-sans bg-primary hover:bg-primary/90 mt-4">
+        {setMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : "Sauvegarder"}
+      </Button>
+    </div>
+  );
+}
+
 function HeroSlidesSettings() {
   const { data: settings, refetch } = trpc.admin.settings.list.useQuery();
   const setMutation = trpc.admin.settings.set.useMutation({ onSuccess: () => { toast.success("Slides sauvegardés"); refetch(); }, onError: e => toast.error(e.message) });
@@ -1016,6 +1100,7 @@ export default function AdminSettings() {
         <div>
           <h2 className="font-serif text-xl font-bold text-foreground mb-4">Page d'accueil</h2>
           <div className="space-y-6">
+            <MagazineHomepageSettings />
             <HeroSlidesSettings />
             <GreenMetricsSettings />
             <GreenCategoriesSettings />

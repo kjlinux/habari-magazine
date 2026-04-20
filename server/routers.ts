@@ -754,7 +754,10 @@ export const appRouter = router({
         }))
         .mutation(async ({ input }) => {
           try { return await adminUpdateUserSubscription(input.userId, input.tier); }
-          catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de la mise à jour de l'abonnement" }); }
+          catch (err) {
+            console.error("[updateSubscription]", err);
+            throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: err instanceof Error ? err.message : "Erreur lors de la mise à jour de l'abonnement" });
+          }
         }),
     }),
 
@@ -1709,36 +1712,27 @@ export const appRouter = router({
     checkAccess: publicProcedure
       .input(z.object({ issueId: z.string() }))
       .query(async ({ ctx, input }) => { try {
-        // Launch period: free premium access for all registered users until configured date
         const LAUNCH_END_DATE = await getLaunchEndDate();
         const isLaunchPeriod = new Date() < LAUNCH_END_DATE;
 
-        // Define which issues require premium
-        const PREMIUM_ISSUES = ["N001", "N002", "N003"]; // Future issues are premium
-        const FREE_ISSUES = ["N000"]; // First issue is free
+        const issueRecord = await getMagazineIssueByNumber(input.issueId);
+        const isPremiumIssue = issueRecord ? issueRecord.isPremium : true;
 
-        const isPremiumIssue = PREMIUM_ISSUES.includes(input.issueId);
-        const isFreeIssue = FREE_ISSUES.includes(input.issueId);
-
-        // Free issues require a registered account to download
-        if (isFreeIssue || !isPremiumIssue) {
+        if (!isPremiumIssue) {
           if (!ctx.user) {
             return { hasAccess: false, reason: "not_authenticated" as const, isLaunchPeriod };
           }
           return { hasAccess: true, reason: "free" as const, isLaunchPeriod };
         }
 
-        // Not logged in
         if (!ctx.user) {
           return { hasAccess: false, reason: "not_authenticated" as const, isLaunchPeriod };
         }
 
-        // Admin always has access
         if (ctx.user.role === "admin") {
           return { hasAccess: true, reason: "admin" as const, isLaunchPeriod };
         }
 
-        // During launch period, all registered users get premium access
         if (isLaunchPeriod) {
           return { hasAccess: true, reason: "launch_promo" as const, isLaunchPeriod };
         }
@@ -1757,8 +1751,6 @@ export const appRouter = router({
           return { hasAccess: true, reason: "subscription" as const, isLaunchPeriod };
         }
 
-        // Check if user bought this specific issue
-        const issueRecord = await getMagazineIssueByNumber(input.issueId);
         if (issueRecord) {
           const purchased = await hasUserPurchasedMagazine(ctx.user.id, issueRecord.id);
           if (purchased) {
@@ -1943,9 +1935,21 @@ export const appRouter = router({
       .mutation(async ({ ctx, input }) => {
         try {
           const priority = ctx.user?.subscriptionTier === "integral" ? "priority" : "normal";
-          return await submitContactMessage({ ...input, priority });
+          const result = await submitContactMessage({ ...input, priority });
+          // best-effort admin notification
+          import("./_core/email").then(({ sendEmail }) => import("./_core/env").then(({ ENV }) =>
+            sendEmail({
+              to: ENV.emailFrom,
+              subject: `[Contact Habari] ${input.subject}`,
+              html: `<p><strong>De :</strong> ${input.name} &lt;${input.email}&gt;</p><p><strong>Catégorie :</strong> ${input.category}</p><p><strong>Message :</strong></p><p>${input.message.replace(/\n/g, "<br>")}</p>`,
+            })
+          )).catch(() => {});
+          return result;
+        } catch (e) {
+          if (e instanceof TRPCError) throw e;
+          console.error("[contact.submit]", e);
+          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de l'envoi du message" });
         }
-        catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors de l'envoi du message" }); }
       }),
   }),
 });

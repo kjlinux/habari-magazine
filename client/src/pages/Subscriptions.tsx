@@ -29,6 +29,11 @@ export default function Subscriptions() {
   const { data: promo } = trpc.siteConfig.promo.useQuery(undefined, { staleTime: 1000 * 60 * 10 });
   const { data: plans } = trpc.subscriptions.plans.useQuery();
   const { data: pdfPriceData } = trpc.magazine.pdfPrice.useQuery();
+  const { data: nlStatus } = trpc.newsletter.status.useQuery(
+    { email: user?.email ?? "" },
+    { enabled: !!user?.email }
+  );
+  const isAlreadySubscribed = !!nlStatus?.status && nlStatus.status === "active";
 
   const premiumPlan = plans?.find(p => p.tier === "premium");
   const integralPlan = plans?.find(p => p.tier === "integral");
@@ -418,10 +423,10 @@ export default function Subscriptions() {
                 <li className="flex items-start gap-2"><Check className="w-4 h-4 text-green-600 mt-0.5 shrink-0" /> 1 analyse courte</li>
                 <li className="flex items-start gap-2"><Check className="w-4 h-4 text-green-600 mt-0.5 shrink-0" /> Agenda des événements</li>
               </ul>
-              {nlDone ? (
+              {nlDone || isAlreadySubscribed ? (
                 <div className="flex items-center gap-2 py-3 px-4 bg-green-50 border border-green-200 rounded-lg">
                   <CheckCircle2 className="w-4 h-4 text-green-600" />
-                  <span className="text-sm font-sans text-green-700">Inscrit !</span>
+                  <span className="text-sm font-sans text-green-700">Vous êtes déjà inscrit à la newsletter gratuite.</span>
                 </div>
               ) : (
                 <form onSubmit={(e) => handleNewsletterSubmit(e, "free")} className="flex gap-2">
