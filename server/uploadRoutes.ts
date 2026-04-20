@@ -132,9 +132,13 @@ router.post(
       }
 
       const openai = new OpenAI({ apiKey });
+      const isAvatar = folder === "avatars";
+      const enhancedPrompt = isAvatar
+        ? `Cartoon animated character portrait avatar, illustration style, colorful and friendly, suitable for a journalist profile picture. ${prompt}. Digital art, flat design or 3D cartoon style, no real photos.`
+        : `Professional magazine editorial photography, photorealistic, high quality press photo. ${prompt}. Shot with professional camera, natural lighting, sharp focus, suitable for a news magazine cover or article illustration. Real people, real places, documentary style.`;
       const response = await openai.images.generate({
         model: "gpt-image-1.5",
-        prompt,
+        prompt: enhancedPrompt,
         size: "1024x1024",
         quality: "high",
         n: 1,
