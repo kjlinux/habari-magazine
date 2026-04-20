@@ -26,50 +26,71 @@ export default function SearchPage() {
 
   const { data: dbArticles, isLoading } = trpc.articles.list.useQuery({ limit: 200, offset: 0 });
 
-  type ArticleItem = { slug: string; rubrique: string; title: string; excerpt: string; author: string; date: string; readTime: string; access: string; image: string };
+  type ArticleItem = {
+    slug: string;
+    rubrique: string;
+    title: string;
+    excerpt: string;
+    author: string;
+    date: string;
+    readTime: string;
+    access: string;
+    image: string;
+  };
 
   const allItems = useMemo<ArticleItem[]>(() => {
     if (!dbArticles) return [];
     return dbArticles.map((a: any) => ({
       slug: a.slug || `db-${a.id}`,
-      rubrique: a.rubrique || a.categoryName || "Non classé",
+      rubrique: "Non classé",
       title: a.title,
       excerpt: a.excerpt || "",
-      author: a.authorName || "La Rédaction Habari",
-      date: a.publishedAt ? new Date(a.publishedAt).toLocaleDateString("fr-FR", { month: "long", year: "numeric" }) : (a.createdAt ? new Date(a.createdAt).toLocaleDateString("fr-FR", { month: "long", year: "numeric" }) : "2026"),
-      readTime: a.readTime || "5 min",
+      author: "La Rédaction Habari",
+      date: a.publishedAt
+        ? new Date(a.publishedAt).toLocaleDateString("fr-FR", { month: "long", year: "numeric" })
+        : a.createdAt
+        ? new Date(a.createdAt).toLocaleDateString("fr-FR", { month: "long", year: "numeric" })
+        : "2026",
+      readTime: "5 min",
       access: a.minSubscriptionTier === "free" ? "free" : "premium",
-      image: a.featuredImage || a.imageUrl || "",
+      image: a.featuredImage || "",
     }));
   }, [dbArticles]);
 
-  const allRubriques = useMemo(() => Array.from(new Set(allItems.map(a => a.rubrique))).sort(), [allItems]);
-  const allAuthors = useMemo(() => Array.from(new Set(allItems.map(a => a.author))).sort(), [allItems]);
-  const allDates = useMemo(() => Array.from(new Set(allItems.map(a => a.date))), [allItems]);
+  const allRubriques = useMemo(() => Array.from(new Set(allItems.map((a) => a.rubrique))).sort(), [allItems]);
+  const allAuthors = useMemo(() => Array.from(new Set(allItems.map((a) => a.author))).sort(), [allItems]);
+  const allDates = useMemo(() => Array.from(new Set(allItems.map((a) => a.date))), [allItems]);
 
   const results = useMemo(() => {
     let items = [...allItems];
 
     if (query.trim()) {
       const q = query.toLowerCase();
-      items = items.filter(a =>
-        a.title.toLowerCase().includes(q) ||
-        a.excerpt.toLowerCase().includes(q) ||
-        a.author.toLowerCase().includes(q) ||
-        a.rubrique.toLowerCase().includes(q)
+      items = items.filter(
+        (a) =>
+          a.title.toLowerCase().includes(q) ||
+          a.excerpt.toLowerCase().includes(q) ||
+          a.author.toLowerCase().includes(q) ||
+          a.rubrique.toLowerCase().includes(q)
       );
     }
-    if (selectedRubrique !== "all") items = items.filter(a => a.rubrique === selectedRubrique);
-    if (selectedAuthor !== "all") items = items.filter(a => a.author === selectedAuthor);
-    if (selectedDate !== "all") items = items.filter(a => a.date === selectedDate);
-    if (selectedAccess !== "all") items = items.filter(a => a.access === selectedAccess);
+    if (selectedRubrique !== "all") items = items.filter((a) => a.rubrique === selectedRubrique);
+    if (selectedAuthor !== "all") items = items.filter((a) => a.author === selectedAuthor);
+    if (selectedDate !== "all") items = items.filter((a) => a.date === selectedDate);
+    if (selectedAccess !== "all") items = items.filter((a) => a.access === selectedAccess);
 
     if (sortBy === "date") {
-      const monthOrder: Record<string, number> = { "Janvier": 1, "Février": 2, "Mars": 3, "Avril": 4, "Mai": 5, "Juin": 6, "Juillet": 7, "Août": 8, "Septembre": 9, "Octobre": 10, "Novembre": 11, "Décembre": 12 };
+      const monthOrder: Record<string, number> = {
+        Janvier: 1, Février: 2, Mars: 3, Avril: 4, Mai: 5, Juin: 6,
+        Juillet: 7, Août: 8, Septembre: 9, Octobre: 10, Novembre: 11, Décembre: 12,
+      };
       items.sort((a, b) => {
         const [mA, yA] = a.date.split(" ");
         const [mB, yB] = b.date.split(" ");
-        return ((parseInt(yB) || 2026) * 100 + (monthOrder[mB] || 0)) - ((parseInt(yA) || 2026) * 100 + (monthOrder[mA] || 0));
+        return (
+          (parseInt(yB) || 2026) * 100 + (monthOrder[mB] || 0) -
+          ((parseInt(yA) || 2026) * 100 + (monthOrder[mA] || 0))
+        );
       });
     } else if (sortBy === "readTime") {
       items.sort((a, b) => parseInt(a.readTime) - parseInt(b.readTime));
@@ -78,7 +99,9 @@ export default function SearchPage() {
     return items;
   }, [allItems, query, selectedRubrique, selectedAuthor, selectedDate, selectedAccess, sortBy]);
 
-  const activeFiltersCount = [selectedRubrique, selectedAuthor, selectedDate, selectedAccess].filter((f) => f !== "all").length;
+  const activeFiltersCount = [selectedRubrique, selectedAuthor, selectedDate, selectedAccess].filter(
+    (f) => f !== "all"
+  ).length;
 
   const clearAllFilters = () => {
     setSelectedRubrique("all");
@@ -99,7 +122,6 @@ export default function SearchPage() {
           <h1 className="font-serif text-3xl md:text-4xl font-bold text-white mb-4">Recherche avancée</h1>
           <div className="w-20 h-1 bg-[oklch(0.72_0.15_75)] mb-6"></div>
 
-          {/* Main search bar */}
           <div className="relative max-w-3xl">
             <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
             <input
@@ -161,7 +183,7 @@ export default function SearchPage() {
               </span>
               <select
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
+                onChange={(e) => setSortBy(e.target.value as "relevance" | "date" | "readTime")}
                 className="text-sm font-sans border border-border rounded-md px-3 py-1.5 bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
               >
                 <option value="relevance">Pertinence</option>
@@ -171,10 +193,8 @@ export default function SearchPage() {
             </div>
           </div>
 
-          {/* Expanded filters */}
           {showFilters && (
             <div className="mt-4 pt-4 border-t border-border grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pb-2 animate-in slide-in-from-top-2 duration-200">
-              {/* Catégorie */}
               <div>
                 <label className="flex items-center gap-1.5 text-xs font-sans font-semibold text-muted-foreground uppercase tracking-wider mb-2">
                   <Tag className="w-3.5 h-3.5" /> Catégorie
@@ -191,7 +211,6 @@ export default function SearchPage() {
                 </select>
               </div>
 
-              {/* Auteur */}
               <div>
                 <label className="flex items-center gap-1.5 text-xs font-sans font-semibold text-muted-foreground uppercase tracking-wider mb-2">
                   <User className="w-3.5 h-3.5" /> Auteur
@@ -208,7 +227,6 @@ export default function SearchPage() {
                 </select>
               </div>
 
-              {/* Date */}
               <div>
                 <label className="flex items-center gap-1.5 text-xs font-sans font-semibold text-muted-foreground uppercase tracking-wider mb-2">
                   <Calendar className="w-3.5 h-3.5" /> Période
@@ -225,7 +243,6 @@ export default function SearchPage() {
                 </select>
               </div>
 
-              {/* Accès */}
               <div>
                 <label className="flex items-center gap-1.5 text-xs font-sans font-semibold text-muted-foreground uppercase tracking-wider mb-2">
                   <Lock className="w-3.5 h-3.5" /> Accès
@@ -252,25 +269,33 @@ export default function SearchPage() {
             {selectedRubrique !== "all" && (
               <span className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-sans font-medium bg-primary/10 text-primary rounded-full">
                 <Tag className="w-3 h-3" /> {selectedRubrique}
-                <button onClick={() => setSelectedRubrique("all")} className="hover:bg-primary/20 rounded-full p-0.5"><X className="w-3 h-3" /></button>
+                <button onClick={() => setSelectedRubrique("all")} className="hover:bg-primary/20 rounded-full p-0.5">
+                  <X className="w-3 h-3" />
+                </button>
               </span>
             )}
             {selectedAuthor !== "all" && (
               <span className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-sans font-medium bg-primary/10 text-primary rounded-full">
                 <User className="w-3 h-3" /> {selectedAuthor}
-                <button onClick={() => setSelectedAuthor("all")} className="hover:bg-primary/20 rounded-full p-0.5"><X className="w-3 h-3" /></button>
+                <button onClick={() => setSelectedAuthor("all")} className="hover:bg-primary/20 rounded-full p-0.5">
+                  <X className="w-3 h-3" />
+                </button>
               </span>
             )}
             {selectedDate !== "all" && (
               <span className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-sans font-medium bg-primary/10 text-primary rounded-full">
                 <Calendar className="w-3 h-3" /> {selectedDate}
-                <button onClick={() => setSelectedDate("all")} className="hover:bg-primary/20 rounded-full p-0.5"><X className="w-3 h-3" /></button>
+                <button onClick={() => setSelectedDate("all")} className="hover:bg-primary/20 rounded-full p-0.5">
+                  <X className="w-3 h-3" />
+                </button>
               </span>
             )}
             {selectedAccess !== "all" && (
               <span className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-sans font-medium bg-primary/10 text-primary rounded-full">
                 <Lock className="w-3 h-3" /> {selectedAccess === "free" ? "Accès libre" : "Premium"}
-                <button onClick={() => setSelectedAccess("all")} className="hover:bg-primary/20 rounded-full p-0.5"><X className="w-3 h-3" /></button>
+                <button onClick={() => setSelectedAccess("all")} className="hover:bg-primary/20 rounded-full p-0.5">
+                  <X className="w-3 h-3" />
+                </button>
               </span>
             )}
           </div>
@@ -304,7 +329,6 @@ export default function SearchPage() {
                 <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 group border-border/50 hover:border-primary/20">
                   <CardContent className="p-0">
                     <div className="flex flex-col sm:flex-row">
-                      {/* Image */}
                       {article.image && (
                         <div className="sm:w-56 md:w-64 h-48 sm:h-auto shrink-0 overflow-hidden">
                           <img
@@ -315,12 +339,15 @@ export default function SearchPage() {
                         </div>
                       )}
 
-                      {/* Content */}
                       <div className="flex-1 p-5 md:p-6">
                         <div className="flex items-center gap-2 mb-2 flex-wrap">
-                          <span className={`text-xs font-sans font-bold uppercase tracking-wider ${
-                            article.rubrique.includes("Green") ? "text-[oklch(0.45_0.15_145)]" : "text-[oklch(0.72_0.15_75)]"
-                          }`}>
+                          <span
+                            className={`text-xs font-sans font-bold uppercase tracking-wider ${
+                              article.rubrique.includes("Green")
+                                ? "text-[oklch(0.45_0.15_145)]"
+                                : "text-[oklch(0.72_0.15_75)]"
+                            }`}
+                          >
                             {article.rubrique}
                           </span>
                           {article.access === "premium" && (

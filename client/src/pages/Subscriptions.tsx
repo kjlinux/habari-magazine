@@ -275,7 +275,11 @@ export default function Subscriptions() {
                     <span>Espace investisseurs et deal flow</span>
                   </li>
                 </ul>
-                {isAuthenticated && (userTier === "premium" || userTier === "integral") ? (
+                {isAuthenticated && userTier === "integral" ? (
+                  <Button className="w-full font-sans" variant="outline" disabled>
+                    <CheckCircle2 className="w-4 h-4 mr-2 text-[oklch(0.72_0.15_75)]" /> Inclus dans votre abonnement
+                  </Button>
+                ) : isAuthenticated && userTier === "premium" ? (
                   <Button className="w-full font-sans" variant="outline" disabled>
                     <CheckCircle2 className="w-4 h-4 mr-2 text-[oklch(0.72_0.15_75)]" /> Abonnement actif
                   </Button>
@@ -469,17 +473,23 @@ export default function Subscriptions() {
                 <li className="flex items-start gap-2"><Check className="w-4 h-4 text-[oklch(0.72_0.15_75)] mt-0.5 shrink-0" /> Accès aux archives complètes</li>
                 <li className="flex items-start gap-2"><Check className="w-4 h-4 text-[oklch(0.72_0.15_75)] mt-0.5 shrink-0" /> Invitations événements exclusifs</li>
               </ul>
-              <Button
-                className="w-full font-sans bg-[oklch(0.72_0.15_75)] text-[oklch(0.15_0.02_250)] hover:bg-[oklch(0.78_0.15_75)] font-semibold"
-                onClick={() => handleCheckout("newsletterPremium")}
-                disabled={checkoutLoading === "newsletterPremium"}
-              >
-                {checkoutLoading === "newsletterPremium" ? (
-                  <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Redirection...</>
-                ) : (
-                  <>S'abonner <ArrowRight className="w-4 h-4 ml-2" /></>
-                )}
-              </Button>
+              {isAuthenticated && userTier === "integral" ? (
+                <Button className="w-full font-sans" variant="outline" disabled>
+                  <CheckCircle2 className="w-4 h-4 mr-2 text-[oklch(0.72_0.15_75)]" /> Inclus dans votre abonnement Intégral
+                </Button>
+              ) : (
+                <Button
+                  className="w-full font-sans bg-[oklch(0.72_0.15_75)] text-[oklch(0.15_0.02_250)] hover:bg-[oklch(0.78_0.15_75)] font-semibold"
+                  onClick={() => handleCheckout("newsletterPremium")}
+                  disabled={checkoutLoading === "newsletterPremium"}
+                >
+                  {checkoutLoading === "newsletterPremium" ? (
+                    <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Redirection...</>
+                  ) : (
+                    <>S'abonner <ArrowRight className="w-4 h-4 ml-2" /></>
+                  )}
+                </Button>
+              )}
             </div>
           </div>
         </div>
