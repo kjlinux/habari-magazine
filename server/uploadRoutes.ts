@@ -133,13 +133,30 @@ router.post(
 
       const openai = new OpenAI({ apiKey });
       const isAvatar = folder === "avatars";
-      const enhancedPrompt = isAvatar
-        ? `Cartoon animated character portrait avatar, illustration style, colorful and friendly, suitable for a journalist profile picture. ${prompt}. Digital art, flat design or 3D cartoon style, no real photos.`
-        : `Professional magazine editorial photography, photorealistic, high quality press photo. ${prompt}. Shot with professional camera, natural lighting, sharp focus, suitable for a news magazine cover or article illustration. Real people, real places, documentary style.`;
+      const isMagazineCover = folder === "magazine-covers";
+
+      let enhancedPrompt: string;
+      let imageSize: "1024x1024" | "1792x1024" | "1024x1792";
+
+      if (isAvatar) {
+        // Avatar: square 32px display, portrait crop
+        enhancedPrompt = `Cartoon animated character portrait avatar, square format 1:1 ratio, centered face and shoulders, illustration style, colorful and friendly, suitable for a journalist profile picture. ${prompt}. Digital art, flat design or 3D cartoon style, no real photos.`;
+        imageSize = "1024x1024";
+      } else if (isMagazineCover) {
+        // Magazine cover: portrait 3:4 ratio (aspect-[3/4] max-h-64)
+        enhancedPrompt = `Professional magazine cover, portrait orientation 3:4 aspect ratio, tall vertical format, editorial design, bold composition with strong visual hierarchy. ${prompt}. High quality print photography, suitable for a news magazine front cover, photorealistic, striking and impactful.`;
+        imageSize = "1024x1792";
+      } else {
+        // Article hero & cards: wide landscape 16:9, object-cover object-top
+        // Used in: hero h-64/h-80 full-width, cards h-48/h-52, home carousel min-h-[380px]
+        enhancedPrompt = `Professional magazine editorial photography, wide landscape format 16:9 aspect ratio, horizontally composed, subject positioned in upper third for top-crop compatibility, photorealistic, high quality press photo. ${prompt}. Shot with professional camera, natural lighting, sharp focus, suitable for a news magazine article hero or card thumbnail. Real people, real places, documentary style.`;
+        imageSize = "1792x1024";
+      }
+
       const response = await openai.images.generate({
         model: "gpt-image-1.5",
         prompt: enhancedPrompt,
-        size: "1024x1024",
+        size: imageSize,
         quality: "high",
         n: 1,
       });
