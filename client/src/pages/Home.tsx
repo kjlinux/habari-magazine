@@ -352,7 +352,7 @@ export default function Home() {
                   <img
                     src={slide.image}
                     alt=""
-                    className="w-full h-full object-cover object-top opacity-40 transition-all duration-700"
+                    className="w-full h-full object-cover object-center opacity-40 transition-all duration-700"
                     key={currentSlide}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[oklch(0.12_0.02_250)] via-[oklch(0.15_0.02_250)]/80 to-[oklch(0.18_0.02_250)]/50" />
@@ -502,7 +502,7 @@ export default function Home() {
                         <img
                           src={item.image || item.featuredImage}
                           alt={item.title}
-                          className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
+                          className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
@@ -629,7 +629,7 @@ export default function Home() {
                 <Card className="border-0 shadow-sm overflow-hidden h-full opacity-90">
                   <div className="w-full h-52 bg-gradient-to-br from-[oklch(0.72_0.15_75)]/15 to-primary/10 relative overflow-hidden">
                     {((item as any).image || (item as any).featuredImage) ? (
-                      <img src={(item as any).image ?? (item as any).featuredImage} alt={item.title} className="w-full h-full object-cover object-top opacity-70" />
+                      <img src={(item as any).image ?? (item as any).featuredImage} alt={item.title} className="w-full h-full object-cover object-center opacity-70" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
                         <Lock className="w-10 h-10 text-[oklch(0.72_0.15_75)]/40" />
