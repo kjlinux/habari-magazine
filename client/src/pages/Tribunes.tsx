@@ -48,11 +48,11 @@ export default function Tribunes() {
       {/* Header */}
       <section className="bg-[oklch(0.20_0.02_250)] py-14">
         <div className="container">
-          <div className="habari-rubrique text-[oklch(0.72_0.15_75)] mb-3">Premium</div>
+          <div className="habari-rubrique text-[oklch(0.42_0.18_10)] mb-3">Premium</div>
           <h1 className="font-serif text-4xl md:text-5xl font-bold text-white mb-4">
             Tribunes
           </h1>
-          <div className="w-20 h-1 bg-[oklch(0.72_0.15_75)] mb-4"></div>
+          <div className="w-20 h-1 bg-[oklch(0.42_0.18_10)] mb-4"></div>
           <p className="text-lg text-white/60 font-sans max-w-2xl">
             Les prises de position et analyses exclusives des décideurs, experts et dirigeants qui façonnent l'économie de l'Afrique Centrale.
           </p>
@@ -136,7 +136,7 @@ export default function Tribunes() {
                             className={`absolute top-3 left-3 text-[0.6rem] font-sans px-2.5 py-1 rounded-full font-semibold uppercase tracking-wider ${
                               article.minSubscriptionTier === "free"
                                 ? "bg-green-100 text-green-700"
-                                : "bg-[oklch(0.72_0.15_75)]/15 text-[oklch(0.55_0.12_75)]"
+                                : "bg-[oklch(0.42_0.18_10)]/15 text-[oklch(0.30_0.15_10)]"
                             }`}
                           >
                             {article.minSubscriptionTier === "free" ? "Accès libre" : "Premium"}
@@ -183,7 +183,7 @@ export default function Tribunes() {
                             )}
                           </div>
                           {isLocked && (
-                            <p className="text-xs text-[oklch(0.55_0.12_75)] font-sans font-medium mt-2">
+                            <p className="text-xs text-[oklch(0.30_0.15_10)] font-sans font-medium mt-2">
                               Réservé aux abonnés Premium — S'abonner →
                             </p>
                           )}

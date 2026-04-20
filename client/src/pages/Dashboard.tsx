@@ -69,7 +69,7 @@ export default function Dashboard() {
       <section className="bg-[oklch(0.20_0.02_250)] py-10">
         <div className="container flex items-center justify-between">
           <div>
-            <div className="habari-rubrique text-[oklch(0.72_0.15_75)] mb-2">Espace membre</div>
+            <div className="habari-rubrique text-[oklch(0.42_0.18_10)] mb-2">Espace membre</div>
             <h1 className="font-serif text-3xl font-bold text-white">Bienvenue, {user?.name || "Membre"}</h1>
           </div>
           <Button variant="outline" size="sm" onClick={() => logout()} className="gap-2 border-white/20 text-white hover:bg-white/10 hover:text-white font-sans">
@@ -314,12 +314,12 @@ export default function Dashboard() {
                 <Card className="border shadow-sm">
                   <CardContent className="p-6">
                     <div className="flex items-center gap-3 mb-5">
-                      <div className="w-10 h-10 rounded-full bg-[oklch(0.72_0.15_75)]/15 flex items-center justify-center shrink-0">
-                        <Crown className="w-5 h-5 text-[oklch(0.55_0.12_75)]" />
+                      <div className="w-10 h-10 rounded-full bg-[oklch(0.42_0.18_10)]/15 flex items-center justify-center shrink-0">
+                        <Crown className="w-5 h-5 text-[oklch(0.30_0.15_10)]" />
                       </div>
                       <div>
                         <h3 className="font-serif font-bold text-lg text-foreground">Support prioritaire</h3>
-                        <p className="text-xs font-sans text-[oklch(0.55_0.12_75)] font-medium">Réservé aux abonnés Habari Intégral — réponse sous 24h</p>
+                        <p className="text-xs font-sans text-[oklch(0.30_0.15_10)] font-medium">Réservé aux abonnés Habari Intégral — réponse sous 24h</p>
                       </div>
                     </div>
                     {supportDone ? (

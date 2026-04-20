@@ -323,13 +323,13 @@ export default function About() {
       <section className="bg-[oklch(0.20_0.02_250)] text-white py-20 md:py-28">
         <div className="container">
           <div className="max-w-3xl">
-            <p className="text-[oklch(0.72_0.15_75)] font-sans text-sm font-semibold tracking-widest uppercase mb-4">
+            <p className="text-[oklch(0.42_0.18_10)] font-sans text-sm font-semibold tracking-widest uppercase mb-4">
               À propos
             </p>
             <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.1] mb-6">
               Comprendre l'Afrique Centrale pour mieux agir
             </h1>
-            <div className="w-16 h-1 bg-[oklch(0.72_0.15_75)] mb-6"></div>
+            <div className="w-16 h-1 bg-[oklch(0.42_0.18_10)] mb-6"></div>
             <p className="text-lg md:text-xl text-white/70 leading-relaxed font-sans">
               Habari — « nouvelles » en swahili — est la plateforme de connexion
               économique de référence pour l'intégration de l'Afrique Centrale. Magazine
@@ -376,8 +376,8 @@ export default function About() {
             {/* Vision */}
             <div>
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 rounded-lg bg-[oklch(0.72_0.15_75)]/10 flex items-center justify-center">
-                  <Eye className="w-6 h-6 text-[oklch(0.72_0.15_75)]" />
+                <div className="w-12 h-12 rounded-lg bg-[oklch(0.42_0.18_10)]/10 flex items-center justify-center">
+                  <Eye className="w-6 h-6 text-[oklch(0.42_0.18_10)]" />
                 </div>
                 <h2 className="font-serif text-2xl font-bold text-foreground">
                   Notre vision
@@ -410,7 +410,7 @@ export default function About() {
       <section className="py-20 bg-muted/30">
         <div className="container">
           <div className="text-center mb-14">
-            <p className="text-[oklch(0.72_0.15_75)] font-sans text-sm font-semibold tracking-widest uppercase mb-3">
+            <p className="text-[oklch(0.42_0.18_10)] font-sans text-sm font-semibold tracking-widest uppercase mb-3">
               Notre ADN
             </p>
             <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground mb-4">
@@ -467,7 +467,7 @@ export default function About() {
             <div className="group relative bg-[oklch(0.20_0.02_250)] rounded-xl p-8 text-white overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
               <div className="relative">
-                <BookOpen className="w-8 h-8 text-[oklch(0.72_0.15_75)] mb-5" />
+                <BookOpen className="w-8 h-8 text-[oklch(0.42_0.18_10)] mb-5" />
                 <h3 className="font-serif text-lg font-bold mb-3">
                   Magazine trimestriel
                 </h3>
@@ -482,7 +482,7 @@ export default function About() {
             <div className="group relative bg-[oklch(0.20_0.02_250)] rounded-xl p-8 text-white overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
               <div className="relative">
-                <Users className="w-8 h-8 text-[oklch(0.72_0.15_75)] mb-5" />
+                <Users className="w-8 h-8 text-[oklch(0.42_0.18_10)] mb-5" />
                 <h3 className="font-serif text-lg font-bold mb-3">
                   Annuaire & Networking
                 </h3>
@@ -497,7 +497,7 @@ export default function About() {
             <div className="group relative bg-[oklch(0.20_0.02_250)] rounded-xl p-8 text-white overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
               <div className="relative">
-                <TrendingUp className="w-8 h-8 text-[oklch(0.72_0.15_75)] mb-5" />
+                <TrendingUp className="w-8 h-8 text-[oklch(0.42_0.18_10)] mb-5" />
                 <h3 className="font-serif text-lg font-bold mb-3">
                   Espace investisseurs
                 </h3>
@@ -512,7 +512,7 @@ export default function About() {
             <div className="group relative bg-[oklch(0.20_0.02_250)] rounded-xl p-8 text-white overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
               <div className="relative">
-                <Award className="w-8 h-8 text-[oklch(0.72_0.15_75)] mb-5" />
+                <Award className="w-8 h-8 text-[oklch(0.42_0.18_10)] mb-5" />
                 <h3 className="font-serif text-lg font-bold mb-3">
                   Événementiel
                 </h3>
@@ -531,7 +531,7 @@ export default function About() {
       <section className="py-20 bg-muted/30">
         <div className="container">
           <div className="text-center mb-14">
-            <p className="text-[oklch(0.72_0.15_75)] font-sans text-sm font-semibold tracking-widest uppercase mb-3">
+            <p className="text-[oklch(0.42_0.18_10)] font-sans text-sm font-semibold tracking-widest uppercase mb-3">
               L'équipe
             </p>
             <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground mb-4">
@@ -560,7 +560,7 @@ export default function About() {
                     <h3 className="font-serif text-base font-bold text-white leading-tight">
                       {member.name}
                     </h3>
-                    <p className="text-[oklch(0.72_0.15_75)] text-xs font-sans font-semibold uppercase tracking-wider mt-1">
+                    <p className="text-[oklch(0.42_0.18_10)] text-xs font-sans font-semibold uppercase tracking-wider mt-1">
                       {member.role}
                     </p>
                   </div>
@@ -602,7 +602,7 @@ export default function About() {
                   )}
                 </div>
                 <div className="pb-10 last:pb-0">
-                  <span className="text-[oklch(0.72_0.15_75)] font-sans text-xs font-semibold uppercase tracking-wider">
+                  <span className="text-[oklch(0.42_0.18_10)] font-sans text-xs font-semibold uppercase tracking-wider">
                     {milestone.year}
                   </span>
                   <h3 className="font-serif text-lg font-bold text-foreground mt-1 mb-2">
@@ -623,13 +623,13 @@ export default function About() {
         <div className="container">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div>
-              <p className="text-[oklch(0.72_0.15_75)] font-sans text-sm font-semibold tracking-widest uppercase mb-4">
+              <p className="text-[oklch(0.42_0.18_10)] font-sans text-sm font-semibold tracking-widest uppercase mb-4">
                 L'éditeur
               </p>
               <h2 className="font-serif text-3xl md:text-4xl font-bold mb-6">
                 Groupe Sixième Sens
               </h2>
-              <div className="w-16 h-1 bg-[oklch(0.72_0.15_75)] mb-6"></div>
+              <div className="w-16 h-1 bg-[oklch(0.42_0.18_10)] mb-6"></div>
               <p className="text-white/70 font-sans leading-relaxed mb-4">
                 Habari est une publication du <strong className="text-white">Groupe Sixième Sens</strong>,
                 agence de conseil en stratégie et communication spécialisée dans
@@ -653,7 +653,7 @@ export default function About() {
               >
                 <Button
                   variant="outline"
-                  className="font-sans border-[oklch(0.72_0.15_75)] text-[oklch(0.72_0.15_75)] hover:bg-[oklch(0.72_0.15_75)]/10"
+                  className="font-sans border-[oklch(0.42_0.18_10)] text-[oklch(0.42_0.18_10)] hover:bg-[oklch(0.42_0.18_10)]/10"
                 >
                   Découvrir le Groupe Sixième Sens
                   <ArrowRight className="w-4 h-4 ml-2" />
@@ -663,7 +663,7 @@ export default function About() {
 
             <div className="grid grid-cols-2 gap-6">
               <div className="bg-white/5 rounded-xl p-6 border border-white/10">
-                <Building2 className="w-8 h-8 text-[oklch(0.72_0.15_75)] mb-4" />
+                <Building2 className="w-8 h-8 text-[oklch(0.42_0.18_10)] mb-4" />
                 <h4 className="font-serif font-bold text-white mb-2">
                   Conseil stratégique
                 </h4>
@@ -673,7 +673,7 @@ export default function About() {
                 </p>
               </div>
               <div className="bg-white/5 rounded-xl p-6 border border-white/10">
-                <BarChart3 className="w-8 h-8 text-[oklch(0.72_0.15_75)] mb-4" />
+                <BarChart3 className="w-8 h-8 text-[oklch(0.42_0.18_10)] mb-4" />
                 <h4 className="font-serif font-bold text-white mb-2">
                   Production éditoriale
                 </h4>
@@ -683,7 +683,7 @@ export default function About() {
                 </p>
               </div>
               <div className="bg-white/5 rounded-xl p-6 border border-white/10">
-                <Handshake className="w-8 h-8 text-[oklch(0.72_0.15_75)] mb-4" />
+                <Handshake className="w-8 h-8 text-[oklch(0.42_0.18_10)] mb-4" />
                 <h4 className="font-serif font-bold text-white mb-2">
                   Événementiel
                 </h4>
@@ -692,7 +692,7 @@ export default function About() {
                 </p>
               </div>
               <div className="bg-white/5 rounded-xl p-6 border border-white/10">
-                <Globe className="w-8 h-8 text-[oklch(0.72_0.15_75)] mb-4" />
+                <Globe className="w-8 h-8 text-[oklch(0.42_0.18_10)] mb-4" />
                 <h4 className="font-serif font-bold text-white mb-2">
                   Communication
                 </h4>
@@ -709,7 +709,7 @@ export default function About() {
       <section className="py-20 bg-background">
         <div className="container">
           <div className="text-center mb-14">
-            <p className="text-[oklch(0.72_0.15_75)] font-sans text-sm font-semibold tracking-widest uppercase mb-3">
+            <p className="text-[oklch(0.42_0.18_10)] font-sans text-sm font-semibold tracking-widest uppercase mb-3">
               Écosystème
             </p>
             <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground mb-4">
@@ -752,7 +752,7 @@ export default function About() {
       <section id="contact" className="py-20 bg-muted/30">
         <div className="container">
           <div className="text-center mb-14">
-            <p className="text-[oklch(0.72_0.15_75)] font-sans text-sm font-semibold tracking-widest uppercase mb-3">
+            <p className="text-[oklch(0.42_0.18_10)] font-sans text-sm font-semibold tracking-widest uppercase mb-3">
               Contact
             </p>
             <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground mb-4">
