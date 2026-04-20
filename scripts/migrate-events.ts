@@ -1,7 +1,9 @@
 import * as mysql from "mysql2/promise";
 import * as dotenv from "dotenv";
+import { fileURLToPath } from "url";
 import * as path from "path";
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
 const MONTHS: Record<string, number> = {
