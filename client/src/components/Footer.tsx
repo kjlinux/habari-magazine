@@ -49,14 +49,10 @@ export default function Footer() {
           <div>
             <h4 className="font-serif font-bold text-white text-sm mb-5 uppercase tracking-wider">Rubriques</h4>
             <ul className="space-y-3 text-sm">
-              <li><Link href="/magazine" className="text-white/60 hover:text-habari-gold transition-colors">Éditorial</Link></li>
-              <li><Link href="/magazine" className="text-white/60 hover:text-habari-gold transition-colors">Dossier Central</Link></li>
-              <li><Link href="/magazine" className="text-white/60 hover:text-habari-gold transition-colors">Interviews</Link></li>
-              <li><Link href="/magazine" className="text-white/60 hover:text-habari-gold transition-colors">Business &amp; Innovation</Link></li>
+              <li><Link href="/magazine" className="text-white/60 hover:text-habari-gold transition-colors">Magazine</Link></li>
               <li><Link href="/analyses-pays" className="text-white/60 hover:text-habari-gold transition-colors">Analyse Pays</Link></li>
               <li><Link href="/tribunes" className="text-white/60 hover:text-habari-gold transition-colors">Tribunes</Link></li>
-              <li><Link href="/magazine" className="text-white/60 hover:text-habari-gold transition-colors">Culture &amp; Société</Link></li>
-              <li><Link href="/habari-green" className="text-white/60 hover:text-habari-gold transition-colors">Habari Green</Link></li>
+              <li><Link href="/green" className="text-white/60 hover:text-habari-gold transition-colors">Habari Green</Link></li>
             </ul>
           </div>
 
