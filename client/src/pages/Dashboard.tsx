@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { trpc } from "@/lib/trpc";
 import { Link } from "wouter";
 
-import { Loader2, LogOut, Bell, Bookmark, MessageSquare, Settings, Eye, Heart, ArrowRight, Download, FileText, Trash2, Plus, Check } from "lucide-react";
+import { Loader2, LogOut, Bell, Bookmark, MessageSquare, Settings, Eye, Heart, ArrowRight, Download, FileText, Trash2, Plus, Check, Headphones, Crown, Send, CheckCircle2 } from "lucide-react";
 import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -14,6 +14,7 @@ const tabs = [
   { id: "downloads", label: "Téléchargements", icon: Download },
   { id: "favorites", label: "Favoris", icon: Bookmark },
   { id: "alerts", label: "Alertes", icon: Bell },
+  { id: "support", label: "Support", icon: Headphones },
   { id: "settings", label: "Paramètres", icon: Settings },
 ] as const;
 
@@ -24,6 +25,12 @@ export default function Dashboard() {
   const { data: userPlan, isLoading: planLoading } = trpc.subscriptions.userPlan.useQuery(undefined, { enabled: isAuthenticated });
   const { data: purchases, isLoading: purchasesLoading } = trpc.magazine.myPurchases.useQuery(undefined, { enabled: isAuthenticated });
   const [activeTab, setActiveTab] = useState<TabId>("overview");
+  const [supportForm, setSupportForm] = useState({ subject: "", message: "" });
+  const [supportDone, setSupportDone] = useState(false);
+  const contactMutation = trpc.contact.submit.useMutation({
+    onSuccess: () => { setSupportDone(true); setSupportForm({ subject: "", message: "" }); },
+  });
+  const isIntegral = (user as any)?.subscriptionTier === "integral";
 
   if (loading) {
     return (
@@ -299,6 +306,104 @@ export default function Dashboard() {
                 <p className="text-muted-foreground font-sans mb-4">Fonctionnalité disponible prochainement.</p>
               </CardContent>
             </Card>
+          )}
+
+          {activeTab === "support" && (
+            <div className="max-w-2xl space-y-6">
+              {isIntegral ? (
+                <Card className="border shadow-sm">
+                  <CardContent className="p-6">
+                    <div className="flex items-center gap-3 mb-5">
+                      <div className="w-10 h-10 rounded-full bg-[oklch(0.72_0.15_75)]/15 flex items-center justify-center shrink-0">
+                        <Crown className="w-5 h-5 text-[oklch(0.55_0.12_75)]" />
+                      </div>
+                      <div>
+                        <h3 className="font-serif font-bold text-lg text-foreground">Support prioritaire</h3>
+                        <p className="text-xs font-sans text-[oklch(0.55_0.12_75)] font-medium">Réservé aux abonnés Habari Intégral — réponse sous 24h</p>
+                      </div>
+                    </div>
+                    {supportDone ? (
+                      <div className="flex items-center gap-3 py-6 text-green-600">
+                        <CheckCircle2 className="w-6 h-6 shrink-0" />
+                        <div>
+                          <p className="font-sans font-medium">Message envoyé avec succès</p>
+                          <p className="text-sm text-muted-foreground font-sans">Notre équipe vous répondra en priorité sous 24h.</p>
+                        </div>
+                      </div>
+                    ) : (
+                      <form
+                        onSubmit={(e) => {
+                          e.preventDefault();
+                          contactMutation.mutate({
+                            name: user?.name || "",
+                            email: user?.email || "",
+                            subject: supportForm.subject,
+                            message: supportForm.message,
+                            category: "subscription",
+                          });
+                        }}
+                        className="space-y-4"
+                      >
+                        <div className="space-y-1">
+                          <label className="text-sm font-sans font-medium text-muted-foreground">Sujet</label>
+                          <input
+                            type="text"
+                            required
+                            minLength={5}
+                            placeholder="Décrivez votre demande..."
+                            value={supportForm.subject}
+                            onChange={(e) => setSupportForm((f) => ({ ...f, subject: e.target.value }))}
+                            className="w-full px-3 py-2 text-sm font-sans border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-sm font-sans font-medium text-muted-foreground">Message</label>
+                          <textarea
+                            required
+                            minLength={20}
+                            rows={5}
+                            placeholder="Détaillez votre demande, problème ou question..."
+                            value={supportForm.message}
+                            onChange={(e) => setSupportForm((f) => ({ ...f, message: e.target.value }))}
+                            className="w-full px-3 py-2 text-sm font-sans border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
+                          />
+                        </div>
+                        <Button
+                          type="submit"
+                          disabled={contactMutation.isPending}
+                          className="font-sans bg-primary hover:bg-primary/90 gap-2"
+                        >
+                          {contactMutation.isPending ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <Send className="w-4 h-4" />
+                          )}
+                          Envoyer au support
+                        </Button>
+                      </form>
+                    )}
+                  </CardContent>
+                </Card>
+              ) : (
+                <Card className="border shadow-sm">
+                  <CardContent className="p-8 text-center">
+                    <Crown className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
+                    <h3 className="font-serif font-bold text-lg text-foreground mb-2">Support prioritaire</h3>
+                    <p className="text-muted-foreground font-sans mb-2">
+                      Le support prioritaire (réponse sous 24h) est réservé aux abonnés <strong>Habari Intégral</strong>.
+                    </p>
+                    <p className="text-sm text-muted-foreground font-sans mb-6">
+                      Pour toute question, vous pouvez nous contacter via le formulaire en bas de page.
+                    </p>
+                    <Link href="/abonnements">
+                      <Button className="font-sans bg-primary hover:bg-primary/90 gap-2">
+                        <Crown className="w-4 h-4" /> Passer à Habari Intégral
+                      </Button>
+                    </Link>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
           )}
 
           {activeTab === "settings" && (

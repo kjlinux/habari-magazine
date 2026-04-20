@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Megaphone, Handshake, FileText, ArrowRight, Mail, Loader2, X, Send } from "lucide-react";
@@ -40,19 +40,19 @@ export default function Partners() {
     onError: (e) => toast.error(e.message || "Erreur lors de l'envoi"),
   });
 
-  const { isFetching } = trpc.partners.list.useQuery(
-    { category: activeTab, limit: LIMIT, offset },
-    {
-      onSuccess: (data) => {
-        if (offset === 0) {
-          setAllItems(data);
-        } else {
-          setAllItems((prev) => [...prev, ...data]);
-        }
-        setHasMore(data.length === LIMIT);
-      },
-    }
+  const { isFetching, data: pageData } = trpc.partners.list.useQuery(
+    { category: activeTab, limit: LIMIT, offset }
   );
+
+  useEffect(() => {
+    if (!pageData) return;
+    if (offset === 0) {
+      setAllItems(pageData);
+    } else {
+      setAllItems((prev) => [...prev, ...pageData]);
+    }
+    setHasMore(pageData.length === LIMIT);
+  }, [pageData, offset]);
 
   const handleTabChange = (tab: Category) => {
     setActiveTab(tab);

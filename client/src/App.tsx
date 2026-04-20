@@ -58,6 +58,8 @@ import GreenActeurs from "./pages/GreenActeurs";
 import GreenRessources from "./pages/GreenRessources";
 import Partners from "./pages/Partners";
 import SearchPage from "./pages/Search";
+import AnalysesPays from "./pages/AnalysesPays";
+import Tribunes from "./pages/Tribunes";
 
 function Router() {
   return (
@@ -81,6 +83,8 @@ function Router() {
       <Route path={"/reinitialiser-mot-de-passe"} component={ResetPassword} />
       <Route path={"/partenaires"} component={Partners} />
       <Route path={"/recherche"} component={SearchPage} />
+      <Route path={"/analyses-pays"} component={AnalysesPays} />
+      <Route path={"/tribunes"} component={Tribunes} />
 
       {/* Green pages */}
       <Route path={"/green"} component={Green} />

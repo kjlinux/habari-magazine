@@ -355,8 +355,8 @@ export async function getSubscriptionPlans() {
 
   if (result.length === 0) {
     await db.insert(subscriptionPlans).values([
-      { tier: "premium", monthlyPrice: "9.99", annualPrice: "99.99" },
-      { tier: "integral", monthlyPrice: "19.99", annualPrice: "199.99" },
+      { tier: "premium", name: "Accès Premium", monthlyPrice: "9.99", annualPrice: "99.99" },
+      { tier: "integral", name: "Habari Intégral", monthlyPrice: "19.99", annualPrice: "199.99" },
     ]).onDuplicateKeyUpdate({ set: { updatedAt: new Date() } });
     result = await db.select().from(subscriptionPlans).orderBy((t) => t.monthlyPrice);
   }

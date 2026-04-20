@@ -16,7 +16,7 @@ const categoryOptions: { value: PartnerCategory; label: string }[] = [
   { value: "report", label: "Rapport" },
 ];
 
-interface FormData {
+interface PartnerFormData {
   title: string;
   category: PartnerCategory;
   source: string;
@@ -30,7 +30,7 @@ interface FormData {
   publishedAt: string;
 }
 
-const defaultForm: FormData = {
+const defaultForm: PartnerFormData = {
   title: "",
   category: "communique",
   source: "",
@@ -50,7 +50,7 @@ export default function AdminPartnerForm() {
   const isNew = params?.id === "nouveau";
   const editId = isNew ? null : params?.id ? parseInt(params.id) : null;
 
-  const [form, setForm] = useState<FormData>(defaultForm);
+  const [form, setForm] = useState<PartnerFormData>(defaultForm);
 
   const { data: existing } = trpc.admin.partners.byId.useQuery(
     { id: editId! },
@@ -199,7 +199,7 @@ export default function AdminPartnerForm() {
                     onChange={(url) => setForm({ ...form, image: url })}
                     folder="partners"
                     uploadEndpoint="/api/upload/image"
-                    aiPromptContext={`Partner image for: "${form.name || ""}"`}
+                    aiPromptContext={`Partner image for: "${form.title || ""}"`}
                     previewHeight="h-40"
                   />
                 </div>

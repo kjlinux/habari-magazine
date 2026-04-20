@@ -7,6 +7,8 @@ import TrialBanner from "@/components/TrialBanner";
 
 const navLinks = [
   { href: "/magazine", label: "Magazine" },
+  { href: "/analyses-pays", label: "Analyses Pays" },
+  { href: "/tribunes", label: "Tribunes" },
   { href: "/green", label: "Green", isGreen: true },
   { href: "/annuaire", label: "Annuaire" },
   { href: "/investisseurs", label: "Investisseurs" },

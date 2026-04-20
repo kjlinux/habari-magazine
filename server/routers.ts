@@ -1890,8 +1890,17 @@ export const appRouter = router({
         limit: z.number().default(12),
         offset: z.number().default(0),
       }))
-      .query(async ({ input }) => {
-        try { return await getArchivedArticles(input); }
+      .query(async ({ ctx, input }) => {
+        try {
+          const result = await getArchivedArticles(input);
+          const activeSub = ctx.user ? await getUserSubscription(ctx.user.id) : null;
+          const articles = result.articles.map((article) => {
+            const access = canAccessArticle(ctx.user ?? null, article, activeSub);
+            if (!access.allowed) return { ...stripPremiumContent(article), access };
+            return { ...article, access };
+          });
+          return { articles, total: result.total };
+        }
         catch { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur lors du chargement des archives" }); }
       }),
 

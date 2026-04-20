@@ -21,10 +21,10 @@ import Footer from "@/components/Footer";
 
 type AnyItem = {
   id: number; title: string; organization: string; country: string;
-  sector?: string; description?: string; deadline?: string; budget?: string;
-  currency?: string; externalLink?: string; featured?: boolean;
-  amiType?: string; partners?: string; webinaire?: string;
-  contractType?: string; experienceLevel?: string;
+  sector?: string | null; description?: string | null; deadline?: string | null; budget?: string | null;
+  currency?: string | null; externalLink?: string | null; featured?: boolean | null;
+  amiType?: string | null; partners?: string | null; webinaire?: string | null;
+  contractType?: string | null; experienceLevel?: string | null;
   type: "bid" | "ami" | "job";
 };
 

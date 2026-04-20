@@ -15,13 +15,12 @@ import {
 const types = ["Tous", "conference", "webinar", "training", "workshop", "networking"];
 const typeLabels: Record<string, string> = { conference: "Conférence", webinar: "Webinaire", training: "Formation", workshop: "Atelier", networking: "Networking" };
 
-type EventItem = NonNullable<ReturnType<typeof trpc.events.upcoming.useQuery>["data"]>[0];
-
 export default function Events() {
   const [activeType, setActiveType] = useState("Tous");
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedEvent, setSelectedEvent] = useState<EventItem | null>(null);
   const { data: dbEvents, isLoading } = trpc.events.upcoming.useQuery({ limit: 20 });
+  type EventItem = NonNullable<typeof dbEvents>[number];
+  const [selectedEvent, setSelectedEvent] = useState<EventItem | null>(null);
 
   const filteredEvents = useMemo(() => {
     let filtered = dbEvents ?? [];
