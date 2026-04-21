@@ -147,9 +147,8 @@ router.post(
         enhancedPrompt = `Professional magazine cover, portrait orientation 3:4 aspect ratio, tall vertical format, editorial design, bold composition with strong visual hierarchy. ${prompt}. High quality print photography, suitable for a news magazine front cover, photorealistic, striking and impactful.`;
         imageSize = "1024x1536";
       } else {
-        // Article hero & cards: wide landscape 16:9, object-cover object-top
-        // Used in: hero h-64/h-80 full-width, cards h-48/h-52, home carousel min-h-[380px]
-        enhancedPrompt = `Professional magazine editorial photography, wide landscape format 16:9 aspect ratio, horizontally composed, subject positioned in upper third for top-crop compatibility, photorealistic, high quality press photo. ${prompt}. Shot with professional camera, natural lighting, sharp focus, suitable for a news magazine article hero or card thumbnail. Real people, real places, documentary style.`;
+        // Article hero & cards: wide landscape 16:9, object-cover
+        enhancedPrompt = `Professional magazine editorial photography, wide landscape format 16:9 aspect ratio, horizontally composed, photorealistic, high quality press photo. ${prompt}. Shot with professional camera, natural lighting, sharp focus, suitable for a news magazine article. Real people, real places, documentary style. IMPORTANT: no text, no title, no caption, no overlay, no watermark on the image.`;
         imageSize = "1536x1024";
       }
 

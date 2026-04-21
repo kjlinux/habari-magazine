@@ -314,12 +314,18 @@ export default function Home() {
                   <p className="font-serif font-bold text-sm text-foreground mb-1">{featuredMagazine.issueLabel}</p>
                   <p className="text-xs text-muted-foreground font-sans mb-3">{featuredMagazine.pdfLabel}</p>
                   <div className="flex flex-col gap-2">
-                    {featuredMagazine.pdfUrl && (
+                    {featuredMagazine.pdfUrl ? (
                       <a href={featuredMagazine.pdfUrl} download target="_blank" rel="noopener noreferrer">
                         <Button size="sm" className="font-sans bg-primary hover:bg-primary/90 w-full text-xs">
                           <Download className="w-3.5 h-3.5 mr-1.5" /> Télécharger le PDF
                         </Button>
                       </a>
+                    ) : (
+                      <Link href="/telecharger">
+                        <Button size="sm" className="font-sans bg-primary hover:bg-primary/90 w-full text-xs">
+                          <Download className="w-3.5 h-3.5 mr-1.5" /> Télécharger le PDF
+                        </Button>
+                      </Link>
                     )}
                     <Link href="/telecharger">
                       <Button size="sm" variant="outline" className="font-sans w-full text-xs border-primary/30 text-primary">
@@ -502,7 +508,7 @@ export default function Home() {
                         <img
                           src={item.image || item.featuredImage}
                           alt={item.title}
-                          className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
+                          className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
