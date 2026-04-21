@@ -1,7 +1,7 @@
 import AdminLayout from "@/components/AdminLayout";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
-import { Plus, Pencil, Trash2, Eye, EyeOff, Download, Upload, FileText, X } from "lucide-react";
+import { Plus, Pencil, Trash2, Eye, EyeOff, Download, Upload, FileText, X, Star } from "lucide-react";
 import { useState, useRef } from "react";
 import ImagePickerWithAI from "@/components/ImagePickerWithAI";
 import { toast } from "sonner";
@@ -78,6 +78,30 @@ export default function AdminMagazine() {
   const utils = trpc.useUtils();
 
   const { data: issues, isLoading } = trpc.admin.magazineIssues.list.useQuery();
+
+  const { data: featuredSetting } = trpc.admin.settings.get.useQuery({ key: "homepage_magazine_featured" });
+  const featuredIssueLabel = (() => {
+    try { return featuredSetting?.value ? JSON.parse(featuredSetting.value).issueLabel : null; } catch { return null; }
+  })();
+
+  const setFeaturedMutation = trpc.admin.settings.set.useMutation({
+    onSuccess: () => {
+      toast.success("Magazine vedette mis à jour sur la page d'accueil");
+      utils.admin.settings.get.invalidate({ key: "homepage_magazine_featured" });
+    },
+    onError: () => toast.error("Erreur lors de la mise à jour"),
+  });
+
+  const setAsFeatured = (issue: MagazineIssue) => {
+    const payload = {
+      issueLabel: `${issue.issueNumber} — ${issue.title}`,
+      coverUrl: issue.coverUrl ?? "",
+      pdfUrl: issue.pdfUrl ?? "",
+      pdfLabel: `${issue.pageCount ? `${issue.pageCount} pages — ` : ""}${issue.isPremium ? "Premium" : "Gratuit"}`,
+      isFree: !issue.isPremium,
+    };
+    setFeaturedMutation.mutate({ key: "homepage_magazine_featured", value: JSON.stringify(payload) });
+  };
 
   const createMutation = trpc.admin.magazineIssues.create.useMutation({
     onSuccess: () => {
@@ -267,7 +291,14 @@ export default function AdminMagazine() {
                       </td>
                       <td className="px-4 py-3">
                         <div>
-                          <p className="font-sans font-medium text-foreground text-sm">{issue.issueNumber}</p>
+                          <div className="flex items-center gap-1.5">
+                            <p className="font-sans font-medium text-foreground text-sm">{issue.issueNumber}</p>
+                            {featuredIssueLabel === `${issue.issueNumber} — ${issue.title}` && (
+                              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-sans font-semibold bg-yellow-100 text-yellow-700">
+                                <Star className="w-2.5 h-2.5" /> Accueil
+                              </span>
+                            )}
+                          </div>
                           <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{issue.title}</p>
                           {issue.pageCount && (
                             <p className="text-xs text-muted-foreground mt-0.5">{issue.pageCount} pages</p>
@@ -301,6 +332,20 @@ export default function AdminMagazine() {
                       <td className="px-4 py-3">
                         <div className="flex items-center justify-end gap-1">
                           <button
+                            type="button"
+                            onClick={() => setAsFeatured(issue)}
+                            disabled={setFeaturedMutation.isPending}
+                            className={`p-1.5 rounded-md transition-colors ${
+                              featuredIssueLabel === `${issue.issueNumber} — ${issue.title}`
+                                ? "bg-yellow-100 text-yellow-600"
+                                : "hover:bg-yellow-50 text-muted-foreground hover:text-yellow-500"
+                            }`}
+                            title="Mettre en vedette sur l'accueil"
+                          >
+                            <Star className="w-4 h-4" />
+                          </button>
+                          <button
+                            type="button"
                             onClick={() => togglePublishMutation.mutate({ id: issue.id, isPublished: !issue.isPublished })}
                             className="p-1.5 rounded-md hover:bg-muted transition-colors"
                             title={issue.isPublished ? "Dépublier" : "Publier"}
@@ -312,6 +357,7 @@ export default function AdminMagazine() {
                             )}
                           </button>
                           <button
+                            type="button"
                             onClick={() => openEdit(issue)}
                             className="p-1.5 rounded-md hover:bg-muted transition-colors"
                             title="Modifier"
@@ -319,6 +365,7 @@ export default function AdminMagazine() {
                             <Pencil className="w-4 h-4 text-muted-foreground" />
                           </button>
                           <button
+                            type="button"
                             onClick={() => setDeleteId(issue.id)}
                             className="p-1.5 rounded-md hover:bg-red-50 transition-colors"
                             title="Supprimer"
@@ -421,8 +468,10 @@ export default function AdminMagazine() {
                   <FileText className="w-5 h-5 text-green-600 shrink-0" />
                   <span className="text-sm font-sans text-green-800 truncate flex-1">PDF uploadé</span>
                   <button
+                    type="button"
                     onClick={() => setForm({ ...form, pdfUrl: "", pdfFileKey: "" })}
                     className="p-1 rounded hover:bg-green-100"
+                    title="Supprimer le PDF"
                   >
                     <X className="w-4 h-4 text-green-600" />
                   </button>
@@ -434,6 +483,7 @@ export default function AdminMagazine() {
                     type="file"
                     accept=".pdf"
                     className="hidden"
+                    aria-label="Sélectionner un fichier PDF"
                     onChange={(e) => {
                       const file = e.target.files?.[0];
                       if (file) handleUploadFile(file, "pdf");
