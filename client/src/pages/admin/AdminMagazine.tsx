@@ -94,6 +94,7 @@ export default function AdminMagazine() {
 
   const setAsFeatured = (issue: MagazineIssue) => {
     const payload = {
+      issueId: issue.id,
       issueLabel: `${issue.issueNumber} — ${issue.title}`,
       coverUrl: issue.coverUrl ?? "",
       pdfUrl: issue.pdfUrl ?? "",

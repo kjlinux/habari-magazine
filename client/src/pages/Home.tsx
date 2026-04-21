@@ -190,6 +190,44 @@ const GREEN_CATEGORY_ICON_MAP: Record<string, React.ElementType> = {
 
 const ECOSYSTEM_ICONS_ORDERED = [Globe2, Briefcase, Users, Calendar];
 
+function FeaturedDownloadButton({ magazine }: { magazine: HomepageMagazine }) {
+  const { isAuthenticated } = useAuth();
+  const { data: access, isLoading } = trpc.magazine.checkAccess.useQuery(
+    { issueId: magazine.issueId! },
+    { enabled: !!magazine.issueId }
+  );
+
+  const handleClick = () => {
+    if (!magazine.issueId) {
+      if (magazine.pdfUrl) window.open(magazine.pdfUrl, "_blank");
+      return;
+    }
+    if (!isAuthenticated) {
+      window.location.href = "/connexion";
+      return;
+    }
+    if (access?.hasAccess && magazine.pdfUrl) {
+      window.open(magazine.pdfUrl, "_blank");
+    } else {
+      window.location.href = "/telecharger";
+    }
+  };
+
+  if (isLoading && magazine.issueId) {
+    return (
+      <Button size="sm" disabled className="font-sans w-full text-xs">
+        <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> Chargement...
+      </Button>
+    );
+  }
+
+  return (
+    <Button size="sm" onClick={handleClick} className="font-sans bg-primary hover:bg-primary/90 w-full text-xs">
+      <Download className="w-3.5 h-3.5 mr-1.5" /> Télécharger le PDF
+    </Button>
+  );
+}
+
 export default function Home() {
   const { isAuthenticated } = useAuth();
   const { data: dbArticles, isLoading: articlesLoading } = trpc.articles.list.useQuery({ limit: 3, offset: 0 });
@@ -314,19 +352,7 @@ export default function Home() {
                   <p className="font-serif font-bold text-sm text-foreground mb-1">{featuredMagazine.issueLabel}</p>
                   <p className="text-xs text-muted-foreground font-sans mb-3">{featuredMagazine.pdfLabel}</p>
                   <div className="flex flex-col gap-2">
-                    {featuredMagazine.pdfUrl ? (
-                      <a href={featuredMagazine.pdfUrl} download target="_blank" rel="noopener noreferrer">
-                        <Button size="sm" className="font-sans bg-primary hover:bg-primary/90 w-full text-xs">
-                          <Download className="w-3.5 h-3.5 mr-1.5" /> Télécharger le PDF
-                        </Button>
-                      </a>
-                    ) : (
-                      <Link href="/telecharger">
-                        <Button size="sm" className="font-sans bg-primary hover:bg-primary/90 w-full text-xs">
-                          <Download className="w-3.5 h-3.5 mr-1.5" /> Télécharger le PDF
-                        </Button>
-                      </Link>
-                    )}
+                    <FeaturedDownloadButton magazine={featuredMagazine} />
                     <Link href="/telecharger">
                       <Button size="sm" variant="outline" className="font-sans w-full text-xs border-primary/30 text-primary">
                         Tous les numéros
@@ -508,7 +534,7 @@ export default function Home() {
                         <img
                           src={item.image || item.featuredImage}
                           alt={item.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          className="w-full h-full object-fill group-hover:scale-105 transition-transform duration-500"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">

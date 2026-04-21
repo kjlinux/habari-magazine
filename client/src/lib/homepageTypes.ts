@@ -32,4 +32,5 @@ export type HomepageMagazine = {
   pdfUrl: string;
   pdfLabel: string;
   isFree: boolean;
+  issueId?: number;
 };
