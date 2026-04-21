@@ -197,22 +197,6 @@ function FeaturedDownloadButton({ magazine }: { magazine: HomepageMagazine }) {
     { enabled: !!magazine.issueId }
   );
 
-  const handleClick = () => {
-    if (!magazine.issueId) {
-      if (magazine.pdfUrl) window.open(magazine.pdfUrl, "_blank");
-      return;
-    }
-    if (!isAuthenticated) {
-      window.location.href = "/connexion";
-      return;
-    }
-    if (access?.hasAccess && magazine.pdfUrl) {
-      window.open(magazine.pdfUrl, "_blank");
-    } else {
-      window.location.href = "/telecharger";
-    }
-  };
-
   if (isLoading && magazine.issueId) {
     return (
       <Button size="sm" disabled className="font-sans w-full text-xs">
@@ -221,10 +205,34 @@ function FeaturedDownloadButton({ magazine }: { magazine: HomepageMagazine }) {
     );
   }
 
+  const canDownload = !magazine.issueId || magazine.isFree || access?.hasAccess;
+
+  if (canDownload && magazine.pdfUrl) {
+    return (
+      <a href={magazine.pdfUrl} download target="_blank" rel="noopener noreferrer">
+        <Button size="sm" className="font-sans bg-primary hover:bg-primary/90 w-full text-xs">
+          <Download className="w-3.5 h-3.5 mr-1.5" /> Télécharger le PDF
+        </Button>
+      </a>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <Link href="/connexion">
+        <Button size="sm" className="font-sans bg-primary hover:bg-primary/90 w-full text-xs">
+          <Download className="w-3.5 h-3.5 mr-1.5" /> Télécharger le PDF
+        </Button>
+      </Link>
+    );
+  }
+
   return (
-    <Button size="sm" onClick={handleClick} className="font-sans bg-primary hover:bg-primary/90 w-full text-xs">
-      <Download className="w-3.5 h-3.5 mr-1.5" /> Télécharger le PDF
-    </Button>
+    <Link href="/telecharger">
+      <Button size="sm" className="font-sans bg-primary hover:bg-primary/90 w-full text-xs">
+        <Download className="w-3.5 h-3.5 mr-1.5" /> Télécharger le PDF
+      </Button>
+    </Link>
   );
 }
 
