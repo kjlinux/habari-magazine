@@ -503,12 +503,12 @@ export default function Home() {
               {(dbArticles && dbArticles.length > 0 ? dbArticles : freeContent).map((item: any, i: number) => (
                 <Link key={i} href={item.slug ? `/article/${item.slug}` : "/magazine"}>
                   <Card className="group cursor-pointer border-0 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden h-full">
-                    <div className="w-full h-52 bg-muted relative overflow-hidden">
+                    <div className="w-full h-52 bg-muted relative overflow-hidden flex items-center justify-center">
                       {item.image || item.featuredImage ? (
                         <img
                           src={item.image || item.featuredImage}
                           alt={item.title}
-                          className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                          className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
