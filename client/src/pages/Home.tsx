@@ -192,30 +192,6 @@ const ECOSYSTEM_ICONS_ORDERED = [Globe2, Briefcase, Users, Calendar];
 
 function FeaturedDownloadButton({ magazine }: { magazine: HomepageMagazine }) {
   const { isAuthenticated } = useAuth();
-  const { data: access, isLoading } = trpc.magazine.checkAccess.useQuery(
-    { issueId: magazine.issueId! },
-    { enabled: !!magazine.issueId }
-  );
-
-  if (isLoading && magazine.issueId) {
-    return (
-      <Button size="sm" disabled className="font-sans w-full text-xs">
-        <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> Chargement...
-      </Button>
-    );
-  }
-
-  const canDownload = !magazine.issueId || magazine.isFree || access?.hasAccess;
-
-  if (canDownload && magazine.pdfUrl) {
-    return (
-      <a href={magazine.pdfUrl} download target="_blank" rel="noopener noreferrer">
-        <Button size="sm" className="font-sans bg-primary hover:bg-primary/90 w-full text-xs">
-          <Download className="w-3.5 h-3.5 mr-1.5" /> Télécharger le PDF
-        </Button>
-      </a>
-    );
-  }
 
   if (!isAuthenticated) {
     return (
@@ -227,12 +203,20 @@ function FeaturedDownloadButton({ magazine }: { magazine: HomepageMagazine }) {
     );
   }
 
+  if (magazine.pdfUrl) {
+    return (
+      <a href={magazine.pdfUrl} download target="_blank" rel="noopener noreferrer">
+        <Button size="sm" className="font-sans bg-primary hover:bg-primary/90 w-full text-xs">
+          <Download className="w-3.5 h-3.5 mr-1.5" /> Télécharger le PDF
+        </Button>
+      </a>
+    );
+  }
+
   return (
-    <Link href="/telecharger">
-      <Button size="sm" className="font-sans bg-primary hover:bg-primary/90 w-full text-xs">
-        <Download className="w-3.5 h-3.5 mr-1.5" /> Télécharger le PDF
-      </Button>
-    </Link>
+    <Button size="sm" disabled className="font-sans w-full text-xs">
+      <Download className="w-3.5 h-3.5 mr-1.5" /> PDF indisponible
+    </Button>
   );
 }
 
