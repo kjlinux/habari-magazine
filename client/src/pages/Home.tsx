@@ -190,12 +190,14 @@ const GREEN_CATEGORY_ICON_MAP: Record<string, React.ElementType> = {
 
 const ECOSYSTEM_ICONS_ORDERED = [Globe2, Briefcase, Users, Calendar];
 
+const FALLBACK_FEATURED_PDF_URL = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663347570863/pqeNdyKiCydqFTQF.pdf";
+
 function FeaturedDownloadButton({ magazine }: { magazine: HomepageMagazine }) {
   const { isAuthenticated } = useAuth();
 
   if (!isAuthenticated) {
     return (
-      <Link href="/connexion">
+      <Link href="/login">
         <Button size="sm" className="font-sans bg-primary hover:bg-primary/90 w-full text-xs">
           <Download className="w-3.5 h-3.5 mr-1.5" /> Télécharger le PDF
         </Button>
@@ -203,20 +205,14 @@ function FeaturedDownloadButton({ magazine }: { magazine: HomepageMagazine }) {
     );
   }
 
-  if (magazine.pdfUrl) {
-    return (
-      <a href={magazine.pdfUrl} download target="_blank" rel="noopener noreferrer">
-        <Button size="sm" className="font-sans bg-primary hover:bg-primary/90 w-full text-xs">
-          <Download className="w-3.5 h-3.5 mr-1.5" /> Télécharger le PDF
-        </Button>
-      </a>
-    );
-  }
+  const pdfUrl = magazine.pdfUrl || FALLBACK_FEATURED_PDF_URL;
 
   return (
-    <Button size="sm" disabled className="font-sans w-full text-xs">
-      <Download className="w-3.5 h-3.5 mr-1.5" /> PDF indisponible
-    </Button>
+    <a href={pdfUrl} download target="_blank" rel="noopener noreferrer">
+      <Button size="sm" className="font-sans bg-primary hover:bg-primary/90 w-full text-xs">
+        <Download className="w-3.5 h-3.5 mr-1.5" /> Télécharger le PDF
+      </Button>
+    </a>
   );
 }
 
