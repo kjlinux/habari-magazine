@@ -112,7 +112,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <button onClick={() => setMobileOpen(!mobileOpen)} className="p-2 rounded-md hover:bg-muted">
             {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
-          <span className="font-serif font-bold text-primary">Habari Admin</span>
+          <img src="/logo-habari.png" alt="Habari Mag" className="h-8 w-auto" />
+          <span className="text-[0.6rem] font-sans text-muted-foreground tracking-wider uppercase">Admin</span>
         </div>
         <Link href="/">
           <Button variant="ghost" size="sm" className="font-sans text-xs">
@@ -128,18 +129,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <div className="h-16 flex items-center px-4 border-b border-border justify-between">
             {sidebarOpen ? (
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 bg-primary rounded flex items-center justify-center shrink-0">
-                  <span className="text-white font-serif font-bold text-sm">H</span>
-                </div>
-                <div className="flex flex-col">
-                  <span className="font-serif text-sm font-bold text-primary leading-tight">HABARI</span>
-                  <span className="text-[0.55rem] font-sans text-muted-foreground tracking-wider uppercase">Administration</span>
-                </div>
+                <img src="/logo-habari.png" alt="Habari Mag" className="h-10 w-auto shrink-0" />
+                <span className="text-[0.55rem] font-sans text-muted-foreground tracking-wider uppercase">Administration</span>
               </div>
             ) : (
-              <div className="w-8 h-8 bg-primary rounded flex items-center justify-center mx-auto">
-                <span className="text-white font-serif font-bold text-sm">H</span>
-              </div>
+              <img src="/logo-habari.png" alt="Habari Mag" className="h-9 w-auto mx-auto" />
             )}
             <button onClick={() => setSidebarOpen(!sidebarOpen)} title={sidebarOpen ? "Réduire" : "Agrandir"} className="p-1.5 rounded-md hover:bg-muted transition-colors hidden lg:block">
               <ChevronLeft className={`w-4 h-4 text-muted-foreground transition-transform ${!sidebarOpen ? "rotate-180" : ""}`} />
