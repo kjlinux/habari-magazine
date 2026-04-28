@@ -117,7 +117,7 @@ L'équipe support`;
           <p style="margin:0 0 12px;line-height:1.6;">Bonjour,</p>
           <p style="margin:0 0 12px;line-height:1.6;">Nous avons bien reçu votre demande de réinitialisation de mot de passe.</p>
           <p style="margin:0 0 12px;line-height:1.6;">Pour définir un nouveau mot de passe, veuillez cliquer sur le lien ci-dessous :</p>
-          <p style="margin:16px 0;line-height:1.6;"><a href="${resetUrl}" style="color:#c8102e;word-break:break-all;">${resetUrl}</a></p>
+          <p style="margin:16px 0;line-height:1.6;"><a href="${resetUrl}" style="color:#1a2a4f;word-break:break-all;">${resetUrl}</a></p>
           <p style="margin:0 0 12px;line-height:1.6;">Ce lien est valable pour une durée limitée. Passé ce délai, vous devrez effectuer une nouvelle demande.</p>
           <p style="margin:0 0 12px;line-height:1.6;">Si vous n'êtes pas à l'origine de cette requête, nous vous recommandons d'ignorer ce message et de contacter notre support.</p>
           <p style="margin:0 0 12px;line-height:1.6;">Restant à votre disposition pour toute assistance complémentaire.</p>
