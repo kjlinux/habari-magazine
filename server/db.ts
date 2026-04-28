@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 import { eq, desc, and, or, sql, count, like, sum, gte, lte } from "drizzle-orm";
 import { drizzle, type MySql2Database } from "drizzle-orm/mysql2";
 import mysql, { type Pool } from "mysql2/promise";
@@ -393,37 +394,105 @@ export async function getUserSubscription(userId: number) {
 export async function subscribeToNewsletter(data: InsertNewsletterSubscriber) {
   const db = await getDb();
   if (!db) return undefined;
-  
-  await db.insert(newsletterSubscribers).values(data).onDuplicateKeyUpdate({
-    set: { tier: data.tier, status: 'active', name: data.name },
+
+  const confirmToken = crypto.randomUUID().replace(/-/g, "");
+  const unsubscribeToken = crypto.randomUUID().replace(/-/g, "");
+
+  await db.insert(newsletterSubscribers).values({
+    ...data,
+    status: "pending",
+    confirmToken,
+    unsubscribeToken,
+  }).onDuplicateKeyUpdate({
+    set: {
+      tier: data.tier,
+      name: data.name,
+      status: "pending",
+      confirmToken,
+      unsubscribeToken,
+      confirmedAt: null,
+    },
   });
-  
-  return { success: true };
+
+  return { success: true, confirmToken, unsubscribeToken };
 }
 
 export async function getNewsletterSubscription(email: string) {
   const db = await getDb();
   if (!db) return undefined;
-  
+
   const result = await db
     .select()
     .from(newsletterSubscribers)
     .where(eq(newsletterSubscribers.email, email))
     .limit(1);
-  
+
   return result[0];
 }
 
 export async function unsubscribeNewsletter(email: string) {
   const db = await getDb();
   if (!db) return undefined;
-  
+
   await db
     .update(newsletterSubscribers)
     .set({ status: 'unsubscribed' })
     .where(eq(newsletterSubscribers.email, email));
-  
+
   return { success: true };
+}
+
+export async function confirmNewsletterByToken(token: string) {
+  const db = await getDb();
+  if (!db) return { ok: false as const };
+
+  const rows = await db
+    .select()
+    .from(newsletterSubscribers)
+    .where(eq(newsletterSubscribers.confirmToken, token))
+    .limit(1);
+
+  const sub = rows[0];
+  if (!sub) return { ok: false as const };
+
+  await db
+    .update(newsletterSubscribers)
+    .set({ status: "active", confirmedAt: new Date(), confirmToken: null })
+    .where(eq(newsletterSubscribers.id, sub.id));
+
+  return { ok: true as const, email: sub.email, unsubscribeToken: sub.unsubscribeToken };
+}
+
+export async function unsubscribeByToken(token: string) {
+  const db = await getDb();
+  if (!db) return { ok: false as const };
+
+  const rows = await db
+    .select()
+    .from(newsletterSubscribers)
+    .where(eq(newsletterSubscribers.unsubscribeToken, token))
+    .limit(1);
+
+  const sub = rows[0];
+  if (!sub) return { ok: false as const };
+
+  await db
+    .update(newsletterSubscribers)
+    .set({ status: "unsubscribed" })
+    .where(eq(newsletterSubscribers.id, sub.id));
+
+  return { ok: true as const, email: sub.email };
+}
+
+export async function getUnsubscribeTokenByEmail(email: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const rows = await db
+    .select({ token: newsletterSubscribers.unsubscribeToken })
+    .from(newsletterSubscribers)
+    .where(eq(newsletterSubscribers.email, email))
+    .limit(1);
+  return rows[0]?.token ?? undefined;
 }
 
 /**

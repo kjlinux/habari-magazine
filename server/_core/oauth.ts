@@ -5,6 +5,7 @@ import * as db from "../db";
 import { getSessionCookieOptions } from "./cookies";
 import { sdk } from "./sdk";
 import { notifyOwner } from "./notification";
+import { sendEmail } from "./email";
 
 // In-memory password reset tokens (replace with DB/Redis in production)
 const resetTokens = new Map<string, { userId: number; email: string; expiresAt: number }>();
@@ -90,11 +91,46 @@ export function registerAuthRoutes(app: Express) {
       const origin = `${req.protocol}://${req.get("host")}`;
       const resetUrl = `${origin}/reinitialiser-mot-de-passe?token=${token}`;
 
-      // Notify site owner with the reset link (no user-facing email service available)
-      notifyOwner({
-        title: `🔑 Demande de réinitialisation : ${email}`,
-        content: `L'utilisateur ${email} a demandé une réinitialisation de mot de passe.\n\nLien de réinitialisation (valide 1h) :\n${resetUrl}\n\nTransmettez ce lien à l'utilisateur.`,
-      }).catch((err) => console.warn("[Auth] Reset notification failed:", err));
+      const subject = "Réinitialisation de votre mot de passe";
+      const text = `Bonjour,
+
+Nous avons bien reçu votre demande de réinitialisation de mot de passe.
+Pour définir un nouveau mot de passe, veuillez cliquer sur le lien ci-dessous :
+
+${resetUrl}
+
+Ce lien est valable 1 heure. Passé ce délai, vous devrez effectuer une nouvelle demande.
+
+Si vous n'êtes pas à l'origine de cette requête, ignorez ce message ou contactez notre support.
+
+Cordialement,
+L'équipe Habari Magazine`;
+      const html = `<!DOCTYPE html>
+<html lang="fr"><head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#f5f5f5;font-family:Arial,Helvetica,sans-serif;color:#222;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f5;padding:32px 0;">
+    <tr><td align="center">
+      <table width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;padding:32px;max-width:560px;">
+        <tr><td>
+          <h1 style="margin:0 0 16px;font-size:22px;color:#111;">Réinitialisation de votre mot de passe</h1>
+          <p style="margin:0 0 12px;line-height:1.5;">Bonjour,</p>
+          <p style="margin:0 0 12px;line-height:1.5;">Nous avons bien reçu votre demande de réinitialisation de mot de passe. Pour définir un nouveau mot de passe, cliquez sur le bouton ci-dessous :</p>
+          <p style="margin:24px 0;text-align:center;">
+            <a href="${resetUrl}" style="display:inline-block;background:#c8102e;color:#ffffff;text-decoration:none;padding:12px 24px;border-radius:6px;font-weight:bold;">Réinitialiser mon mot de passe</a>
+          </p>
+          <p style="margin:0 0 12px;line-height:1.5;font-size:13px;color:#555;">Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :<br><a href="${resetUrl}" style="color:#c8102e;word-break:break-all;">${resetUrl}</a></p>
+          <p style="margin:16px 0 12px;line-height:1.5;">Ce lien est valable <strong>1 heure</strong>. Passé ce délai, vous devrez effectuer une nouvelle demande.</p>
+          <p style="margin:0 0 12px;line-height:1.5;">Si vous n'êtes pas à l'origine de cette requête, ignorez ce message ou contactez notre support.</p>
+          <p style="margin:24px 0 0;line-height:1.5;">Cordialement,<br>L'équipe Habari Magazine</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body></html>`;
+
+      sendEmail({ to: email, subject, html, text }).catch((err) =>
+        console.warn("[Auth] Reset email failed:", err),
+      );
 
       console.log(`[Auth] Password reset requested for ${email}.`);
       res.json({ ok: true });

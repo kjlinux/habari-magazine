@@ -366,7 +366,10 @@ export const newsletterSubscribers = mysqlTable("newsletterSubscribers", {
   name: varchar("name", { length: 255 }),
   userId: int("userId").references(() => users.id),
   tier: mysqlEnum("tier", ["free", "premium"]).default("free").notNull(),
-  status: mysqlEnum("status", ["active", "unsubscribed"]).default("active").notNull(),
+  status: mysqlEnum("status", ["pending", "active", "unsubscribed"]).default("pending").notNull(),
+  confirmToken: varchar("confirmToken", { length: 64 }),
+  confirmedAt: timestamp("confirmedAt"),
+  unsubscribeToken: varchar("unsubscribeToken", { length: 64 }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

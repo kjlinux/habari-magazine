@@ -50,6 +50,8 @@ import Registration from "./pages/Registration";
 import Login from "./pages/Login";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
+import ConfirmNewsletter from "./pages/ConfirmNewsletter";
+import UnsubscribeNewsletter from "./pages/UnsubscribeNewsletter";
 import Green from "./pages/Green";
 import GreenCarbone from "./pages/GreenCarbone";
 import GreenForets from "./pages/GreenForets";
@@ -83,6 +85,8 @@ function Router() {
       <Route path={"/login"} component={Login} />
       <Route path={"/mot-de-passe-oublie"} component={ForgotPassword} />
       <Route path={"/reinitialiser-mot-de-passe"} component={ResetPassword} />
+      <Route path={"/newsletter/confirmer"} component={ConfirmNewsletter} />
+      <Route path={"/newsletter/desinscription"} component={UnsubscribeNewsletter} />
       <Route path={"/partenaires"} component={Partners} />
       <Route path={"/recherche"} component={SearchPage} />
       <Route path={"/analyses-pays"} component={AnalysesPays} />

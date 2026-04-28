@@ -198,7 +198,18 @@ export async function sendNewsletterBroadcast(
 ) {
   const targets = await getUsersWithPref(targetPref, tier);
   const emails = targets.map((u) => u.email!).filter(Boolean);
-  await sendBulkEmails(emails, subject, html);
+
+  const { getUnsubscribeTokenByEmail } = await import("../db");
+  const base = ENV.appUrl || siteUrl();
+
+  for (const email of emails) {
+    const token = await getUnsubscribeTokenByEmail(email);
+    const unsubUrl = token
+      ? `${base}/newsletter/desinscription?token=${token}`
+      : `${base}/mon-compte`;
+    const footer = `<hr style="border:none;border-top:1px solid #eee;margin:24px 0"><p style="font-size:12px;color:#777;text-align:center;font-family:Arial,sans-serif;">Vous recevez cet email car vous êtes abonné à la newsletter Habari Magazine.<br><a href="${unsubUrl}" style="color:#777;">Se désinscrire</a></p>`;
+    await sendEmail({ to: email, subject, html: html + footer });
+  }
 
   const subs = await getPushSubs(targets.map((u) => u.id));
   const expired = await sendBulkPush(subs, { title: subject, body: "Habari Magazine", url: siteUrl(), icon: siteUrl("/icon-192.png") });
