@@ -126,14 +126,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* Sidebar - Desktop */}
         <aside className={`hidden lg:flex flex-col sticky top-0 h-screen border-r border-border bg-background transition-all duration-300 overflow-hidden ${sidebarOpen ? "w-64" : "w-16"}`}>
           {/* Logo */}
-          <div className="h-16 flex items-center px-4 border-b border-border justify-between">
+          <div className="h-16 flex items-center px-3 border-b border-border justify-between gap-2">
             {sidebarOpen ? (
-              <div className="flex items-center gap-2.5">
-                <img src="/logo-habari.png" alt="Habari Mag" className="h-10 w-auto shrink-0" />
-                <span className="text-[0.55rem] font-sans text-muted-foreground tracking-wider uppercase">Administration</span>
+              <div className="flex flex-col items-start gap-0.5 min-w-0">
+                <img src="/logo-habari.png" alt="Habari Mag" className="h-7 w-auto shrink-0" />
+                <span className="text-[0.55rem] font-sans text-muted-foreground tracking-[0.15em] uppercase leading-none">Administration</span>
               </div>
             ) : (
-              <img src="/logo-habari.png" alt="Habari Mag" className="h-9 w-auto mx-auto" />
+              <img src="/logo-habari.png" alt="Habari Mag" className="h-7 w-auto mx-auto" />
             )}
             <button onClick={() => setSidebarOpen(!sidebarOpen)} title={sidebarOpen ? "Réduire" : "Agrandir"} className="p-1.5 rounded-md hover:bg-muted transition-colors hidden lg:block">
               <ChevronLeft className={`w-4 h-4 text-muted-foreground transition-transform ${!sidebarOpen ? "rotate-180" : ""}`} />
