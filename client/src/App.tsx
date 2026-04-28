@@ -1,7 +1,6 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import NotFound from "@/pages/NotFound";
-import { Route, Switch, useLocation } from "wouter";
+import { Route, Switch, useLocation, Redirect } from "wouter";
 import { useEffect } from "react";
 import { trpc } from "@/lib/trpc";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -132,8 +131,7 @@ function Router() {
       <Route path={"/admin/notifications"} component={AdminNotifications} />
       <Route path={"/admin/communaute"} component={AdminCommunity} />
 
-      <Route path={"/404"} component={NotFound} />
-      <Route component={NotFound} />
+      <Route><Redirect to="/" /></Route>
     </Switch>
   );
 }

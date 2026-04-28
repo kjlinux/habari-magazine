@@ -57,12 +57,16 @@ export async function notifyNewArticle(article: {
   const targets = await getUsersWithPref("notifNewArticles");
   if (targets.length === 0) return;
 
-  const url = siteUrl(`/articles/${article.slug}`);
+  const url = siteUrl(`/article/${encodeURIComponent(article.slug)}`);
   const html = `
-    <h2 style="color:#1a3c5e">Nouvel article : ${article.title}</h2>
-    ${article.excerpt ? `<p>${article.excerpt}</p>` : ""}
-    <a href="${url}" style="background:#1a3c5e;color:white;padding:10px 20px;text-decoration:none;border-radius:4px;display:inline-block;margin-top:12px">Lire l'article</a>
-    <hr style="margin-top:32px"/><p style="font-size:12px;color:#999">Habari Magazine — <a href="${siteUrl("/mon-compte")}">Gérer mes préférences</a></p>
+    <div style="font-family:Arial,Helvetica,sans-serif;max-width:560px;margin:0 auto;padding:24px;background:#ffffff;border-top:4px solid #c8102e;">
+      <div style="font-size:11px;letter-spacing:2px;color:#c8102e;font-weight:bold;text-transform:uppercase;margin-bottom:8px;">Habari Magazine</div>
+      <h2 style="color:#c8102e;font-family:Georgia,serif;margin:0 0 12px;">Nouvel article : ${article.title}</h2>
+      ${article.excerpt ? `<p style="color:#333;line-height:1.6;">${article.excerpt}</p>` : ""}
+      <p style="margin:24px 0;text-align:center;"><a href="${url}" style="background:#c8102e;color:#ffffff;padding:12px 24px;text-decoration:none;border-radius:6px;display:inline-block;font-weight:bold;">Lire l'article</a></p>
+      <hr style="margin-top:32px;border:none;border-top:1px solid #eee;"/>
+      <p style="font-size:12px;color:#999;text-align:center;">Habari Magazine — <a href="${siteUrl("/mon-compte")}" style="color:#D4A017;">Gérer mes préférences</a></p>
+    </div>
   `;
 
   const emails = targets.map((u) => u.email!).filter(Boolean);
@@ -92,12 +96,16 @@ export async function notifyNewOpportunity(opp: {
   const targets = await getUsersWithPref(pref);
   if (targets.length === 0) return;
 
-  const url = siteUrl(`/opportunites/${opp.slug ?? opp.id}`);
+  const url = siteUrl(isInvestment ? `/investisseurs` : `/appels-offres`);
   const typeLabel = isInvestment ? "Alerte investissement" : "Appel d'offres";
   const html = `
-    <h2 style="color:#1a3c5e">${typeLabel} : ${opp.title}</h2>
-    <a href="${url}" style="background:#1a3c5e;color:white;padding:10px 20px;text-decoration:none;border-radius:4px;display:inline-block;margin-top:12px">Voir l'opportunité</a>
-    <hr style="margin-top:32px"/><p style="font-size:12px;color:#999">Habari Magazine — <a href="${siteUrl("/mon-compte")}">Gérer mes préférences</a></p>
+    <div style="font-family:Arial,Helvetica,sans-serif;max-width:560px;margin:0 auto;padding:24px;background:#ffffff;border-top:4px solid #c8102e;">
+      <div style="font-size:11px;letter-spacing:2px;color:#c8102e;font-weight:bold;text-transform:uppercase;margin-bottom:8px;">Habari Magazine</div>
+      <h2 style="color:#c8102e;font-family:Georgia,serif;margin:0 0 12px;">${typeLabel} : ${opp.title}</h2>
+      <p style="margin:24px 0;text-align:center;"><a href="${url}" style="background:#c8102e;color:#ffffff;padding:12px 24px;text-decoration:none;border-radius:6px;display:inline-block;font-weight:bold;">Voir l'opportunité</a></p>
+      <hr style="margin-top:32px;border:none;border-top:1px solid #eee;"/>
+      <p style="font-size:12px;color:#999;text-align:center;">Habari Magazine — <a href="${siteUrl("/mon-compte")}" style="color:#D4A017;">Gérer mes préférences</a></p>
+    </div>
   `;
 
   const emails = targets.map((u) => u.email!).filter(Boolean);
@@ -119,15 +127,19 @@ export async function notifyNewEvent(event: {
   const targets = await getUsersWithPref("notifEvents");
   if (targets.length === 0) return;
 
-  const url = siteUrl(`/evenements/${event.slug ?? event.id}`);
+  const url = siteUrl(`/evenements`);
   const dateStr = event.startDate
     ? new Date(event.startDate).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })
     : "";
   const html = `
-    <h2 style="color:#1a3c5e">Nouvel événement : ${event.title}</h2>
-    ${dateStr ? `<p>📅 ${dateStr}</p>` : ""}
-    <a href="${url}" style="background:#1a3c5e;color:white;padding:10px 20px;text-decoration:none;border-radius:4px;display:inline-block;margin-top:12px">Voir l'événement</a>
-    <hr style="margin-top:32px"/><p style="font-size:12px;color:#999">Habari Magazine — <a href="${siteUrl("/mon-compte")}">Gérer mes préférences</a></p>
+    <div style="font-family:Arial,Helvetica,sans-serif;max-width:560px;margin:0 auto;padding:24px;background:#ffffff;border-top:4px solid #c8102e;">
+      <div style="font-size:11px;letter-spacing:2px;color:#c8102e;font-weight:bold;text-transform:uppercase;margin-bottom:8px;">Habari Magazine</div>
+      <h2 style="color:#c8102e;font-family:Georgia,serif;margin:0 0 12px;">Nouvel événement : ${event.title}</h2>
+      ${dateStr ? `<p style="color:#333;">📅 ${dateStr}</p>` : ""}
+      <p style="margin:24px 0;text-align:center;"><a href="${url}" style="background:#c8102e;color:#ffffff;padding:12px 24px;text-decoration:none;border-radius:6px;display:inline-block;font-weight:bold;">Voir l'événement</a></p>
+      <hr style="margin-top:32px;border:none;border-top:1px solid #eee;"/>
+      <p style="font-size:12px;color:#999;text-align:center;">Habari Magazine — <a href="${siteUrl("/mon-compte")}" style="color:#D4A017;">Gérer mes préférences</a></p>
+    </div>
   `;
 
   const emails = targets.map((u) => u.email!).filter(Boolean);
