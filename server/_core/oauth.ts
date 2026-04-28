@@ -99,12 +99,14 @@ Pour définir un nouveau mot de passe, veuillez cliquer sur le lien ci-dessous :
 
 ${resetUrl}
 
-Ce lien est valable 1 heure. Passé ce délai, vous devrez effectuer une nouvelle demande.
+Ce lien est valable pour une durée limitée. Passé ce délai, vous devrez effectuer une nouvelle demande.
 
-Si vous n'êtes pas à l'origine de cette requête, ignorez ce message ou contactez notre support.
+Si vous n'êtes pas à l'origine de cette requête, nous vous recommandons d'ignorer ce message et de contacter notre support.
+
+Restant à votre disposition pour toute assistance complémentaire.
 
 Cordialement,
-L'équipe Habari Magazine`;
+L'équipe support`;
       const html = `<!DOCTYPE html>
 <html lang="fr"><head><meta charset="UTF-8"></head>
 <body style="margin:0;padding:0;background:#f5f5f5;font-family:Arial,Helvetica,sans-serif;color:#222;">
@@ -112,16 +114,14 @@ L'équipe Habari Magazine`;
     <tr><td align="center">
       <table width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;padding:32px;max-width:560px;">
         <tr><td>
-          <h1 style="margin:0 0 16px;font-size:22px;color:#111;">Réinitialisation de votre mot de passe</h1>
-          <p style="margin:0 0 12px;line-height:1.5;">Bonjour,</p>
-          <p style="margin:0 0 12px;line-height:1.5;">Nous avons bien reçu votre demande de réinitialisation de mot de passe. Pour définir un nouveau mot de passe, cliquez sur le bouton ci-dessous :</p>
-          <p style="margin:24px 0;text-align:center;">
-            <a href="${resetUrl}" style="display:inline-block;background:#c8102e;color:#ffffff;text-decoration:none;padding:12px 24px;border-radius:6px;font-weight:bold;">Réinitialiser mon mot de passe</a>
-          </p>
-          <p style="margin:0 0 12px;line-height:1.5;font-size:13px;color:#555;">Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :<br><a href="${resetUrl}" style="color:#c8102e;word-break:break-all;">${resetUrl}</a></p>
-          <p style="margin:16px 0 12px;line-height:1.5;">Ce lien est valable <strong>1 heure</strong>. Passé ce délai, vous devrez effectuer une nouvelle demande.</p>
-          <p style="margin:0 0 12px;line-height:1.5;">Si vous n'êtes pas à l'origine de cette requête, ignorez ce message ou contactez notre support.</p>
-          <p style="margin:24px 0 0;line-height:1.5;">Cordialement,<br>L'équipe Habari Magazine</p>
+          <p style="margin:0 0 12px;line-height:1.6;">Bonjour,</p>
+          <p style="margin:0 0 12px;line-height:1.6;">Nous avons bien reçu votre demande de réinitialisation de mot de passe.</p>
+          <p style="margin:0 0 12px;line-height:1.6;">Pour définir un nouveau mot de passe, veuillez cliquer sur le lien ci-dessous :</p>
+          <p style="margin:16px 0;line-height:1.6;"><a href="${resetUrl}" style="color:#c8102e;word-break:break-all;">${resetUrl}</a></p>
+          <p style="margin:0 0 12px;line-height:1.6;">Ce lien est valable pour une durée limitée. Passé ce délai, vous devrez effectuer une nouvelle demande.</p>
+          <p style="margin:0 0 12px;line-height:1.6;">Si vous n'êtes pas à l'origine de cette requête, nous vous recommandons d'ignorer ce message et de contacter notre support.</p>
+          <p style="margin:0 0 12px;line-height:1.6;">Restant à votre disposition pour toute assistance complémentaire.</p>
+          <p style="margin:24px 0 0;line-height:1.6;">Cordialement,<br>L'équipe support</p>
         </td></tr>
       </table>
     </td></tr>

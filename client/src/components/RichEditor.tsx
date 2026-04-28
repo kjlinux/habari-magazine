@@ -202,10 +202,46 @@ export default function RichEditor({ value, onChange, placeholder }: Props) {
     editor.chain().focus().extendMarkRange("link").setLink({ href: url }).run();
   }, [editor]);
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+
   const insertImage = useCallback(() => {
     if (!editor) return;
-    const url = window.prompt("URL de l'image");
-    if (url) editor.chain().focus().setImage({ src: url }).run();
+    const choice = window.confirm(
+      "Cliquez sur OK pour téléverser une image depuis votre ordinateur, ou Annuler pour saisir une URL."
+    );
+    if (choice) {
+      fileInputRef.current?.click();
+    } else {
+      const url = window.prompt("URL de l'image");
+      if (url) editor.chain().focus().setImage({ src: url }).run();
+    }
+  }, [editor]);
+
+  const handleFileUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || !editor) return;
+    if (!file.type.startsWith("image/")) {
+      alert("Le fichier doit être une image.");
+      return;
+    }
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch("/api/upload/image", { method: "POST", body: fd, credentials: "include" });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || "Échec de l'upload");
+      }
+      const { url } = await res.json();
+      if (url) editor.chain().focus().setImage({ src: url }).run();
+    } catch (err: any) {
+      alert(`Erreur d'upload : ${err?.message || "inconnue"}`);
+    } finally {
+      setUploading(false);
+    }
   }, [editor]);
 
   const insertYoutube = useCallback(() => {
@@ -278,7 +314,15 @@ export default function RichEditor({ value, onChange, placeholder }: Props) {
         {sep()}
 
         {btn(editor.isActive("link"), setLink, "Lien", LinkIcon)}
-        {btn(false, insertImage, "Image", ImageIcon)}
+        {btn(false, insertImage, uploading ? "Upload en cours…" : "Image (upload ou URL)", ImageIcon)}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleFileUpload}
+          className="hidden"
+          aria-label="Téléverser une image"
+        />
         {btn(false, insertYoutube, "Vidéo YouTube", YoutubeIcon)}
         {btn(false, insertTable, "Tableau", TableIcon)}
 
