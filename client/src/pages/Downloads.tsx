@@ -109,11 +109,15 @@ function AccessBadge({ level, isLaunchPeriod }: { level: "free" | "premium"; isL
 }
 
 /* Download button with access control */
-function DownloadButton({ issue }: { issue: MagazineIssue }) {
+function DownloadButton({ issue, dbId }: { issue: MagazineIssue; dbId?: number }) {
   const { isAuthenticated } = useAuth();
   const { data: access, isLoading } = trpc.magazine.checkAccess.useQuery({ issueId: issue.id });
   const [buyLoading, setBuyLoading] = useState(false);
   const purchaseMutation = trpc.magazine.purchaseIssue.useMutation();
+  const trackDownload = trpc.magazineIssues.trackDownload.useMutation();
+  const handleDownload = () => {
+    if (dbId) trackDownload.mutate({ issueId: dbId });
+  };
 
   if (isLoading) {
     return (
@@ -143,7 +147,7 @@ function DownloadButton({ issue }: { issue: MagazineIssue }) {
           </div>
         )}
         <div className="flex flex-col sm:flex-row gap-4">
-          <a href={issue.pdfUrl} download={`Habari-Magazine-${issue.numero}.pdf`} target="_blank" rel="noopener noreferrer">
+          <a href={issue.pdfUrl} download={`Habari-Magazine-${issue.numero}.pdf`} target="_blank" rel="noopener noreferrer" onClick={handleDownload}>
             <Button size="lg" className="font-sans bg-primary hover:bg-primary/90 w-full sm:w-auto shadow-md">
               <Download className="w-5 h-5 mr-2" /> Télécharger le PDF
             </Button>
@@ -372,6 +376,9 @@ export default function Downloads() {
   const featuredIssues = allMagazines.filter(m => m.featured);
   const otherIssues = allMagazines.filter(m => !m.featured);
 
+  const dbIdByNumero: Record<string, number> = {};
+  (dbIssues ?? []).forEach((i: any) => { if (i?.issueNumber && typeof i?.id === "number") dbIdByNumero[i.issueNumber] = i.id; });
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -494,7 +501,7 @@ export default function Downloads() {
                 </div>
 
                 {/* Download buttons with access control */}
-                <DownloadButton issue={mag} />
+                <DownloadButton issue={mag} dbId={dbIdByNumero[mag.numero]} />
               </div>
             </div>
           </div>
@@ -525,7 +532,7 @@ export default function Downloads() {
                     <p className="text-xs font-sans text-muted-foreground mb-2 flex items-center gap-1"><Calendar className="w-3 h-3" /> {mag.date}</p>
                     <h3 className="font-serif font-bold text-foreground text-lg leading-tight mb-2 line-clamp-2">{mag.title}</h3>
                     <p className="text-sm font-sans text-muted-foreground line-clamp-2 mb-4">{mag.description}</p>
-                    <DownloadButton issue={mag} />
+                    <DownloadButton issue={mag} dbId={dbIdByNumero[mag.numero]} />
                   </div>
                 </div>
               ))}
