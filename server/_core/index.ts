@@ -6,6 +6,7 @@ import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerAuthRoutes } from "./oauth";
 import { registerStripeWebhook } from "../stripe/webhook";
 import { registerUploadRoutes } from "../uploadRoutes";
+import { registerArticleRoutes } from "../articleRoutes";
 import { startCronJobs } from "./cron";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
@@ -42,6 +43,7 @@ async function startServer() {
   registerAuthRoutes(app);
   // File upload routes for magazine PDFs and covers
   registerUploadRoutes(app);
+  registerArticleRoutes(app);
   // tRPC API
   app.use(
     "/api/trpc",
